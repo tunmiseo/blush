@@ -1,0 +1,161 @@
+# -*- mode: conf-space; fill-column: 79 -*-
+#
+# ble-syntax:bash
+#
+#   This file contains definition of context values
+#
+#
+#   Nomenclature for word context values
+#
+#   CTX_FOOX ... expect word FOO to come next
+#   CTX_FOOI ... means parsed state in word FOO
+#   CTX_FOOR ... Word FOO is a variable assignment, tilde expansion in the middle is valid, path name expansion and brace expansion are inactive.
+#   CTX_FOOQ ... Word FOO is in variable assignment format, and tilde expansion in the middle is valid.
+#
+
+CTX_UNSPECIFIED 0
+CTX_ARGX        3  # (command) Next comes the argument
+CTX_ARGX0       18 # (Command) A context in which an argument is likely to come next, but no argument should come. For example after ]] or )).
+CTX_ARGI        4  # (command) context,attr: in an argument
+CTX_ARGQ        61 # (Command) After = in arguments of the form v=1 v+=1 a[1]=1 a[1]+=1. Tilde expansion separated by : is valid.
+CTX_CMDX        1  # (Command) Next comes the command.
+CTX_CMDX0       82 # (Command) A context where grammatically it seems like a command will come next, but in reality it should not come any more. For example, immediately after { :; } >a (grammar error at redirection).
+CTX_CMDX1       17 # (Command) At least one command must come next. For example, immediately after (, &&, or while.
+CTX_CMDXT       49 #(Command) After time or !. Next comes at least one command, a ; , or the end of a line.
+CTX_CMDXC       26 # (Command) Next comes the compound command ('(' '{' '((' '[[' for select case if while until).
+CTX_CMDXE       43 # (Command) A terminal keyword ('}' 'done' 'fi' 'esac') may or may not come next.
+CTX_CMDXD0      38 # (Command) Next comes 'do', '{' or ';'. Immediately after "for (())" (old CTX_ARGX0F).
+CTX_CMDXD       68 # (Command) Next comes 'do' and '{'. Immediately after "for a in 1 2 3" or "for (());".
+CTX_CMDXV       13 # (command) Immediately after var=val. The next command may or may not come.
+CTX_CMDI        2  # (command) context,attr: in a command
+CTX_VRHS        11 # (command) context,attr: var=rhs
+CTX_QUOT        5  # context,attr: in double quotations
+CTX_EXPR        8  # context,attr: in arithmetic expression
+ATTR_ERR        6  # attr: error
+ATTR_VAR        7  # attr: variable
+ATTR_QDEL       9  # attr: delimiters for quotation
+ATTR_QESC       81 # attr: \q
+ATTR_DEF        10 # attr: default (currently not used)
+ATTR_DEL        12 # attr: delimiters
+ATTR_HISTX      21 # History expansion (!!$, etc.)
+CTX_PARAM       14 # (parameter expansion) context,attr: inside of parameter expansion
+CTX_PWORD       15 # (parameter expansion) context,attr: inside of parameter expansion
+CTX_PWORDE      73 # (Parameter expansion) When in ... of ${!var@...}
+CTX_PWORDR      72 # (Parameter expansion) When in before of ${var//before/after}
+CTX_RDRF        19 # (redirect) File to be redirected.
+CTX_RDRD        20 # (redirect) File descriptor to be redirected.
+CTX_RDRD2       80 # (redirect) >& NUMBER or >& FILENAME
+CTX_RDRS        27 # (Redirect) Here String
+CTX_VALX        23 # (value list) arr=(@)
+CTX_VALI        24 # (value list) arr=(a@b)
+CTX_VALR        65 # (value list) arr=([0]=a@b)
+CTX_VALQ        66 # (value list) arr=(a=b@c a[0]=b@c)
+ATTR_COMMENT    25 # Comment
+CTX_ARGVX       28 # (command) declare argument comes
+CTX_ARGVI       29 # (Command) In the argument of declare
+CTX_ARGVR       62 # (command) right side of declare argument
+CTX_CONDX       32
+CTX_CONDI       33
+CTX_CONDQ       67
+CTX_CASE        34 # Waiting for case pattern to start ("(" is treated specially)
+CTX_CPATX       76 # case pattern wait for word (after "(")
+CTX_CPATI       77 # case pattern word internal
+CTX_CPATQ       79 # case pattern variable assignment format (differentiated due to tilde expansion)
+CTX_CPATX0      78 # case pattern After the word ends. "|" or ")" wait
+CTX_PATN        30 # glob regular character
+ATTR_GLOB       31 # glob special character
+CTX_BRAX        54 # [...] (square bracket expression)
+ATTR_BRACE      55 # {...} (brace expansion)
+CTX_BRACE1      56 # Context for reading inside brace expansion (before "," appears)
+CTX_BRACE2      57 # Context for reading inside brace expansion (after "," appears)
+ATTR_TILDE      60 # tilde expansion
+
+# for var in ...
+CTX_FARGX1      16 # Immediately after for. If the immediately after is ((, it is treated the same as CTX_CMDX. (old CTX_CMDXF)
+CTX_FARGI1      35
+CTX_FARGX2      36 # in
+CTX_FARGI2      37
+CTX_FARGX3      58 # args...
+CTX_FARGI3      59
+CTX_FARGQ3      63
+
+# select name in ...
+CTX_SARGX1      48 # Immediately after select. For processing Joins CTX_FARGI1.
+
+# case arg in ...
+CTX_CARGX1      39
+CTX_CARGI1      40
+CTX_CARGQ1      64
+CTX_CARGX2      41
+CTX_CARGI2      42
+
+# time -p -- ...
+CTX_TARGX1      50
+CTX_TARGI1      51
+CTX_TARGX2      52
+CTX_TARGI2      53
+
+# function name ...
+CTX_FNAMEX      83
+CTX_FNAMEI      22 # Function name (such as hoge() or function fuga)
+
+# Here documents
+CTX_RDRH        44 # (redirection) Here document word reading << word
+CTX_RDRI        45 # (redirection) read here document word <<- word
+CTX_HERE0       46 # Here document first line
+CTX_HERE1       47 # Other than the beginning of the line in the here document
+
+# eval a=1 b=(1 2 3) declare c=1 d=(1 2 3)
+CTX_ARGEX       69
+CTX_ARGEI       70
+CTX_ARGER       71
+
+# coproc var
+CTX_COARGX      74
+CTX_COARGI      75
+
+#------------------------------------------------------------------------------
+# Attribute for syntax highlight
+
+ATTR_CMD_BOLD       101
+ATTR_CMD_BUILTIN    102
+ATTR_CMD_ALIAS      103
+ATTR_CMD_FUNCTION   104
+ATTR_CMD_FILE       105
+ATTR_KEYWORD        106
+ATTR_KEYWORD_BEGIN  118 # if, case, while, until, for, select, { etc.
+ATTR_KEYWORD_END    119 # fi, esac, done, } etc.
+ATTR_KEYWORD_MID    120 # then, elif, else, do etc.
+ATTR_CMD_JOBS       107
+ATTR_CMD_DIR        112
+ATTR_CMD_SUFFIX     135
+ATTR_CMD_SUFFIX_NEW 136
+ATTR_FILE_DIR       108
+ATTR_FILE_STICKY    124 # directory with sticky bit
+ATTR_FILE_LINK      109
+ATTR_FILE_ORPHAN    121
+ATTR_FILE_FILE      111
+ATTR_FILE_SETUID    122
+ATTR_FILE_SETGID    123
+ATTR_FILE_EXEC      110
+ATTR_FILE_FIFO      114
+ATTR_FILE_CHR       115
+ATTR_FILE_BLK       116
+ATTR_FILE_SOCK      117
+ATTR_FILE_WARN      113
+ATTR_FILE_URL       125
+ATTR_VAR_UNSET      126
+ATTR_VAR_EMPTY      127
+ATTR_VAR_NUMBER     128
+ATTR_VAR_EXPR       129
+ATTR_VAR_ARRAY      130
+ATTR_VAR_HASH       132
+ATTR_VAR_READONLY   131
+ATTR_VAR_TRANSFORM  133
+ATTR_VAR_EXPORT     134
+ATTR_VAR_NEW        137
+
+#------------------------------------------------------------------------------
+# Various input contents
+
+CTX_EDIT_NamedCommand 201

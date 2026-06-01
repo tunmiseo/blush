@@ -220,16 +220,17 @@ $(OUTDIR)/doc/%: docs/% | $(OUTDIR)/doc
 #------------------------------------------------------------------------------
 # contrib
 
-# contrib is vendored locally (no git submodule).  `make update-contrib`
-# re-fetches the pinned snapshot of github.com/akinomyoga/blesh-contrib via
-# make/fetch-contrib.sh.  contrib/contrib.mk is expected to exist in-tree; if it
-# is missing, fail with a clear hint instead of reaching for a submodule.
-.PHONY: update-contrib
-update-contrib:
-	bash make/fetch-contrib.sh
-
+# contrib is vendored in-tree (English-converted; no git submodule, no
+# re-fetch).  contrib/contrib.mk must exist in the working tree and is built
+# locally from the in-tree sources.  If it is missing, fail loudly -- do NOT
+# re-download upstream, which would overwrite the English-converted sources with
+# the original Japanese ones.
 contrib/contrib.mk:
-	@printf 'ble.sh: %s\n' 'contrib/ is missing; run `make update-contrib` to fetch the vendored blesh-contrib snapshot.' >&2; exit 1
+	@printf '%s\n' \
+	  'ERROR: contrib/contrib.mk is missing.' \
+	  'The contrib component is vendored in-tree and English-converted.' \
+	  'Restore contrib/ from your own source -- do not re-fetch upstream.' >&2; \
+	exit 1
 
 include contrib/contrib.mk
 
