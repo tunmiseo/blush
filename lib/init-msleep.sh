@@ -7,7 +7,7 @@ function ble/util/msleep/.load-compiled-builtin/compile {
   local CC=cc
   ble/bin#has gcc && CC=gcc
 
-  local include='#include' # '#' で始まる行はインストール時に消される
+  local include='#include' # Lines starting with '#' are removed during installation
   "$CC" -O2 -s -shared -o "$builtin_path" -xc - << EOF || return 1
 #%$ sed 's/^#include/$include/' lib/init-msleep.c
 EOF

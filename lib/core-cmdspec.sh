@@ -10,7 +10,7 @@ function ble/complete/opts/initialize {
   ble/cmdspec/opts mandb-disable-man:mandb-help=%'help "$command"':stop-options-postarg pwd suspend
   local help_opt_help=
   if ((_ble_bash>=40400)); then
-    # Note: 既に説明がある時に優先順位を下げる為にインデントは 8 文字にしている
+    # Note: The indentation is set to 8 characters to lower the priority when there is already an explanation.
     help_opt_help='          --help    Show help.'
     ble/cmdspec/opts +mandb-help=@"$help_opt_help" times pwd suspend
   fi
@@ -43,7 +43,7 @@ function ble/complete/opts/initialize {
     -a (EXPR1 -o EXPR2)      True if either expr1 OR expr2 is true.'
   ble/cmdspec/opts disable-double-hyphen:mandb-help=%'help test':mandb-help=@"$test_operators":mandb-exclude='^--' 'test' '['
 
-  # cd, dirs, popd, pushd (別に実装)
+  # cd, dirs, popd, pushd (separate implementation)
   ble/cmdspec/opts +plus-options:mandb-exclude='^[-+]N$' dirs popd pushd
 
 

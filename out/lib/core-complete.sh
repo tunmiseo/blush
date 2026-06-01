@@ -39,7 +39,7 @@ function ble/complete/string#common-suffix-prefix {
 }
 
 ## @fn ble/complete/string#match-patterns str patterns...
-##   指定した文字列が patterns 集合の何れかのパターンに一致するか検査します。
+## Tests whether the specified string matches any pattern in the patterns set.
 ##   @param[in] str
 ##   @param[in] patterns
 ##   @exit
@@ -64,19 +64,19 @@ function ble/complete/get-wordbreaks {
 
 # 
 #==============================================================================
-# 選択インターフェイス (ble/complete/menu)
+# Selection interface (ble/complete/menu)
 
 ## @arr _ble_complete_menu_page_icons
 ##
-##   各要素は以下の形式の文字列である。
+## Each element is a string in the following format.
 ##
 ##   x0,y0,x1,y1,${#pack},${#esc1}[,bbox]:$pack$esc1
 ##
-##   * x0,y0 と x1,y1 は menu 項目の描画開始点と終了点。
-##   * esc1 は実際に出力する描画シーケンス。
-##   * bbox は "x y cols lines" の形式をしていて、描画シーケンスを生成する際に
-##     使った bbox の情報を格納する。これは特に truncate が起こった時に、選択状
-##     態の描画を同じ条件で実行する時に参照する。
+## * x0,y0 and x1,y1 are the drawing start and end points of the menu item.
+## * esc1 is the drawing sequence to actually output.
+## * bbox has the form "x y cols lines" and is used when generating a drawing sequence.
+## Stores information about the bbox used. This is especially true when a truncate occurs.
+## Refer to this when drawing a state under the same conditions.
 
 _ble_complete_menu_items=()
 _ble_complete_menu_class=
@@ -95,7 +95,7 @@ function ble/complete/menu#check-cancel {
 }
 
 ## @fn ble/complete/menu-style:$menu_style/construct-page
-##   候補一覧メニューの表示・配置を計算します。
+## Calculate the display/arrangement of the candidate list menu.
 ##
 ##   @var[in] menu_style
 ##   @arr[in] menu_items
@@ -106,8 +106,8 @@ function ble/complete/menu#check-cancel {
 ##   @var[out] x y esc
 ##
 ## @fn ble/complete/menu-style:$menu_style/guess
-##   scroll 番目の候補がどのページにいるかを予測します。
-##   可能性のある最初のページ番号 ipage を返します。
+## scroll Predict which page the th candidate is on.
+## Returns the first possible page number ipage.
 ##
 ##   @var[in] scroll
 ##   @var[out] ipage begin end
@@ -125,7 +125,7 @@ _ble_complete_menu_style_pages=()
 
 ## @fn ble/complete/menu#render-item item opts
 ##   @var[in] cols lines
-##     Note: "$menu_class"/render-item の中で用いる。
+## Note: Used in "$menu_class"/render-item.
 ##   @var[out] x y ret
 function ble/complete/menu#render-item {
   # use custom renderer
@@ -184,17 +184,17 @@ function ble/complete/menu#render-prefix {
 }
 
 ## @fn ble/complete/menu-style:align/construct/.measure-candidates-in-page
-##   その頁に入り切る範囲で候補の幅を計測する
+## Measure the width of the candidate within the range that fits on the page
 ##   @var[in] begin
-##     その頁の一番最初に表示する候補を指定します。
+## Specify the candidate to be displayed at the beginning of the page.
 ##   @var[out] end
-##     その頁に表示する候補の範囲の終端を返します。
-##     実際には描画の際に全角文字などの文字送りによって
-##     ここまで表示できるとは限りません。
+## Returns the end of the range of candidates to display on the page.
+## In reality, when drawing, you can change the characters by moving characters such as full-width characters.
+## It is not always possible to display this much.
 ##   @var[out] wcell
-##     その頁を描画する時のセル幅を返します。
+## Returns the cell width when drawing the page.
 ##   @arr[in,out] _ble_complete_menu_style_measure
-##     計測結果をキャッシュしておく配列です。
+## This is an array that caches measurement results.
 ##
 ##   @var[in] lines cols menu_iloop
 function ble/complete/menu-style:align/construct/.measure-candidates-in-page {
@@ -206,7 +206,7 @@ function ble/complete/menu-style:align/construct/.measure-candidates-in-page {
     ble/complete/menu#check-cancel && return 148
     local wcell_old=$wcell
 
-    # 候補の表示幅 w を計算
+    # Calculate the candidate display width w
     local w=${_ble_complete_menu_style_measure[index]%%:*}
     if [[ ! $w ]]; then
       local prefix_esc
@@ -217,23 +217,23 @@ function ble/complete/menu-style:align/construct/.measure-candidates-in-page {
       _ble_complete_menu_style_measure[index]=$w:${#item},${#esc1}:$item$esc1$prefix_esc
     fi
 
-    # wcell, ncell 更新
+    # wcell, ncell update
     local wcell_request=$((w++,w<=max_wcell?w:max_wcell))
     ((wcell<wcell_request)) && wcell=$wcell_request
 
-    # 新しい ncell
+    # new ncell
     local line_ncell=$((cols/wcell))
     local cand_ncell=$(((w+wcell-1)/wcell))
     if [[ $menu_style == align-nowrap ]]; then
-      # Note: nowrap が起こるのはすでに wcell == max_wcell の時なので、
-      # 改行処理が終わった後に wcell が変化するという事はない。
+      # Note: nowrap occurs when wcell == max_wcell, so
+      # wcell does not change after line break processing is complete.
       local x1=$((ncell%line_ncell*wcell))
       local ncell_eol=$(((ncell/line_ncell+1)*line_ncell))
       if ((x1>0&&x1+w>=cols)); then
-        # 行送り
+        # leading
         ((ncell=ncell_eol+cand_ncell))
       elif ((x1+w<cols)); then
-        # 余白に収まる場合
+        # If it fits in the margin
         ((ncell+=cand_ncell))
         ((ncell>ncell_eol&&(ncell=ncell_eol)))
       else
@@ -289,7 +289,7 @@ function ble/complete/menu-style:align/construct-page {
       else
         ((x+=prefix_width))
         ble/complete/menu#render-item "$item" ||
-          ((begin==index)) || # [Note: 少なくとも1個ははみ出ても表示する]
+          ((begin==index)) || #[Note: It will be displayed even if at least one item protrudes]
           { x=$x0 y=$y0; break; }; esc1=$ret
       fi
     fi
@@ -297,17 +297,17 @@ function ble/complete/menu-style:align/construct-page {
     _ble_complete_menu_style_icons[index]=$((x0+prefix_width)),$y0,$x,$y,${#item},${#esc1}:$item$esc1
     esc=$esc$prefix_esc$esc1
 
-    # 候補と候補の間の空白
+    # Space between candidates
     if ((++index<end)); then
       local icell=$((x==0?0:(x+wcell)/wcell))
       if ((icell<ncell)); then
-        # 次の升目
+        # next square
         local pad=$((icell*wcell-x))
         ble/string#reserve-prototype "$pad"
         esc=$esc${_ble_string_prototype::pad}
         ((x=icell*wcell))
       else
-        # 次の行
+        # next line
         ((y+1>=lines)) && break
         esc=$esc$'\n'
         ((x=0,++y))
@@ -362,7 +362,7 @@ function ble/complete/menu-style:dense/construct-page {
     _ble_complete_menu_style_icons[index]=$x1,$y1,$x,$y,${#item},${#esc1}:$item$esc1
     esc=$esc$prefix_esc$esc1
 
-    # 候補と候補の間の空白
+    # Space between candidates
     if ((++index<N)); then
       if [[ $menu_style == dense-nowrap ]] && ((x==0)); then
         : skip
@@ -379,7 +379,7 @@ function ble/complete/menu-style:dense/construct-page {
   end=$index
 }
 ## @fn ble/complete/menu-style:dense/construct opts
-##   complete_menu_style=align{,-nowrap} に対して候補を配置します。
+## Align suggestions for complete_menu_style=align{,-nowrap}.
 function ble/complete/menu-style:dense-nowrap/construct-page {
   ble/complete/menu-style:dense/construct-page "$@"
 }
@@ -439,7 +439,7 @@ function ble/complete/menu-style:desc/construct-page {
   local opts=$1 ret
   local opt_raw=; [[ $menu_style != desc-text ]] && opt_raw=1
 
-  # 失敗時・エラー時の既定値
+  # Default value in case of failure/error
   end=$begin esc= x=0 y=0
 
   local colsep=' | '
@@ -462,10 +462,10 @@ function ble/complete/menu-style:desc/construct-page {
   local ncolumn_max=$(((nrest_item+nline-1)/nline))
   ((ncolumn>ncolumn_max&&(ncolumn=ncolumn_max)))
 
-  # Note #D1727: 相対移動の時は、右端に接すると端末による振る舞いの違
-  #   いが問題になるので、右端に接しない様に col-1 にする。一部の端末
-  #   については右端に接しても相対移動が壊れないと分かっているので、
-  #   white list で右端に接する事を許可する。
+  # Note #D1727: During relative movement, when touching the right edge, the behavior differs depending on the terminal.
+  # This is a problem, so set it to col-1 so that it does not touch the right end. some devices
+  # Since we know that the relative movement will not be broken even if it touches the right edge,
+  # Allow touching the right edge with white list.
   local available_width=$cols
   case $_ble_term_TERM in
   (screen:*|tmux:*|kitty:*|contra:*) ;;
@@ -485,7 +485,7 @@ function ble/complete/menu-style:desc/construct-page {
   local index=$begin icolumn ymax=0
   for ((icolumn=0;icolumn<ncolumn;icolumn++)); do
 
-    # 各候補を描画して幅を計算する
+    # Draw each candidate and calculate the width
     local measure; measure=()
     local pack w esc1 max_width=0
     for pack in "${menu_items[@]:index:nline}"; do
@@ -518,18 +518,18 @@ function ble/complete/menu-style:desc/construct-page {
       ble/canvas/put.draw "$prefix_esc"
       ((x+=prefix_width))
 
-      # 候補表示
+      # Candidate display
       ((x0=x,y0=y,x+=w))
       _ble_complete_menu_style_icons[index]=$((xcolumn+x0)),$y0,$((xcolumn+x)),$y,${#pack},${#esc1},"0 0 $wcand_limit 1":$pack$esc1
       ((index++))
       ble/canvas/put.draw "$esc1"
 
-      # 余白
+      # margin
       ble/canvas/put-spaces.draw "$((pad=desc_x-x))"
       ble/canvas/put.draw "$desc_prefix"
       ((x+=pad+${#desc_prefix}))
 
-      # 説明表示
+      # Explanation display
       local desc=$desc_sgrt'(no description)'$desc_sgr0
       ble/function#try "$menu_class"/get-desc "$pack"
       if [[ $opt_raw ]]; then
@@ -548,7 +548,7 @@ function ble/complete/menu-style:desc/construct-page {
     ((y>ymax)) && ymax=$y
 
     if ((icolumn+1<ncolumn)); then
-      # カラム仕切りを出力 (最後に次のカラムの先頭に移動)
+      # Output column divider (move to start of next column at the end)
       ble/canvas/put-move.draw "$((wcolumn-x))" "$((-y))"
       for ((y=0;y<=ymax;y++)); do
         ble/canvas/put.draw "$colsep"
@@ -619,7 +619,7 @@ function ble/complete/menu#construct/.initialize-size {
   ((maxlines>0&&lines>maxlines)) && lines=$maxlines
 }
 ## @fn ble/complete/menu#construct opts
-##   実装分離の adapter 部分
+## adapter part of implementation separation
 ##
 ##   @param[in] opts
 ##     A colon-separated list of options.
@@ -635,31 +635,31 @@ function ble/complete/menu#construct/.initialize-size {
 ##   @var[in] menu_style
 ##
 ##   @arr[in] menu_items
-##     項目のリストを指定します。
+## Specifies a list of items.
 ##
 ##   @var[in] menu_class menu_param
-##     以下に掲げる様々な callback を呼び出す為の変数です。
+## These variables are used to call the various callbacks listed below.
 ##
 ##   @fn[in,opt] $menu_class/render-item item opts
-##     各項目に対応する描画内容を決定する renderer 関数を指定します。
+## Specify the renderer function that determines the rendering content for each item.
 ##     @param[in] item
-##       描画される項目を指定します。
+## Specifies the item to be drawn.
 ##     @param[in] opts
 ##       selected
-##         選択されている項目の描画を行う事を示します。
+## Indicates that the selected item will be drawn.
 ##     @var[in] lines cols
-##       描画範囲の行数と列数を指定します。
+## Specify the number of rows and columns in the drawing range.
 ##     @var[in,out] x y
-##       描画開始位置を指定します。終了位置を返します。
+## Specify the drawing start position. Returns the ending position.
 ##     @var[out] ret
-##       描画に用いるシーケンスを返します。
+## Returns the sequence used for drawing.
 ##
 ##   @fn[in,opt] $menu_class/onselect nsel osel
-##     項目が選択された時に呼び出される callback を指定します。
+## Specifies the callback that will be called when the item is selected.
 ##     @param[in] nsel osel
 ##
 ##   @fn[in,opt] $menu_class/get-desc item
-##     項目の説明を取得します。
+## Gets the item's description.
 ##     @param[out] desc
 ##
 ##   @fn[in,opt] $menu_class/onaccept nsel [item]
@@ -685,7 +685,7 @@ function ble/complete/menu#construct {
     _ble_complete_menu_page_infodata=(store 0 0 '')
     return 0
   elif ((nitem==0)); then
-    # 項目がない時の特別表示
+    # Special display when there is no item
     _ble_complete_menu_page_style=
     _ble_complete_menu_page_index=0
     _ble_complete_menu_page_offset=0
@@ -698,7 +698,7 @@ function ble/complete/menu#construct {
   ble/complete/menu#construct/.initialize-size
   local hash=$nitem,$lines,$cols:$menu_style
 
-  # 表示したい項目の指定
+  # Specifying the items you want to display
   local scroll=0 use_cache=
   if ble/string#match ":$menu_construct_opts:" ':scroll=([0-9]+):'; then
     scroll=${BASH_REMATCH[1]}
@@ -718,7 +718,7 @@ function ble/complete/menu#construct {
     ((scroll<begin)) && return 1
     local page_data=${_ble_complete_menu_style_pages[ipage]}
     if [[ $page_data ]]; then
-      # キャッシュがある時はキャッシュから読み取り
+      # Read from cache if cache exists
       local fields; ble/string#split fields , "${page_data%%:*}"
       begin=${fields[0]} end=${fields[1]}
       if ((begin<=scroll&&scroll<end)); then
@@ -726,7 +726,7 @@ function ble/complete/menu#construct {
         break
       fi
     else
-      # キャッシュがない時は頁を構築
+      # Build the page when there is no cache
       ble/complete/menu-style:"$menu_style"/construct-page "$menu_construct_opts" || return "$?"
       _ble_complete_menu_style_pages[ipage]=$begin,$end,$x,$y:$esc
       ((begin<=scroll&&scroll<end)) && break
@@ -769,8 +769,8 @@ function ble/complete/menu#select/.erase-item-selection.draw {
 
   ((fields[3]<_ble_canvas_panel_height[_ble_edit_info_panel])) || return 1
 
-  # Note: 編集文字列の内容の変化により info panel が削れている事がある。
-  # 現在の項目がちゃんと info panel の中にある時にだけ描画する。(#D0880)
+  # Note: The info panel may be deleted due to changes in the contents of the edited string.
+  # Draws only when the current item is properly inside the info panel. (#D0880)
 
   ble/canvas/panel#goto.draw "$_ble_edit_info_panel" "${fields[@]::2}"
   ble/canvas/put.draw "${text:fields[4]}"
@@ -819,8 +819,8 @@ function ble/complete/menu#select/.render-item-selection.draw {
     ble/complete/menu#render-item "$item" selected
   fi
 
-  # Note: 編集文字列の内容の変化により info panel が削れている事がある。
-  # 現在の項目がちゃんと info panel の中にある時にだけ描画する。(#D0880)
+  # Note: The info panel may be deleted due to changes in the contents of the edited string.
+  # Draws only when the current item is properly inside the info panel. (#D0880)
   ((y<_ble_canvas_panel_height[_ble_edit_info_panel])) || return 12
 
   ble/canvas/panel#goto.draw "$_ble_edit_info_panel" "${fields[@]::2}"
@@ -831,8 +831,8 @@ function ble/complete/menu#select/.render-item-selection.draw {
 ## @fn ble/complete/menu#select index [opts]
 ##   @param[in] opts
 ##     goto-page-top
-##       指定した項目を含む頁に移動した後に、
-##       その頁の一番上の項目に移動する事を指定します。
+## After moving to the page containing the specified item,
+## Specifies to move to the top item on the page.
 function ble/complete/menu#select {
   local menu_class=$_ble_complete_menu_class
   local menu_param=$_ble_complete_menu_param
@@ -845,7 +845,7 @@ function ble/complete/menu#select {
   local infox infoy
   ble/canvas/panel#get-origin "$_ble_edit_info_panel" --prefix=info
 
-  # ページ更新
+  # Page update
   local visible_beg=0
   local visible_end=$ncand
   if [[ :$_ble_complete_menu_opts: != *:hidden:* ]]; then
@@ -865,7 +865,7 @@ function ble/complete/menu#select {
       visible_beg=$_ble_complete_menu_page_offset
       visible_end=$((visible_beg+${#_ble_complete_menu_page_icons[@]}))
 
-      # スクロールに対応していない menu_style や、スクロールしすぎた時の為。
+      # For menu_style that doesn't support scrolling or when you scroll too much.
       ((visible_end<=nsel&&(nsel=visible_end-1)))
       ((nsel<=visible_beg&&(nsel=visible_beg)))
       ((visible_beg<=osel&&osel<visible_end)) || osel=-1
@@ -970,7 +970,7 @@ function ble/widget/menu/.check-last-column {
   _ble_complete_menu_lastcolumn=$ox
 }
 ## @fn ble/widget/menu/.goto-column column
-##   現在行の中で指定した列に対応する要素に移動する。
+## Moves to the element corresponding to the specified column in the current row.
 ##   @param[in] column
 function ble/widget/menu/.goto-column {
   local column=$1
@@ -1167,39 +1167,39 @@ function ble/complete/menu#start {
 
 # 
 #==============================================================================
-# 候補源 (context, source, action)
+# Candidate source (context, source, action)
 
-## ble/complete 内で共通で使われるローカル変数
+## Local variables commonly used within ble/complete
 ##
 ## @var COMP1 COMP2 COMPS COMPV
-##   COMP1-COMP2 は補完対象の範囲を指定します。
-##   COMPS は COMP1-COMP2 にある文字列を表し、
-##   COMPV は COMPS の評価値 (クォート除去、簡単なパラメータ展開をした値) を表します。
-##   COMPS に複雑な構造が含まれていて即時評価ができない場合は
-##   COMPV は unset になります。必要な場合は [[ $comps_flags == *v* ]] で判定して下さい。
-##   ※ [[ -v COMPV ]] は bash-4.2 以降です。
+## COMP1-COMP2 specifies the range for completion.
+## COMPS represents the string in COMP1-COMP2,
+## COMPV represents the evaluated value of COMPS (quotes removed and simple parameter expansion performed).
+## If COMPS contains a complex structure and immediate evaluation is not possible,
+## COMPV will be unset. If necessary, use [[ $comps_flags == *v* ]] to determine.
+## * [[ -v COMPV ]] is for bash-4.2 or later.
 ##
 ## @var comp_type
-##   候補生成の方法を制御します。
-##   以下のオプションのコロン区切りの組み合わせからなる文字列です。
+## Controls how candidates are generated.
+## A string consisting of a colon-separated combination of the following options:
 ##
-##   a 曖昧補完に用いる候補を生成する。
-##     曖昧一致するかどうかは呼び出し元で判定されるので、
-##     曖昧一致する可能性のある候補をできるだけ多く生成すれば良い。
-##   m 曖昧補完 (中間部分に一致)
-##   A 曖昧補完 (部分列・最初の文字も一致しなくて良い)
+## a Generate candidates for use in ambiguous completion.
+## Whether there is a fuzzy match or not is determined by the caller, so
+## It is sufficient to generate as many candidates as possible that have a possibility of vague matching.
+## m ambiguous completion (matches middle part)
+## A Ambiguous completion (substring/first character does not need to match either)
 ##
 ##   i (rlvar completion-ignore-case)
-##     大文字小文字を区別しない補完候補生成を行う。
+## Generates completion candidates that are case-insensitive.
 ##   vstat (rlvar visible-stats)
-##     ファイル名末尾にファイルの種類を示す記号を付加する。
+## Add a symbol indicating the file type to the end of the file name.
 ##   markdir (rlvar mark-directories)
-##     ディレクトリ名の補完後に / を付加する。
+## Add / after directory name completion.
 ##
 ##   sync
-##     ユーザの入力があっても中断しない事を表す。
+## Indicates that there is no interruption even if there is user input.
 ##   raw
-##     COMPV としてシェル評価前の文字列を使用します。
+## Use the string before shell evaluation as COMPV.
 ##
 
 function ble/complete/check-cancel {
@@ -1209,7 +1209,7 @@ function ble/complete/check-cancel {
 #------------------------------------------------------------------------------
 # action
 
-## 既存の action
+## existing action
 ##
 ##   ble/complete/action:plain
 ##   ble/complete/action:{,literal-}{word,substr}
@@ -1222,44 +1222,44 @@ function ble/complete/check-cancel {
 ##   ble/complete/action:tilde
 ##   ble/complete/action:{suffix-,}sabbrev
 ##
-## action の実装
+## implementation of action
 ##
 ## @fn ble/complete/action:$ACTION/initialize
-##   基本的に INSERT を設定すれば良い
+## Basically you just need to set INSERT
 ##   @var[in    ] CAND
 ##   @var[in,out] ACTION
 ##   @var[in,out] DATA
 ##   @var[in,out] INSERT
-##     COMP1-COMP2 を置き換える文字列を指定します
+## Specify the string to replace COMP1-COMP2
 ##
 ##   @var[in] COMP1 COMP2 COMPS COMPV comp_type
 ##
 ##   @var[in] COMP_PREFIX
 ##
 ##   @var[in] comps_flags
-##     以下のフラグ文字からなる文字列です。
+## A string consisting of the following flag characters.
 ##
-##     p パラメータ展開の直後に於ける補完である事を表します。
-##       直後に識別子を構成する文字を追記する時に対処が必要です。
+## p Indicates completion immediately after parameter expansion.
+## This is necessary when adding the characters that make up the identifier immediately after.
 ##
-##     v COMPV が利用可能である事を表します。
-##     f failglob で COMPV 評価が失敗した事を表します。
+## v Indicates that COMPV is available.
+## f Indicates that COMPV evaluation failed with failglob.
 ##
-##     S クォート ''  の中にいる事を表します。
-##     E クォート $'' の中にいる事を表します。
-##     D クォート ""  の中にいる事を表します。
-##     I クォート $"" の中にいる事を表します。
-##     B クォート \   の直後にいる事を表します。
-##     x ブレース展開の中にいる事を表します。
+## S indicates that you are inside a quote ''.
+## E Represents being inside the quote $''.
+## D Represents being inside a quote "".
+## I Indicates that you are inside the quote $"".
+## B Indicates that it is immediately after the quote \.
+## x indicates that you are inside a brace expansion.
 ##
-##     Note: shopt -s nocaseglob のため、フラグ文字は
-##       大文字・小文字でも重複しないように定義する必要がある。
+## Note: Because of shopt -s nocaseglob, the flag character is
+## It is necessary to define the characters in uppercase and lowercase letters so that they do not overlap.
 ##
 ##   @var[in] comps_fixed
-##     補完対象がブレース展開を含む場合に ibrace:value の形式になります。
-##     それ以外の場合は空文字列です。
-##     ibrace はブレース展開の構造を保持するのに必要な COMPS 接頭辞の長さです。
-##     value は ${COMPS::ibrace} のブレース展開を実行した結果の最後の単語の評価結果です。
+## If the completion target contains brace expansion, it takes the form ibrace:value.
+## Otherwise, it is an empty string.
+## ibrace is the length of the COMPS prefix required to preserve the brace expansion structure.
+## value is the evaluation result of the last word resulting from brace expansion of ${COMPS::ibrace}.
 ##
 ## @fn ble/complete/action:$ACTION/initialize.batch
 ##   Convert all the elements stored in "cands" to the array "inserts" at once.
@@ -1276,8 +1276,8 @@ function ble/complete/check-cancel {
 ##     (see ble/complete/action:$ACTION/initialize)
 ##
 ## @fn ble/complete/action:$ACTION/complete
-##   一意確定時に、挿入文字列・範囲に対する加工を行います。
-##   例えばディレクトリ名の場合に / を後に付け加える等です。
+## When confirming uniqueness, process the inserted string/range.
+## For example, add / to the end of a directory name.
 ##
 ##   @var[in] CAND
 ##   @var[in] ACTION
@@ -1285,19 +1285,19 @@ function ble/complete/check-cancel {
 ##   @var[in] COMP1 COMP2 COMPS COMPV comp_type comps_flags
 ##
 ##   @var[in,out] insert suffix
-##     補完によって挿入される文字列を指定します。
-##     加工後の挿入する文字列を返します。
+## Specifies the string to be inserted by completion.
+## Returns the string to be inserted after processing.
 ##
 ##   @var[in] insert_beg insert_end
-##     補完によって置換される範囲を指定します。
+## Specifies the range to be replaced by completion.
 ##
 ##   @var[in,out] insert_flags
-##     以下のフラグ文字の組み合わせの文字列です。
+## A string that is a combination of the following flag characters:
 ##
-##     r   [in] 既存部分を書き換えるような補完であることを表します。
-##         これが含まれない場合、既存部分を保持したまま追記する形で補完します。
-##     m   [out] 候補一覧 (menu) の表示を要求する事を表します。
-##     n   [out] 再度補完を試み (確定せずに) 候補一覧を表示する事を要求します。
+## r [in] Indicates a completion that rewrites an existing part.
+## If this is not included, it will be supplemented by adding it while retaining the existing part.
+## m [out] Indicates a request to display a list of candidates (menu).
+## n [out] Requests to try completion again (without confirming) and display a list of candidates.
 ##
 ## @fn ble/complete/action:$ACTION/init-menu-item
 ##   @var[in] ACTION CAND INSERT DATA PREFIX_LEN
@@ -1351,8 +1351,8 @@ function ble/complete/action/complete.close-quotation {
 ##   @var[ref] INSERT
 ##   @var[in] ${_ble_complete_quote_insert_varnames[@]}
 ##
-## Note: quote-insert を呼び出す前に予め quote-insert.initialize を呼び出して
-## quote_... 変数を初期化しておく必要があります。
+## Note: Call quote-insert.initialize before calling quote-insert.
+## The quote_... variable must be initialized.
 ##
 ## Example:
 ##
@@ -1382,26 +1382,26 @@ function ble/complete/action/quote-insert.initialize {
   if [[ $quote_action == command ]]; then
     quote_escape_flags=
   elif [[ $quote_action == progcomp ]]; then
-    # #D1362 Bash は "compopt -o filenames" が指定されている時、
-    # '~' で始まる補完候補と同名のファイルがある時にのみチルダをクォートする。
+    # #D1362 Bash when "compopt -o filenames" is specified,
+    # Quote the tilde only when there is a file with the same name as a completion candidate starting with '~'.
     # [[ $CAND == '~'* && ! ( $comp_opts == *:filenames:* && -e $CAND ) ]] &&
     #   quote_escape_flags=T$quote_escape_flags
-    # #D1434 = 及び : は filenames がついていない限りは quote しない事にする。
-    #    bash-complete が unquoted =, : を生成する可能性があるので。
+    # #D1434 = and : will not be quoted unless filenames is included.
+    # Since bash-complete can generate unquoted =, : .
     [[ $comp_opts != *:filenames:* ]] &&
       quote_escape_flags=${quote_escape_flags//c}
   fi
   [[ $comps_fixed ]] && quote_escape_flags=b$quote_escape_flags
 
-  # 孤立 backslash が前置している時は二重クォートを防ぐ為に削除
+  # If an isolated backslash is prefixed, it is removed to prevent double quotes.
   quote_cont_cutbackslash=
   [[ $comps_flags == *B* && $COMPS == *'\' ]] &&
     quote_cont_cutbackslash=1
 
-  # 直前にパラメータ展開があればエスケープ
+  # Escape if there is a parameter expansion immediately before
   quote_paramx_comps=$COMPS
   if [[ $comps_flags == *p* ]]; then
-    # Note: 安全策 (本来 comps_flags に p がある時点で '\' では終わらない筈)
+    # Note: Safety measure (Originally, when there is p in comps_flags, it should not end with '\')
     [[ $comps_flags == *B* && $quote_paramx_comps == *'\' ]] &&
       quote_paramx_comps=${quote_paramx_comps%'\'}
 
@@ -1411,7 +1411,7 @@ function ble/complete/action/quote-insert.initialize {
         local rematch1=${BASH_REMATCH[1]}
         quote_paramx_comps=$rematch1'${'${COMPS:${#rematch1}+1}'}'
       else
-        # Note: 安全策 (本来上で一致する筈)
+        # Note: Safety measure (should match above)
         quote_paramx_comps=$quote_paramx_comps'""'
       fi ;;
     (*)
@@ -1419,7 +1419,7 @@ function ble/complete/action/quote-insert.initialize {
     esac
   fi
 
-  # 遡って書き換えた時に文脈を復元
+  # Restore context when rewriting retroactively
   quote_trav_prefix=
   case $comps_flags in
   (*S*) quote_trav_prefix=\' ;;
@@ -1428,7 +1428,7 @@ function ble/complete/action/quote-insert.initialize {
   (*I*) quote_trav_prefix=\$\" ;;
   esac
 
-  # 遡って書き換える時に comps_fixed には注意する。
+  # Be careful about comps_fixed when rewriting retroactively.
   quote_fixed_comps=('')
   quote_fixed_compv=('')
   quote_fixed_comps_len=('')
@@ -1440,8 +1440,8 @@ function ble/complete/action/quote-insert.initialize {
     quote_fixed_comps=${COMPS::quote_fixed_comps_len}
   fi
 
-  # 遡って書き換える時に '/' 区切りでできるだけ元の展開を保持する。
-  # comps_fixed[1] 以降に '/' 区切りで展開した結果を短い順に格納する。
+  # When rewriting backwards, use '/' delimiters to preserve the original expansion as much as possible.
+  # After comps_fixed[1], store the expanded results separated by '/' in ascending order.
   local i v
   for ((i=1;i<${#comps_fixed[@]};i++)); do
     v=${comps_fixed[i]#*:}
@@ -1453,9 +1453,9 @@ function ble/complete/action/quote-insert.initialize {
 }
 
 ## @fn ble/complete/action/quote-insert
-# Note: この関数の処理は ble/complete/action/quote-insert.batch/awk と一貫して
-# いる必要がある。この関数を変更する時には quote-insert.batch/awk にも等価の変
-# 更を適用する必要がある。
+# Note: The processing of this function is consistent with ble/complete/action/quote-insert.batch/awk.
+# I need to be there. When changing this function, also make equivalent changes to quote-insert.batch/awk.
+# changes need to be applied.
 function ble/complete/action/quote-insert {
   if [[ ! $quote_action ]]; then
     local "${_ble_complete_quote_insert_varnames[@]/%/=}" # WA #D1570 checked
@@ -1464,26 +1464,26 @@ function ble/complete/action/quote-insert {
 
   local escape_flags=$quote_escape_flags
   if [[ $quote_action == command ]]; then
-    # Note (#D1715,#D1978): "*:noquote:*" の判定について。action=command
-    #   DATA=:noquote: は alias 生成のみで使われる。そして alias 生成は
-    #   yield.batch を使わずに直接 yield を呼び出して行われる。なので :noquote:
-    #   の判定は awk batch の側では行わなくて良い。
+    # Note (#D1715,#D1978): Regarding the judgment of "*:noquote:*". action=command
+    # DATA=:noquote: is only used in alias generation. And the alias generation is
+    # This is done by calling yield directly without using yield.batch. So :noquote:
+    # There is no need to make this determination on the awk batch side.
     [[ $DATA == *:noquote:* || $COMPS == "$COMPV" && ( $CAND == '[[' || $CAND == '!' ) ]] && return 0
   elif [[ $quote_action == progcomp ]]; then
     [[ $comp_opts == *:noquote:* ]] && return 0
     [[ $comp_opts == *:ble/syntax-raw:* && $comp_opts != *:filenames:* ]] && return 0
 
-    # bash-completion には compopt -o nospace として、
-    # 自分でスペースを付加する補完関数がある。この時クォートすると問題。
+    # For bash-completion, as compopt -o nospace,
+    # There is a completion function to add spaces yourself. There is a problem if you quote at this time.
     [[ $comp_opts == *:nospace:* && $CAND == *' ' && ! -f $CAND ]] && return 0
 
-    # #D1362 Bash は "compopt -o filenames" が指定されていてかつ
-    # '~' で始まる補完候補と同名のファイルがある時にのみチルダをクォートする。
+    # #D1362 Bash requires "compopt -o filenames" and
+    # Quote the tilde only when there is a file with the same name as a completion candidate starting with '~'.
     [[ $CAND == '~'* && ! ( $comp_opts == *:filenames:* && -e $CAND ) ]] &&
       escape_flags=T$escape_flags
   fi
 
-  # 入力済み文字列への追記の場合、元の単語を保持する。
+  # When adding to an already input string, the original word is retained.
   if [[ $comps_flags == *v* && $CAND == "$COMPV"* ]]; then
     local ins ret
     ble/complete/string#escape-for-completion-context "${CAND:${#COMPV}}" "$escape_flags"; ins=$ret
@@ -1496,7 +1496,7 @@ function ble/complete/action/quote-insert {
     return 0
   fi
 
-  # 遡って書き換わる場合には単語内のできるだけ長い部分パスを保持する。
+  # When rewriting retroactively, the longest possible partial path within a word is retained.
   local i=${#quote_fixed_comps[@]}
   while ((--i>=0)); do
     if [[ ${quote_fixed_comps[i]} && $CAND == "${quote_fixed_compv[i]}"* ]]; then
@@ -1506,7 +1506,7 @@ function ble/complete/action/quote-insert {
     fi
   done
 
-  # 既存の物に一致しない場合、完全に書き換える。
+  # If it doesn't match the existing one, completely rewrite it.
   local ret; ble/complete/string#escape-for-completion-context "$CAND" "$escape_flags"
   INSERT=$quote_trav_prefix$ret
 }
@@ -1634,7 +1634,7 @@ function ble/complete/action/quote-insert.batch/awk {
     }
 
     function quote_insert(cand, _, i) {
-      # progcomp 特有
+      # progcomp specific
       if (quote_action == "command") {
         if (comps == compv && cand ~ /^(\[\[|]]|!)$/) return cand;
       } else if (quote_action == "progcomp") {
@@ -1739,23 +1739,23 @@ function ble/complete/action/requote-final-insert {
   if [[ $insert == "$COMPS"* ]]; then
     [[ $comps_flags == *[SEDI]* ]] && return 0
 
-    # Note: 以下の設定は遡って書き換える事を許す事になる
+    # Note: The following settings will be allowed to be rewritten retroactively.
     [[ $COMPS != *[!':/={,'] ]] && comps_prefix=$COMPS
     check_optarg=$COMPS
   else
-    # 遡って書き換える場合 (中途半端な quote 状態ではないと仮定)
+    # When rewriting retroactively (assuming it is not in a halfway quote state)
     check_optarg=$insert
   fi
 
   # Note: --prefix='/usr/local', PREFIX='/usr/local', -L'/usr/local/share/lib'
-  # 等、オプション・変数代入の右辺などの quote は、その開始点と思われる箇所から
-  # 始める。
+  # etc., the quote on the right side of option/variable assignment, etc., starts from the point where it seems to be the starting point.
+  # start.
   if [[ $check_optarg ]]; then
     if ble/string#match "$check_optarg" '^([_a-zA-Z][_a-zA-Z0-9]*|-[-a-zA-Z0-9.]+)=(([^\'\''"`${}]*|\\.)*:)?'; then
-      # --prefix= や PREFIX=, PATH=xxxx: 等があった場合には = や : の直後から quote する。
+      # If there is --prefix=, PREFIX=, PATH=xxxx:, etc., quote immediately after = or :.
       comps_prefix=$BASH_REMATCH
     elif [[ $COMP_PREFIX == -[!'-=:/\'\''"$`{};&|<>!^{}'] && $check_optarg == "$COMP_PREFIX"* ]]; then
-      # -L'/path/to/library' 等。COMP_PREFIX=-L かつ COMPS が -L で始まっている時のみ。
+      # -L'/path/to/library' etc. Only when COMP_PREFIX=-L and COMPS starts with -L.
       comps_prefix=${check_optarg::2}
     fi
   fi
@@ -1785,7 +1785,7 @@ function ble/complete/action/requote-final-insert {
       fi
       ((${#ret}+threshold<=${#ins})) || return 0
       insert=$comps_prefix$ret
-      [[ $insert == "$COMPS"* ]] || insert_flags=r$insert_flags # 遡って書き換えた
+      [[ $insert == "$COMPS"* ]] || insert_flags=r$insert_flags #Rewritten retroactively
     fi
   fi
   return 0
@@ -1847,7 +1847,7 @@ function ble/complete/action:literal-word/get-desc { ble/complete/action:plain/g
 
 # action:word
 #
-#   DATA ... 候補の説明として使用する文字列を指定します
+# DATA ... specifies a string to use as a description of the candidate
 #
 function ble/complete/action:word/initialize {
   ble/complete/action/quote-insert
@@ -1865,11 +1865,11 @@ function ble/complete/action:word/get-desc {
 }
 
 # action:file
-# action:file_rhs (source:argument 内部使用)
+# action:file_rhs (source:argument internal use)
 
 ## @fn ble/complete/action:file/.get-filename word
-##   "compopt -o ble/syntax-raw" の場合も考慮してファイル名を抽出する。
-##   Bash の振る舞いを見るとチルダ展開だけを実行する様だ。
+## Extract the file name considering the case of "compopt -o ble/syntax-raw".
+## Looking at Bash's behavior, it seems that it only performs tilde expansion.
 ##   @var[in] CAND DATA
 function ble/complete/action:file/.get-filename {
   ret=$CAND
@@ -1954,7 +1954,7 @@ function ble/complete/action:file/get-desc {
 
 # action:progcomp
 #
-#   DATA ... compopt 互換のオプションをコロン区切りで指定します
+# DATA ... compopt Compatible options separated by colons
 #
 ## @fn ble/complete/action:progcomp/initialize/.reconstruct-from-noquote
 ##   @var[in,out] INSERT CAND
@@ -1968,7 +1968,7 @@ function ble/complete/action:progcomp/initialize/.reconstruct-from-noquote {
 
   CAND=$ret
 
-  # ブレース展開がある時は逆に INSERT を補正し返す。
+  # Conversely, when there is brace expansion, the INSERT is corrected and returned.
   if [[ $quote_fixed_comps && $CAND == "$quote_fixed_compv"* ]]; then
     local ret; ble/complete/string#escape-for-completion-context "${CAND:quote_fixed_compv_len}" "$escape_flags"
     INSERT=$quote_fixed_comps$quote_trav_prefix$ret
@@ -1994,8 +1994,8 @@ function ble/complete/action:progcomp/initialize.batch {
   if [[ :$DATA: == *:noquote:* ]]; then
     inserts=("${cands[@]}")
 
-    # Note: 直接 comp_words に対して補完した時は意図的にブレース展開を潰してい
-    # ると解釈できるので、ブレース展開を復元する事はしない。
+    # Note: When directly completing comp_words, brace expansion was intentionally suppressed.
+    # Therefore, we do not restore the brace expansion.
     local progcomp_resolve_brace=$quote_fixed_comps
     [[ :$DATA: == *:ble/syntax-raw:* ]] && progcomp_resolve_brace=
 
@@ -2005,7 +2005,7 @@ function ble/complete/action:progcomp/initialize.batch {
       ((cand_iloop++%bleopt_complete_polling_cycle==0)) && ble/complete/check-cancel && return 148
       local CAND=$INSERT
       ble/complete/action:progcomp/initialize/.reconstruct-from-noquote ||
-        inserts[icand]=$INSERT # INSERT を上書きした時 ($?==3)
+        inserts[icand]=$INSERT #When overwriting INSERT ($?==3)
       cands[icand++]=$CAND
     done
   else
@@ -2051,14 +2051,14 @@ function ble/complete/action:command/complete {
   if [[ -d $CAND ]]; then
     ble/complete/action/complete.mark-directory
   elif ! ble/bin#has "$CAND"; then
-    # 関数名について縮約されたもので一意確定した時。
+    # When the function name is contracted and unique.
     #
-    # Note: 関数名について縮約されている時、
-    #   本来は一意確定でなくても一意確定として此処に来ることがある。
-    #   そのコマンドが存在していない時に、縮約されていると判定する。
+    # Note: When a function name is contracted,
+    # Even if it is not originally uniquely determined, it may come here as uniquely determined.
+    # When the command does not exist, it is determined that the command has been reduced.
     #
     if [[ $CAND == */ ]]; then
-      # 縮約されていると想定し続きの補完候補を出す。
+      # Assuming that it has been reduced, it generates a continuation completion candidate.
       insert_flags=${insert_flags}n
     fi
   else
@@ -2073,9 +2073,9 @@ function ble/complete/action:command/init-menu-item {
     if [[ $CAND != "$INSERT" ]]; then
       ble/syntax/highlight/cmdtype "$CAND" "$INSERT"
     else
-      # Note: ble/syntax/highlight/cmdtype はキャッシュ機能がついているが、
-      #   キーワードに対して呼び出さない前提なのでキーワードを渡すと
-      #   _ble_attr_ERR を返してしまう。
+      # Note: ble/syntax/highlight/cmdtype has a cache function, but
+      # It is assumed that it will not be called for a keyword, so if you pass the keyword
+      # It returns _ble_attr_ERR.
       local type; ble/util/type type "$CAND"
       ble/syntax/highlight/cmdtype1 "$type" "$CAND"
     fi
@@ -2119,8 +2119,8 @@ function ble/complete/action:command/get-desc {
 
       local def; ble/function#getdef "$CAND"
       ble/string#match "$def" '^[^()]*\(\)[[:blank:]]*\{[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\}[[:blank:]]*$' &&
-        def=${BASH_REMATCH[1]} # 関数の中身を抽出する
-      local ret sgr0=$'\e[27m' sgr1=$'\e[7m' # Note: sgr-ansi で生成
+        def=${BASH_REMATCH[1]} #Extract the contents of a function
+      local ret sgr0=$'\e[27m' sgr1=$'\e[7m' #Note: Generated with sgr-ansi
       lines=1 cols=${COLUMNS:-80} x=0 y=0 ble/canvas/trace-text "$def" external-sgr
 
       title=function value="${source##*/}:$lineno $desc_sgrq$ret" ;;
@@ -2143,18 +2143,18 @@ function ble/complete/action:command/get-desc {
 
 # action:variable
 #
-#   DATA ... 変数名の文脈を指定します。
-#     assignment braced word arithmetic の何れかです。
+# DATA ... Specifies the context of the variable name.
+# assignment braced word arithmetic.
 #
 function ble/complete/action:variable/initialize { ble/complete/action/quote-insert; }
 function ble/complete/action:variable/initialize.batch { ble/complete/action/quote-insert.batch newline; }
 function ble/complete/action:variable/complete {
   case $DATA in
   (assignment)
-    # var= 等に於いて = を挿入
+    # Insert = in var= etc.
     ble/complete/action/complete.addtail '=' ;;
   (braced)
-    # ${var 等に於いて } を挿入
+    # Insert } in ${var etc.
     ble/complete/action/complete.addtail '}' ;;
   (word)       ble/complete/action:word/complete ;;
   (arithmetic|nosuffix) ;; # do nothing
@@ -2210,8 +2210,8 @@ function ble/complete/source/test-limit {
   if [[ $limit && value -gt limit ]]; then
     cand_limit_reached=1
 
-    # Note: #D1618 自動候補一覧表示で失敗した時は不完全なリストが生成
-    #   されるのを防ぐ為に補完全体をキャンセルする。
+    # Note: #D1618 When automatic candidate list display fails, an incomplete list is generated.
+    # Cancel the entire completion to prevent this from happening.
     [[ :$comp_type: == *:auto_menu: ]] && cand_limit_reached=cancel
     return 1
   else
@@ -2221,12 +2221,12 @@ function ble/complete/source/test-limit {
 
 ## @fn ble/complete/source/eval-simple-word
 ## @fn ble/complete/source/evaluate-path-spec
-##   補完用の中断設定・timeout設定(auto-complete時のみ)を指定して、
-##   それぞれ simple-word/{eval,evaluate-path-spec} を呼び出します。
+## Specify the interruption setting and timeout setting (only when auto-complete) for completion,
+## Call simple-word/{eval,evaluate-path-spec} for each.
 ##
-## 注意: 現在の実装では、ユーザー入力による中断 148 及びtimeout による
-## 中断 142 の両方に対してこれらの関数は 148 を返す様に振る舞いを変更
-## している。呼び出し元で両方を区別なく取り扱うのに都合が良い為。
+## Note: The current implementation does not allow interrupts due to user input 148 and timeout
+## Changed behavior so that these functions return 148 for both 142 and abort
+## I am doing it. This is because it is convenient for the caller to handle both without distinction.
 ##
 function ble/complete/source/eval-simple-word {
   local word=$1 opts=$2
@@ -2253,7 +2253,7 @@ function ble/complete/source/evaluate-path-spec {
 
 
 ## @fn ble/complete/source/reduce-compv-for-ambiguous-match
-##   曖昧補完の為に擬似的な COMPV と COMPS を生成・設定します。
+## Generate and set pseudo COMPV and COMPS for ambiguous completion.
 ##   @var[in] comp_type comps_flags comps_fixed
 ##   @var[in,out] COMPS COMPV
 function ble/complete/source/reduce-compv-for-ambiguous-match {
@@ -2392,7 +2392,7 @@ function ble/complete/cand/unpack {
   PREFIX_LEN=${pack[2]}
 }
 
-## 定義されている source
+## defined source
 ##
 ##   source:wordlist
 ##   source:command
@@ -2401,16 +2401,16 @@ function ble/complete/cand/unpack {
 ##   source:argument
 ##   source:variable
 ##
-## source の実装
+## implementation of source
 ##
 ## @fn ble/complete/source:$name args...
 ##   @param[in] args...
-##     ble/syntax/completion-context/generate で設定されるユーザ定義の引数。
+## User-defined arguments set in ble/syntax/completion-context/generate.
 ##
 ##   @var[in] COMP1 COMP2 COMPS COMPV comp_type
 ##   @var[in] comp_filter_type
 ##   @var[out] COMP_PREFIX
-##     ble/complete/cand/yield で参照される一時変数。
+## Temporary variable referenced in ble/complete/cand/yield.
 ##
 ##   @var[in,out] cand_count cand_cand cand_word cand_pack
 ##   @var[in,out] cand_limit_reached
@@ -2420,9 +2420,9 @@ function ble/complete/source:none { return 0; }
 
 # source:wordlist
 #
-#  -r 指定された単語をエスケープせずにそのまま挿入する
-#  -W 補完完了時に空白を挿入しない
-#  -s sabbrev 候補も一緒に生成する
+# -r Insert the specified word as is without escaping it
+# -W Do not insert blank space on completion
+# -s sabbrev Generate candidates as well
 #
 function ble/complete/source:wordlist {
   [[ $comps_flags == *v* ]] || return 1
@@ -2555,9 +2555,9 @@ function ble/complete/source:command/.contract-by-slashes {
 
 ## @fn ble/complete/source:command/.print-command
 function ble/complete/source:command/.print-command {
-  # Note #D1922: パス名コマンドの曖昧補完は compgen -c ではなく自前で処理する。
-  # ディレクトリ名に関しては ble/complete/source:command/.print の側で生成されるの
-  # でここでは生成しない。
+  # Note #D1922: Ambiguous completion for pathname commands is handled by itself, not by compgen -c.
+  # Regarding the directory name, it is generated on the ble/complete/source:command/.print side.
+  # It is not generated here.
   if [[ $COMPV == */* && :$comp_type: == *:[maA]:* ]]; then
     local ret
     ble/complete/source:file/generate "$COMPV"; (($?==148)) && return 148
@@ -2572,8 +2572,8 @@ function ble/complete/source:command/.print-command {
     local COMPS=$COMPS COMPV=$COMPV
     ble/complete/source/reduce-compv-for-ambiguous-match
 
-    # Note: cygwin では cyg,x86,i68 等で始まる場合にとても遅い。他の環境でも空
-    #   の補完を実行すると遅くなる可能性がある。
+    # Note: cygwin is very slow when starting with cyg,x86,i68, etc. Empty in other environments
+    # Completion can be slow.
     local slow_compgen=
     if [[ ! $COMPV ]]; then
       shopt -q no_empty_cmd_completion && return 0
@@ -2591,9 +2591,9 @@ function ble/complete/source:command/.print-command {
       esac
     fi
 
-    # Note: 何故か compgen -A command はクォート除去が実行されない。compgen -A
-    #   function はクォート除去が実行される。従って、compgen -A command には直
-    #   接 COMPV を渡し、compgen -A function には compv_quoted を渡す。
+    # Note: For some reason, compgen -A command does not remove quotes. compgen -A
+    # function has quotes removed. Therefore, the compgen -A command directly
+    # Pass the connection COMPV and pass compv_quoted to the compgen -A function.
     if [[ $slow_compgen ]]; then
       ble/util/conditional-sync \
         'builtin compgen -c -- "$COMPV"' \
@@ -2618,12 +2618,12 @@ function ble/complete/source:command/.print {
     ble/complete/source:command/.print-command
   fi
 
-  # ディレクトリ名列挙 (/ 付きで生成する)
+  # Directory name enumeration (generated with /)
   #
-  #   Note: shopt -q autocd &>/dev/null かどうかに拘らず列挙する。
+  # Note: shopt -q autocd &> Enumerates whether or not it is /dev/null.
   #
-  #   Note: compgen -A directory (以下のコード参照) はバグがあって、
-  #     bash-4.3 以降でクォート除去が実行されないので使わない (#D0714 #M0009)
+  # Note: compgen -A directory (see code below) has a bug,
+  # Do not use since bash-4.3 and later do not remove quotes (#D0714 #M0009)
   #
   #     [[ :$comp_type: == *:a:* ]] && local COMPS=${COMPS::1} COMPV=${COMPV::1}
   #     compgen -A directory -S / -- "$compv_quoted"
@@ -2636,15 +2636,15 @@ function ble/complete/source:command/.print {
     ((${#ret[@]})) && printf '%s\n' "${ret[@]}"
   fi
 
-  # ジョブ名列挙
+  # Job name enumeration
   if [[ ! $COMPV || $COMPV == %* ]]; then
-    # %コマンド名
+    # %command name
     local q="'" Q="'\''"
     local compv_quoted=${COMPV#'%'}
     compv_quoted="'${compv_quoted//$q/$Q}'"
     builtin compgen -j -P % -- "$compv_quoted"
 
-    # %ジョブ番号
+    # %Job number
     local i joblist; ble/util/joblist
     local job_count=${#joblist[@]}
     for i in "${!joblist[@]}"; do
@@ -2677,7 +2677,7 @@ function ble/complete/source:command/.generate {
   local action=command "${_ble_complete_yield_varnames[@]/%/=}" # WA #D1570 checked
   ble/complete/cand/yield.initialize "$action"
 
-  # 無効 keyword, alias 判定用
+  # Invalid keyword, alias for determination
   local is_quoted=
   [[ $COMPS != "$COMPV" ]] && is_quoted=1
   local rex_keyword='^(if|then|else|elif|fi|case|esac|for|select|while|until|do|done|function|time|[!{}]|\[\[|coproc|\]\]|in)$'
@@ -2688,36 +2688,36 @@ function ble/complete/source:command/.generate {
   for cand in "${arr[@]}"; do
     ((cand_iloop++%bleopt_complete_polling_cycle==0)) && ble/complete/check-cancel && return 148
 
-    # workaround: 何故か compgen -c -- "$compv_quoted" で
-    #   厳密一致のディレクトリ名が混入するので削除する。
+    # workaround: For some reason compgen -c -- "$compv_quoted"
+    # Delete the exact match directory name as it will be mixed in.
     [[ $cand != */ && -d $cand ]] && ! ble/bin#has "$cand" && continue
 
     if [[ $is_quoted ]]; then
       local disable_count=
-      # #D1691 keyword は quote されている場合には無効
+      # #D1691 keyword is invalid if quoted
       [[ $cand =~ $rex_keyword ]] && ((disable_count++))
-      # #D1715 alias も quote されている場合には無効
+      # #D1715 Invalid if alias is also quoted
       [[ $expand_aliases ]] && ble/is-alias "$cand" && ((disable_count++))
       if [[ $disable_count ]]; then
         local type; ble/util/type type "$cand"
         ((${#type[@]}>disable_count)) || continue
       fi
     else
-      # 'in' と ']]' は alias でない限り常にエラー
+      # 'in' and ']]' always error unless aliased
       [[ $cand == ']]' || $cand == in ]] &&
         ! { [[ $expand_aliases ]] && ble/is-alias "$cand"; } &&
         continue
 
       if [[ ! $expand_aliases ]]; then
-        # #D1715 expand_aliases が無効でも compgen -c は alias を列挙してしまうので、
-        # ここで alias は除外 (type は expand_aliases をちゃんと考慮してくれる)。
+        # #D1715 compgen -c enumerates alias even if expand_aliases is disabled, so
+        # Exclude alias here (type takes expand_aliases into account).
         ble/is-alias "$cand" && ! ble/bin#has "$cand" && continue
       fi
 
-      # alias は quote されては困るので、quote される可能性のある文字を含んでい
-      # る場合は個別に :noquote: 指定で yield する [ Note: alias 内で許される特
-      # 殊文字は !#%-~^[]{}+*:@,.?_ である。更にその中で escape/quote の対象と
-      # なり得る文字は、[*?]{,}!^~#: だけである。_.@+%- は quote されない ]。
+      # You don't want alias to be quoted, so don't include characters that can be quoted.
+      # If the
+      # The special characters are !#%-~^[]{}+*:@,.?_. Furthermore, the target of escape/quote and
+      # The only possible characters are [*?]{,}!^~#:. _.@+%- is not quoted ].
       if ble/string#match "$cand" '[][*?{,}!^~#]' && ble/is-alias "$cand"; then
         ble/complete/cand/yield "$action" "$cand" :noquote:
         continue
@@ -2836,8 +2836,8 @@ function ble/complete/util/eval-pathname-expansion {
     shopt -s dotglob
     ble/array#push dtor 'shopt -u dotglob'
   else
-    # GLOBIGNORE に触ると設定が変わるので
-    # dotglob は明示的に保存・復元する。
+    # If you touch GLOBIGNORE, the settings will change.
+    # dotglob is explicitly saved and restored.
     ble/array#push dtor 'shopt -s dotglob'
   fi
 
@@ -2898,9 +2898,9 @@ function ble/complete/util/eval-pathname-expansion {
 }
 
 ## @fn ble/complete/source:file/.construct-ambiguous-pathname-pattern path [fixlen] [opts]
-##   指定された path に対応する曖昧一致パターンを生成します。
-##   例えば alpha/beta/gamma に対して a*/b*/g* でファイル名を生成します。
-##   但し "../" や "./" については (".*.*/" や ".*/" 等に変換せず) そのままにします。
+## Generates a fuzzy match pattern corresponding to the specified path.
+## For example, generate file names with a*/b*/g* for alpha/beta/gamma.
+## However, "../" and "./" should be left as is (without converting them to ".*.*/", ".*/", etc.).
 ##
 ##   @param[in] path
 ##   @param[in,opt] fixlen
@@ -2909,8 +2909,8 @@ function ble/complete/util/eval-pathname-expansion {
 ##   @var[out] ret
 ##
 ##   @remarks
-##     当初は a*/b*/g* で生成して、後のフィルタに一致しないものの除外を一任していたが遅い。
-##     従って、a*l*p*h*a*/b*e*t*a*/g*a*m*m*a* の様なパターンを生成する様に変更した。
+## Initially, it was generated using a*/b*/g* and left to filtering out those that did not match in the later filters, but it was slow.
+## Therefore, I changed it to generate patterns like a*l*p*h*a*/b*e*t*a*/g*a*m*m*a*.
 ##
 function ble/complete/source:file/.construct-ambiguous-pathname-pattern {
   local path=$1 fixlen=${2:-1} opts=${3:-}
@@ -2935,7 +2935,7 @@ function ble/complete/source:file/.construct-ambiguous-pathname-pattern {
       for ((j=fixlen;j<${#name};j++)); do
         ble/string#quote-word "${name:j:1}"
         if [[ $_ble_bash -lt 50000 && $pattern == *\* ]]; then
-          # * を extglob *([!ch]) に変換 #D1389
+          # Convert * to extglob *([!ch]) #D1389
           pattern=$pattern'([!'$ret'])'
         fi
         pattern=$pattern$ret*
@@ -3011,11 +3011,11 @@ function ble/complete/source:file {
   local opts=$1
   [[ $comps_flags == *v* ]] || return 1
   [[ :$comp_type: != *:[maA]:* && $COMPV =~ ^.+/ ]] && COMP_PREFIX=${BASH_REMATCH[0]}
-  # 入力文字列が空の場合は曖昧補完は本質的に通常の補完と同じなのでスキップ
+  # If the input string is empty, fuzzy completion is essentially the same as normal completion, so skip it.
   [[ :$comp_type: == *:[maA]:* && ! $COMPV ]] && return 1
 
-  #   Note: compgen -A file/directory (以下のコード参照) はバグがあって、
-  #     bash-4.0 と 4.1 でクォート除去が実行されないので使わない (#D0714 #M0009)
+  # Note: compgen -A file/directory (see code below) has a bug,
+  # Do not use in bash-4.0 and 4.1 as quote removal is not performed (#D0714 #M0009)
   #
   #     local q="'" Q="'\''"; local compv_quoted="'${COMPV//$q/$Q}'"
   #     local candidates; ble/util/compgen candidates -A file -- "$compv_quoted"
@@ -3062,11 +3062,11 @@ function ble/complete/source:rhs { ble/complete/source:file; }
 # source:tilde
 
 function ble/complete/action:tilde/initialize {
-  # チルダは quote しない
+  # Tilde is not quoted
   CAND=${CAND#\~} ble/complete/action/quote-insert
   INSERT=\~$INSERT
 
-  # Note: Windows 等でチルダ展開の無効なユーザー名があるのでチェック
+  # Note: Check for invalid user names with tilde expansion on Windows, etc.
   local rex='^~[^/'\''"$`\!:]*$'; [[ $INSERT =~ $rex ]]
 }
 function ble/complete/action:tilde/complete {
@@ -3106,14 +3106,14 @@ function ble/complete/source:tilde {
   local rex='^~[^/'\''"$`\!:]*$'; [[ $COMPS =~ $rex ]] || return 1
 
   # Generate candidates
-  #   Note: Windows で同じユーザ名が compgen によって
-  #   複数回列挙されるので sort -u を実行する。
+  # Note: On Windows, the same username is
+  # Run sort -u as it will be enumerated multiple times.
   local compgen candidates
   ble/util/assign compgen ble/complete/source:tilde/.generate
   [[ $compgen ]] || return 1
   ble/util/assign-array candidates 'ble/bin/sort -u <<< "$compgen"'
 
-  # COMPS を用いて自前でフィルタ
+  # Filter by yourself using COMPS
   local flag_source_filter=1
   if [[ $COMPS == '~'?* ]]; then
     local filter_type=$comp_filter_type
@@ -3187,7 +3187,7 @@ function ble/complete/progcomp/.compvar-perform-wordbreaks {
 
   ret=()
   while local head=${word%%["$wordbreaks"]*}; [[ $head != $word ]]; do
-    # Note: #D1094 bash の動作に倣って wordbreaks の連続は一つにまとめる。
+    # Note: #D1094 Combine consecutive wordbreaks into one, following bash behavior.
     ble/array#push ret "$head"
     word=${word:${#head}}
     head=${word%%[!"$wordbreaks"]*}
@@ -3195,9 +3195,9 @@ function ble/complete/progcomp/.compvar-perform-wordbreaks {
     word=${word:${#head}}
   done
 
-  # Note: #D1094 $word が空の時でも ret に push する。
-  #   $word が空の時は wordbreaks で終わっている事を意味するが、
-  #   その場合には wordbreaks の次に新しい単語を開始していると考える。
+  # Note: #D1094 Push to ret even if $word is empty.
+  # When $word is empty, it means that it ends with wordbreaks, but
+  # In that case, consider starting a new word after the wordbreaks.
   ble/array#push ret "$word"
 }
 function ble/complete/progcomp/.compvar-eval-word {
@@ -3212,19 +3212,19 @@ function ble/complete/progcomp/.compvar-eval-word {
 }
 
 ## @fn ble/complete/progcomp/.compvar-generate-subwords/impl1 word
-##   $wordbreaks で分割してから評価する戦略。
+## Strategy to split with $wordbreaks and then evaluate.
 ##
 ##   @param word
 ##   @arr[out] words
 ##   @var[in,out] point
 ##   @var[in] wordbreaks
 ##   @exit
-##     単純単語として処理できなかった場合に失敗します。
-##     それ以外の場合は 0 を返します。
+## Fails if it cannot be processed as a simple word.
+## otherwise returns 0.
 function ble/complete/progcomp/.compvar-generate-subwords/impl1 {
   local word=$1 ret simple_flags simple_ibrace
   if [[ $point ]]; then
-    # point で単語を前半と後半に分割
+    # Split word into first half and second half at point
     local left=${word::point} right=${word:point}
   else
     local left=$word right=
@@ -3247,7 +3247,7 @@ function ble/complete/progcomp/.compvar-generate-subwords/impl1 {
 
   point=0 words=()
 
-  # 単語毎に評価 (前半)
+  # Evaluate each word (first half)
   local eval_opts=noglob
   ((${#ret[@]}==1)) && eval_opts=
   ble/syntax:bash/simple-word#break-word "$left" "$wordbreaks"
@@ -3258,7 +3258,7 @@ function ble/complete/progcomp/.compvar-generate-subwords/impl1 {
     ((point+=${#ret}))
   done
 
-  # 単語毎に評価 (後半)
+  # Evaluation for each word (second half)
   if [[ $right ]]; then
     ble/syntax:bash/simple-word#break-word "$right" "$wordbreaks"
     local subword isfirst=1
@@ -3276,15 +3276,15 @@ function ble/complete/progcomp/.compvar-generate-subwords/impl1 {
   return 0
 }
 ## @fn ble/complete/progcomp/.compvar-generate-subwords/impl2 word
-##   評価してから $wordbreaks で分割する戦略。
+## Strategy to evaluate and then split with $wordbreaks.
 ##
 ##   @param word
 ##   @arr[out] words
 ##   @var[in,out] point
 ##   @var[in] wordbreaks
 ##   @exit
-##     単純単語として処理できなかった場合に失敗します。
-##     それ以外の場合は 0 を返します。
+## Fails if it cannot be processed as a simple word.
+## otherwise returns 0.
 function ble/complete/progcomp/.compvar-generate-subwords/impl2 {
   local word=$1
   ble/syntax:bash/simple-word/reconstruct-incomplete-word "$word" || return 1
@@ -3303,43 +3303,43 @@ function ble/complete/progcomp/.compvar-generate-subwords/impl2 {
   return 0
 }
 ## @fn ble/complete/progcomp/.compvar-generate-subwords word1
-##   word1 を COMP_WORDBREAKS で分割します。
+## Split word1 by COMP_WORDBREAKS.
 ##
 ##   @arr[out] words
-##     分割して得られた単語片を格納します。
+## Stores the word fragments obtained by segmentation.
 ##
 ##   @var[in,out] subword_flags
-##     E が含まれる時、単語の展開・分割が実施された事を示す。
-##       全体が単純単語になっている時、先に eval して COMP_WORDBREAKS で分割する。
-##       そうでない時に先に COMP_WORDBREAKS で分割して、
-##       各単語片に対して単純単語 eval を試みる。
+## When E is included, it indicates that the word has been expanded or divided.
+## When the whole word is a simple word, first eval and divide using COMP_WORDBREAKS.
+## If not, first split with COMP_WORDBREAKS,
+## Attempt a simple word eval for each word fragment.
 ##
-##     Q が含まれている時、後続の処理における展開・クォートを抑制し、
-##       補完関数に対してそのままの形で単語を渡す事を示す。
-##       これはチルダ ~ に対してユーザ名を補完させるのに使う。
+## When Q is included, suppress expansion and quoting in subsequent processing,
+## Indicates that the word is passed as is to the completion function.
+## This is used to complete the username for the tilde ~.
 ##
 ##   @var[in,out] point
 ##   @var[in] wordbreaks
 ##
-## Note: 全体が単純単語になっている時には先に eval して COMP_WORDBREAKS で分割する。
-##   この時 subword_flags=E を設定する。
+## Note: If the whole word is a simple word, eval it first and split it using COMP_WORDBREAKS.
+## At this time, set subword_flags=E.
 ##
 function ble/complete/progcomp/.compvar-generate-subwords {
   local word1=$1 ret simple_flags simple_ibrace
   if [[ ! $word1 ]]; then
-    # Note: 空文字列に対して正しい単語とする為に '' とすると git の補完関数が動かなくなる。
-    #   仕方がないので空文字列のままで登録する事にする。
+    # Note: If you use '' to make the empty string a valid word, git's completion function will not work.
+    # I have no choice but to register it as an empty string.
     subword_flags=E
     words=('')
   elif [[ $word1 == '~' ]]; then
-    # #D1362: ~ は展開するとユーザ名を補完できなくので特別にそのまま渡す。
+    # #D1362: When ~ is expanded, the user name cannot be completed, so pass it as is.
     subword_flags=Q
     words=('~')
   elif ble/complete/progcomp/.compvar-generate-subwords/impl1 "$word1"; then
-    # 初めに、先に分割してから評価する戦略を試す。
+    # First, try a split-first, then-evaluate strategy.
     subword_flags=E
   elif ble/complete/progcomp/.compvar-generate-subwords/impl2 "$word1"; then
-    # 次に、評価してから分割する戦略を試す。
+    # Next, try an evaluate-then-divide strategy.
     subword_flags=E
   else
     ble/complete/progcomp/.compvar-perform-wordbreaks "$word1"; words=("${ret[@]}")
@@ -3359,7 +3359,7 @@ function ble/complete/progcomp/.compvar-quote-subword {
     to_quote=1
   fi
 
-  # コマンド名以外は再クォート
+  # Requote everything except the command name
   if [[ $to_quote ]]; then
     local shell_specialchars=']\ ["'\''`$|&;<>()*?{}!^'$'\n\t' q="'" Q="'\''" qq="''"
     if ((index>0)) && [[ $word == *["$shell_specialchars"]* || $word == [#~]* ]]; then
@@ -3368,7 +3368,7 @@ function ble/complete/progcomp/.compvar-quote-subword {
     fi
   fi
 
-  # 単語片が補正されている時、p も補正する
+  # When word fragments are corrected, p is also corrected.
   if [[ $p && $word != "$1" ]]; then
     if ((p==${#1})); then
       p=${#word}
@@ -3396,7 +3396,7 @@ builtin unset -v _ble_complete_progcomp_cur_wordbreaks
 _ble_complete_progcomp_cur_rex_simple=
 _ble_complete_progcomp_cur_rex_break=
 function ble/complete/progcomp/.compvar-reduce-cur {
-  # 正規表現の更新
+  # Regular expression update
   if [[ ! ${_ble_complete_progcomp_cur_wordbreaks+set} || $COMP_WORDBREAKS != "$_ble_complete_progcomp_cur_wordbreaks" ]]; then
     _ble_complete_progcomp_cur_wordbreaks=$COMP_WORDBREAKS
     _ble_complete_progcomp_cur_rex_simple='^([^\"'\'']|\\.|"([^\"]|\\.)*"|'\''[^'\'']*'\'')*'
@@ -3424,25 +3424,25 @@ function ble/complete/progcomp/.compvar-reduce-cur {
 }
 
 ## @fn ble/complete/progcomp/.compvar-initialize
-##   プログラム補完で提供される変数を構築します。
+## Construct variables provided by program completion.
 ##   @var[in]  comp_words comp_cword comp_line comp_point
 ##   @var[out] COMP_WORDS COMP_CWORD COMP_LINE COMP_POINT COMP_KEY COMP_TYPE
 ##   @var[out] cmd cur prev
-##     補完関数に渡す引数を格納します。cmd は COMP_WORDBREAKS による分割前のコ
-##     マンド名を保持します。cur は現在の単語のカーソル前の部分を保持します。但
-##     し、閉じていない引用符がある時は引用符の中身を、COMP_WORDBREAKS の文字が
-##     含まれる場合にはそれによって分割された後の最後の単語を返します。
+## Stores arguments to be passed to the completion function. cmd is the code before division by COMP_WORDBREAKS.
+## command name. cur holds the part of the current word before the cursor. However,
+## If there is an unclosed quotation mark, the contents of the quotation mark are replaced by the characters COMP_WORDBREAKS.
+## Returns the last word after being split by it, if any.
 ##   @var[out] progcomp_prefix
 function ble/complete/progcomp/.compvar-initialize {
   COMP_TYPE=9
   COMP_KEY=9
   ((${#KEYS[@]})) && COMP_KEY=${KEYS[${#KEYS[@]}-1]:-9} # KEYS defined in ble-decode/widget/.call-keyseq
 
-  # Note: 以降の処理は基本的には comp_words, comp_line, comp_point, comp_cword を
-  #   COMP_WORDS COMP_LINE COMP_POINT COMP_CWORD にコピーする。
-  #   (1) 但し、直接代入する場合。$'' などがあると bash-completion が正しく動かないので、
-  #   エスケープを削除して適当に処理する。
-  #   (2) シェルの特殊文字以外の COMP_WORDBREAKS に含まれる文字で単語を分割する。
+  # Note: The subsequent processing basically uses comp_words, comp_line, comp_point, and comp_cword.
+  # COMP_WORDS COMP_LINE COMP_POINT Copy to COMP_CWORD.
+  # (1) However, when directly substituted. bash-completion does not work properly if $'' etc.
+  # Remove escape and process appropriately.
+  # (2) Split words on characters in COMP_WORDBREAKS other than shell special characters.
 
   local wordbreaks
   ble/complete/progcomp/.compvar-initialize-wordbreaks
@@ -3458,11 +3458,11 @@ function ble/complete/progcomp/.compvar-initialize {
   local word1 index=0 offset=0 sep=
   for word1 in "${comp_words[@]}"; do
     # @var offset_dst
-    #   現在の単語の COMP_LINE 内部に於ける開始位置
+    # Starting position within COMP_LINE of the current word
     local offset_dst=${#COMP_LINE}
     # @var point
-    #   word が現在の単語の時、word 内のカーソル位置を保持する。
-    #   それ以外の時は空文字列。
+    # When word is the current word, maintains the cursor position within word.
+    # Empty string otherwise.
     local point=$((comp_point-offset))
     ((0<=point&&point<=${#word1})) || point=
     ((offset+=${#word1}))
@@ -3473,25 +3473,25 @@ function ble/complete/progcomp/.compvar-initialize {
     local w wq i=0 o=0 p
     for w in "${words[@]}"; do
       # @var p
-      #   現在の単語片の内部におけるカーソルの位置。
-      #   現在の単語片の内部にカーソルがない場合は空文字列。
+      # The position of the cursor within the current word fragment.
+      # An empty string if the cursor is not inside the current word fragment.
       p=
       if [[ $point ]]; then
         ((p=point-o))
-        # Note: #D1094 境界上にいる場合には偶数番目の単語片
-        #   (非 wordbreaks) に属させる。
+        # Note: #D1094 Even numbered word fragments if on the boundary
+        # (non-wordbreaks).
         ((i%2==0?p<=${#w}:p<${#w})) || p=
         ((o+=${#w},i++))
       fi
-      # カーソルが subword の境界にある時は左側の subword に属させる。
-      # 右側の subword で処理が行われない様に point をクリア。
+      # When the cursor is on the subword boundary, it belongs to the left subword.
+      # Clear point so that no processing is performed on the subword on the right.
       [[ $p ]] && point=
       [[ $point ]] && progcomp_prefix=$progcomp_prefix$w
 
-      # Note: w -> wq の修正に伴ってここで p も修正される。
+      # Note: When w -> wq is modified, p is also modified here.
       ble/complete/progcomp/.compvar-quote-subword "$w"; local wq=$ret
 
-      # 単語登録
+      # word registration
       if [[ $p ]]; then
         COMP_CWORD=${#COMP_WORDS[*]}
         ((COMP_POINT=${#COMP_LINE}+${#sep}+p))
@@ -3757,7 +3757,7 @@ function ble/complete/progcomp/parse-complete/.next {
     compdef=${compdef:${#BASH_REMATCH}}
     return 0
   elif [[ ${compdef%%' '*} ]]; then
-    # 本来此処には来ない筈
+    # He shouldn't have come here
     arg=${compdef%%' '*}
     compdef=${compdef#*' '}
     return 0
@@ -3807,7 +3807,7 @@ function ble/complete/progcomp/parse-complete {
           esac
           ble/array#push compoptions "-$c" ;;
         ([pr])
-          ;; # 無視 (-p 表示 -r 削除)
+          ;; #Ignore (-p display -r delete)
         ([AGWXPS])
           # Note: workaround #D0714 #M0009 #D0870
           ble/complete/progcomp/parse-complete/.optarg || break 2
@@ -3825,17 +3825,17 @@ function ble/complete/progcomp/parse-complete {
           ble/array#push compoptions "-$c" "$optarg" ;;
         (C)
           if ((_ble_bash<40000)); then
-            # bash-3.2以下では -C は一番最後に出力される (unquoted)
+            # In bash-3.2 and below, -C is output last (unquoted)
             comp_prog=${compdef%' '}
             compdef=
           else
-            # bash-4.0以降では -C は quoted
+            # -C is quoted in bash-4.0 and later
             ble/complete/progcomp/parse-complete/.optarg || break 2
             comp_prog=$optarg
           fi
           ble/array#push compoptions "-$c" ble/complete/progcomp/.compgen-helper-prog ;;
         (F)
-          # unquoted optarg (bash-3.2 以下では続きに unquoted -C prog が来得る)
+          # unquoted optarg (under bash-3.2, unquoted -C prog may follow)
           if ((_ble_bash<40000)) && [[ $compdef == *' -C '* ]]; then
             comp_prog=${compdef#*' -C '}
             comp_prog=${comp_prog%' '}
@@ -3853,7 +3853,7 @@ function ble/complete/progcomp/parse-complete {
         esac
       done ;;
     (*)
-      ;; # 無視
+      ;; #ignore
     esac
   done
 }
@@ -3913,14 +3913,14 @@ function ble/complete/progcomp/.filter-and-split-compgen {
   [[ :$2: == *:workaround-for-git:* ]] && c_rtrim=set
 
   # ble/filter-by-prefix
-  #   "$COMPV" で始まる単語だけを正規表現でフィルタする。それで候補が一つもなく
-  #   なる場合にはフィルタ無しで単語を列挙する。
+  # Filter only words starting with "$COMPV" using a regular expression. So there are no candidates
+  # If so, list the words without filtering.
   #
-  #   2019-02-03 実は、現在の実装ではわざわざフィルタする必要はないかもしれない。
-  #   以前 compgen に -- "$COMPV" を渡してもフィルタしてくれなかったのは、
-  #   #D0245 cdd38598 で ble/complete/progcomp/.compgen-helper-func に於いて、
-  #   "$comp_func" に引数を渡し忘れていたのが原因と思われる。
-  #   これは 1929132b に於いて修正されたが念のためにフィルタを残していた気がする。
+  # 2019-02-03 Actually, with the current implementation, there may be no need to bother with filtering.
+  # Previously, even if I passed -- "$COMPV" to compgen, it did not filter.
+  # #D0245 cdd38598 in ble/complete/progcomp/.compgen-helper-func,
+  # The cause seems to be that I forgot to pass the argument to "$comp_func".
+  # This was fixed in 1929132b, but I feel like the filter was left in just in case.
   local -x c_rex_filter=
   if [[ $comp_opts == *:ble/filter-by-prefix:* ]]; then
     local ret; ble/string#escape-for-awk-regex "$COMPV"; c_rex_filter="^$ret"
@@ -4345,30 +4345,30 @@ function ble/complete/progcomp/adjust-third-party-completions {
 ## @fn ble/complete/progcomp/.compgen opts
 ##
 ##   @param[in] opts
-##     コロン区切りのオプションリストです。
+## A colon-separated list of options.
 ##
 ##     @opt default
-##       既定の補完設定 (complete -D) を用います。
+## Use default completion settings (complete -D).
 ##     @opt empty
-##       空のコマンド行の為の補完設定 (complete -E) を用います。
+## Use the completion setting for empty command lines (complete -E).
 ##     @opt initial
-##       最初の単語 (コマンド名) の補完設定 (complete -I) を用います。
+## Use the first word (command name) completion setting (complete -I).
 ##
 ##   @param[in,opt] cmd
-##     プログラム補完規則を検索するのに使う名前を指定します。省略した場合
-##     ${comp_words[0]} が使われます。opts に initial または default が指定され
-##     ている場合は使われません。
+## Specifies the name used to search for program completion rules. If omitted
+## ${comp_words[0]} is used. initial or default is specified for opts.
+## Not used if
 ##
 ##   @var[out] comp_opts
 ##
 ##   @var[in] COMP1 COMP2 COMPV COMPS comp_type
-##     ble/complete/source の標準的な変数たち。
+## Standard variables of ble/complete/source.
 ##
 ##   @var[in] comp_words comp_line comp_point comp_cword
-##     ble/syntax:bash/extract-command によって生成される変数たち。
+## Variables generated by ble/syntax:bash/extract-command.
 ##
-##   @var[in] 他色々
-##   @exit 入力がある時に 148 を返します。
+## @var[in] and many other things
+## @exit Returns 148 when there is input.
 function ble/complete/progcomp/.compgen {
   local opts=$1
 
@@ -4405,7 +4405,7 @@ function ble/complete/progcomp/.compgen {
     # -D, -E, and -I
     ble/util/assign compdef 'builtin complete -p "$compcmd" 2>/dev/null'
   elif ble/syntax:bash/simple-word/is-simple "$compcmd"; then
-    # 既に呼び出し元で quote されている想定
+    # Assumptions already quoted by the caller
     ble/util/assign compdef "builtin complete -p -- $compcmd 2>/dev/null"
     local ret; ble/syntax:bash/simple-word/eval "$compcmd"; compcmd=$ret
   else
@@ -4413,10 +4413,10 @@ function ble/complete/progcomp/.compgen {
   fi
   [[ $compdef ]] || return 1
   # strip -D, -E, -I, or $compcmd
-  # Note (#D1579): bash-5.1 では空コマンドに限り '' と出力する様である。
-  # Note (#D2088): bash-5.2 ではコマンド名に特殊文字が含まれている時 '...' と出
-  #   力するが、一方で安全に eval で評価する事ができるのでこの時点でコマンド名
-  #   を削除しなくても良い。
+  # Note (#D1579): bash-5.1 seems to output '' only for empty commands.
+  # Note (#D2088): In bash-5.2, '...' is displayed when the command name contains special characters.
+  # However, on the other hand, you can safely evaluate it with eval, so at this point you can change the command name to
+  # There is no need to delete it.
   compdef=${compdef%"${compcmd:-''}"}
   compdef=${compdef%' '}' '
 
@@ -4433,8 +4433,8 @@ function ble/complete/progcomp/.compgen {
   # calling "builtin compgen".
   local old_cand_count=$cand_count
 
-  # Note: 一旦 compgen だけで ble/util/assign するのは、compgen をサブシェルではなく元のシェルで評価する為である。
-  #   補完関数が遅延読込になっている場合などに、読み込まれた補完関数が次回から使える様にする為に必要である。
+  # Note: The reason to ble/util/assign only compgen is to evaluate compgen in the original shell, not in the subshell.
+  # This is necessary so that the loaded completion function can be used from the next time, such as when the completion function is loaded lazily.
   local compgen compgen_compv=$COMPV
   if [[ ! $flag_noquote && :$comp_opts: != *:noquote:* ]]; then
     local q="'" Q="'\''"
@@ -4442,19 +4442,19 @@ function ble/complete/progcomp/.compgen {
   fi
   local progcomp_prefix= progcomp_retry=
   if ((_ble_bash>=50300)); then
-    # WA #D1682: libvirt の virsh 用の補完が勝手に変数 IFS 及び word を書き換え
-    # てそのまま放置して抜けてしまう。仕方がないので tmpenv で変数の内容を復元
-    # する事にする。
+    # WA #D1682: libvirt's completion for virsh automatically rewrites variables IFS and word.
+    # If you leave it as is, it will fall out. Since there is no other choice, restore the contents of the variable with tmpenv
+    # I'll do something.
     IFS=$IFS word= builtin compgen -V compgen "${compoptions[@]}" -- "$compgen_compv" 2>/dev/null
   else
     IFS=$IFS word= ble/util/assign compgen 'builtin compgen "${compoptions[@]}" -- "$compgen_compv" 2>/dev/null'
   fi
 
-  # Note #D0534: complete -D 補完仕様に従った補完関数が 124 を返したとき再度始
-  #   めから補完を行う。ble/complete/progcomp/.compgen-helper-func 関数内で補間
-  #   関数の終了ステータスを確認し、もし 124 だった場合には
-  #   progcomp_retry に retry を設定する。
-  # Note #D1760: complete -D 以外の時でも 124 が返された時再試行する。
+  # Note #D0534: complete -D If the completion function according to the completion specification returns 124, start again.
+  # Perform completion from the beginning. Interpolate within the ble/complete/progcomp/.compgen-helper-func function
+  # Check the exit status of the function and if it is 124
+  # Set retry in progcomp_retry.
+  # Note #D1760: Retry when 124 is returned even when other than complete -D.
   if [[ $progcomp_retry && ! $_ble_complete_retry_guard ]]; then
     local _ble_complete_retry_guard=1
     opts=:$opts:
@@ -4463,7 +4463,7 @@ function ble/complete/progcomp/.compgen {
     return "$?"
   fi
 
-  # plusdirs が動的に追加された時は別に追加生成する必要がある
+  # When plusdirs is added dynamically, it is necessary to generate it separately.
   if [[ $comp_opts_parsed != *:plusdirs:* && $comp_opts == *:plusdirs:* ]]; then
     local compgen_plusdirs
     if ((_ble_bash>=50300)); then
@@ -4492,14 +4492,14 @@ function ble/complete/progcomp/.compgen {
   local filter_opts=
   ((_ble_bash>=50300)) && filter_opts=array
 
-  # WA: git の補完関数など勝手に末尾に space をつけ -o nospace を指定する物が存在する。
-  #   単語の後にスペースを挿入する事を意図していると思われるが、
-  #   通常 compgen (例: compgen -f) で生成される候補に含まれるスペースは、
-  #   挿入時のエスケープ対象であるので末尾の space もエスケープされてしまう。
+  # WA: There are some git completion functions that arbitrarily add space to the end and specify -o nospace.
+  # It seems that the intention is to insert a space after the word, but
+  # The spaces normally included in the candidates generated by compgen (e.g. compgen -f) are
+  # Since this is an escape target during insertion, the trailing space will also be escaped.
   #
-  #   仕方がないので sed で各候補の末端の [[:blank:]]+ を除去する。
-  #   これだとスペースで終わるファイル名を挿入できないという実害が発生するが、
-  #   そのような変な補完関数を作るのが悪いのである。
+  # There is no other choice, so use sed to remove the [[:blank:]]+ at the end of each candidate.
+  # This will cause a real problem in that you will not be able to insert file names that end with a space, but
+  # It is wrong to create such strange completion functions.
   if [[ $comp_func == __git* && $comp_opts == *:nospace:* ]]; then
     filter_opts=$filter_opts:workaround-for-git
     if ((_ble_bash>=50300)); then
@@ -4574,8 +4574,8 @@ function ble/complete/progcomp/process-compgen-output {
 }
 
 ## @fn ble/complete/progcomp/.compline-rewrite-command cmd [args...]
-##   alias 展開等によるコマンド名の変更に対応して、
-##   補完対象のコマンド名を指定の物に書き換えます。
+## In response to changing the command name due to alias expansion etc.,
+## Replaces the command name to be completed with the specified one.
 ##
 ##   @var[in,out] comp_line comp_words comp_point comp_cword
 ##
@@ -4585,7 +4585,7 @@ function ble/complete/progcomp/.compline-rewrite-command {
   local IFS=$_ble_term_IFS
   local ins="$*"
   if (($#==0)); then
-    # コマンド除去 (aliasで空に展開された時)
+    # Command removal (when expanded to empty with alias)
     local ret; ble/string#ltrim "${comp_line:${#ocmd}}"
     ((comp_point-=${#comp_line}-${#ret}))
     comp_line=$ret
@@ -4651,7 +4651,7 @@ function ble/complete/progcomp/.split-alias-words {
 }
 
 ## @fn ble/complete/progcomp/.try-load-completion cmd
-##   bash-completion の loader を呼び出して遅延補完設定をチェックする。
+## Call bash-completion's loader and check the lazy completion settings.
 function ble/complete/progcomp/.try-load-completion {
   if ble/is-function _comp_load; then
     ble/function#push command_not_found_handle
@@ -4670,7 +4670,7 @@ function ble/complete/progcomp/.try-load-completion {
 }
 
 ## @fn ble/complete/progcomp cmd opts
-##   補完指定を検索して対応する補完関数を呼び出します。
+## Search for a completion specification and call the corresponding completion function.
 ##   @var[in] comp_line comp_words comp_point comp_cword
 function ble/complete/progcomp {
   local cmd=${1-${comp_words[0]}} opts=$2
@@ -4690,9 +4690,9 @@ function ble/complete/progcomp {
     local alias_checked=' '
   while ((1)); do
 
-    # @var cmd   ... 元のコマンド名
-    # @var ucmd  ... simple-word/eval したコマンド名
-    # @var qcmds ... simple-word/eval x quote-word したコマンド
+    # @var cmd ... original command name
+    # @var ucmd ... simple-word/eval command name
+    # @var qcmds ... simple-word/eval x quote-word command
     local ret ucmd qcmds
     ucmd=$cmd qcmds=("$cmd")
     if ble/syntax:bash/simple-word/is-simple "$cmd"; then
@@ -4747,7 +4747,7 @@ function ble/complete/progcomp {
     fi
     alias_checked=$alias_checked$cmd' '
 
-    # progcomp_alias が有効でなければ break
+    # break if progcomp_alias is valid
     ((_ble_bash<50000)) || shopt -q progcomp_alias || break
 
     local ret
@@ -4755,7 +4755,7 @@ function ble/complete/progcomp {
     [[ $ret == "$cmd" ]] && break
     ble/complete/progcomp/.split-alias-words "$ret"
     if ((${#ret[@]}==0)); then
-      # alias 展開により内容が消滅した時は次の単語をコマンドとして再度展開を繰り返す
+      # When the contents disappear due to alias expansion, repeat expansion using the next word as a command.
       ble/complete/progcomp/.compline-rewrite-command "${alias_args[@]}"
       if ((${#comp_words[@]})); then
         if ((comp_cword==0)); then
@@ -4773,7 +4773,7 @@ function ble/complete/progcomp {
       alias_args=("${ret[@]:1}" "${alias_args[@]}")
   done
 
-  # comp_words の再構築
+  # Rebuilding comp_words
   comp_words=("${orig_comp_words[@]}")
   comp_cword=$orig_comp_cword
   comp_line=$orig_comp_line
@@ -4786,10 +4786,10 @@ function ble/complete/progcomp {
 #------------------------------------------------------------------------------
 # mandb
 
-# オプション名に現れる事を許す文字の集合 (- と + を除く)
+# Set of characters allowed to appear in option names (excluding - and +)
 # Exclude non-ASCII or symbols /[][()<>{}="'\''`]/
-# Note: awk の正規表現内部で使っても大丈夫な様に \ と / をエスケープしている。
-# Note (#D2039): @ は cd -@ で使われている
+# Note: \ and / are escaped so that they can be used inside awk regular expressions.
+# Note (#D2039): @ is used in cd -@
 _ble_complete_option_chars='_!#$%&:;.,^~|\\?\/*a-zA-Z0-9@'
 
 # action:mandb
@@ -4908,11 +4908,11 @@ function ble/complete/mandb/search-file/.check {
   fi
 }
 ## @fn ble/complete/mandb/search-file command
-##   指定したコマンドに対応する man ページのファイルを検索します。
+## Search for man page files corresponding to the specified command.
 ##   @var[out] ret
-##     見つかったファイルへのパスを格納します。
+## Stores the path to the found file.
 ##   @exit
-##     該当するファイルが見つかった時に成功します。
+## Succeeds when the corresponding file is found.
 function ble/complete/mandb/search-file {
   local command=$1
 
@@ -4966,7 +4966,7 @@ function ble/complete/mandb/search-file {
 if ble/bin#freeze-utility-path preconv; then
   function ble/complete/mandb/.preconv { ble/bin/preconv; }
 else
-  # macOS では preconv がない
+  # There is no preconv on macOS
   function ble/complete/mandb/.preconv {
     ble/bin/od -A n -t u1 -v | ble/bin/awk '
       BEGIN {
@@ -5025,7 +5025,7 @@ if ble/is-function ble/bin/groff; then
     fi
   }
 
-  # Note #D1551: macOS (groff-1.19.2) では groff -k も preconv も既定では存在しない
+  # Note #D1551: Neither groff -k nor preconv exist by default on macOS (groff-1.19.2)
   if [[ $OSTYPE == darwin* ]] && ! ble/bin/groff -k -Tutf8 -man &>/dev/null <<< 'α'; then
     if ble/bin/groff -T utf8 -m man &>/dev/null <<< '\[u03B1]'; then
       function ble/complete/mandb/convert-mandoc {
@@ -5884,7 +5884,7 @@ function ble/complete/mandb:help/generate-cache {
 ##   @param[in,opt] opts
 ##     @opt man=MAN_PAGE
 ##   @var[out] ret
-##     キャッシュファイル名を返します。
+## Returns the cache file name.
 function ble/complete/mandb/generate-cache {
   local command=${1##*/} opts=${2-}
   [[ $command ]] || return 1
@@ -6016,8 +6016,8 @@ function ble/complete/mandb/load-cache {
 }
 
 ## @fn ble/complete/source:option/.is-option-context args...
-##   args... に "--" などのオプション解釈を停止する様な引数が含まれて
-##   いないか判定します。
+## args... contains an argument such as "--" that stops option interpretation.
+## Determine if there are any.
 ##
 ##   @param[in] args...
 ##   @var[in] cmdspec_opts
@@ -6057,10 +6057,10 @@ function ble/complete/source:option/.is-option-context {
 function ble/complete/source:option {
   local opts=$1
   if [[ :$opts: == *:empty:* ]]; then
-    # 空文字列に対する補完を明示的に実行
+    # Explicitly perform completion for empty strings
     [[ ! $COMPV ]] || return 0
   else
-    # /^[-+].*/ の時にだけ候補生成 (曖昧補完で最初の /^[-+]/ は補わない)
+    # Candidates are generated only when /^[-+].*/ (the first /^[-+]/ is not filled in with ambiguous completion)
     local rex='^-[-+'$_ble_complete_option_chars']*$|^\+[_'$_ble_complete_option_chars']*$'
     [[ $COMPV =~ $rex ]] || return 0
   fi
@@ -6112,7 +6112,7 @@ function ble/complete/source:option/generate-for-command {
     ble/alias#expand "$cmd" || return 1
     local words; ble/string#split-words ret "$ret"; words=("${ret[@]}")
 
-    # 変数代入は読み飛ばし
+    # Skip variable assignments
     local iword=0 rex='^[_a-zA-Z][_a-zA-Z0-9]*\+?='
     while [[ ${words[iword]} =~ $rex ]]; do ((iword++)); done
     [[ ${words[iword]} && $alias_checked != *" ${words[iword]} "* ]] || return 1
@@ -6142,7 +6142,7 @@ function ble/complete/source:option/generate-for-command {
 
   local cmdspec_opts=
   ble/cmdspec/opts#load "$cmdv"
-  # "--" や非オプション引数など、オプション無効化条件をチェック
+  # Check for option disabling conditions such as "--" and non-optional arguments
   ble/complete/source:option/.is-option-context "${prev_args[@]}" || return 1
 
   local "${_ble_complete_yield_varnames[@]/%/=}" # WA #D1570 checked
@@ -6164,16 +6164,16 @@ function ble/complete/source:option/generate-for-command {
 # source:argument
 
 ## @fn ble/complete/source:argument/.generate-user-defined-completion opts
-##   ユーザ定義の補完を実行します。ble/cmdinfo/complete:コマンド名
-##   という関数が定義されている場合はそれを使います。
-##   それ以外の場合は complete によって登録されているプログラム補完が使用されます。
+## Performs user-defined completion. ble/cmdinfo/complete:command name
+## If a function is defined, use it.
+## Otherwise, the program completion registered by complete is used.
 ##
 ##   @param[in] opts
-##     コロン区切りのオプションリストを指定します。
+## Specifies a colon-separated list of options.
 ##     @opt empty
-##       空のコマンドラインに対する補完である事を示します。
+## Indicates completion for an empty command line.
 ##     @opt initial
-##       最初の単語(コマンド名)の補完である事を示します。
+## Indicates completion of the first word (command name).
 ##   @var[in] COMP1 COMP2
 ##   @var[in] (variables set by ble/syntax/parse)
 ##
@@ -6199,14 +6199,14 @@ function ble/complete/source:argument/.generate-user-defined-completion {
     fi
   fi
 
-  # @var comp2_in_word 単語内のカーソルの位置
-  # @var comp1_in_word 単語内の補完開始点
+  # @var comp2_in_word cursor position in word
+  # @var comp1_in_word In-word completion start point
   local forward_words=
   ((comp_cword>0)) && IFS=' ' builtin eval 'forward_words="${comp_words[*]::comp_cword} "'
   local comp2_in_word=$((comp_point-${#forward_words}))
   local comp1_in_word=$((comp2_in_word-(COMP2-COMP1)))
 
-  # 単語の途中に補完開始点がある時、単語を分割する
+  # Split a word when the completion start point is in the middle of the word
   if ((comp1_in_word>0)); then
     local w=${comp_words[comp_cword]}
     comp_words=("${comp_words[@]::comp_cword}" "${w::comp1_in_word}" "${w:comp1_in_word}" "${comp_words[@]:comp_cword+1}")
@@ -6215,7 +6215,7 @@ function ble/complete/source:argument/.generate-user-defined-completion {
     ((comp2_in_word=COMP2-COMP1,comp1_in_word=0))
   fi
 
-  # 曖昧補完の場合は単語の内容を reduce する #D1413
+  # For ambiguous completion, reduce the content of the word #D1413
   if [[ $COMPV && :$comp_type: == *:[maA]:* ]]; then
     local oword=${comp_words[comp_cword]::comp2_in_word} ins
     local ins=; [[ :$comp_type: == *:a:* ]] && ins=${COMPV::1}
@@ -6223,8 +6223,8 @@ function ble/complete/source:argument/.generate-user-defined-completion {
     # escape ins
     local ret comps_flags= comps_fixed= # referenced in ble/complete/string#escape-for-completion-context
     if [[ $oword ]]; then
-      # Note: 実は曖昧補完の時は COMP2=$COMP1 としていて、
-      #   更に COMP1 で単語分割しているのでここには入らない筈。
+      # Note: Actually, when using ambiguous completion, COMP2=$COMP1 is set,
+      # Furthermore, since the word is divided by COMP1, it shouldn't fit here.
       local simple_flags simple_ibrace
       ble/syntax:bash/simple-word/reconstruct-incomplete-word "$oword" || return 1
       comps_flags=v$simple_flags
@@ -6295,7 +6295,7 @@ function ble/complete/source:argument/fallback {
   #----------------------------------------------------------------------------
   # 2. Attempt built-in argument completion
 
-  # "-option" の時は complete options based on mandb
+  # "-option" complete options based on mandb
   local option_opts=
   [[ :$opts: == *:reuse-comp_words:* ]] &&
     option_opts=$option_opts:reuse-comp_words
@@ -6316,7 +6316,7 @@ function ble/complete/source:argument/fallback {
     ((ext==148)) && return "$ext"
   fi
 
-  # 空文字列に対するオプション生成はファイル名よりも後で試みる
+  # Attempt to generate options for empty strings after filenames
   ble/complete/source:option "$option_opts:empty"; local ext=$?
   ((ext==148||cand_count>old_cand_count)) && return "$ext"
 
@@ -6324,7 +6324,7 @@ function ble/complete/source:argument/fallback {
   # 3. Attempt rhs completion
 
   if local rex='^/?[-_a-zA-Z0-9.]+\+?[:=]|^-[^-/=:]'; [[ $COMPV =~ $rex ]]; then
-    # var=filename --option=filename /I:filename など。
+    # For example, var=filename --option=filename /I:filename.
     local prefix=$BASH_REMATCH value=${COMPV:${#BASH_REMATCH}}
     local COMP_PREFIX=$prefix
     [[ :$comp_type: != *:[maA]:* && $value =~ ^.+/ ]] &&
@@ -6348,7 +6348,7 @@ function ble/complete/source:argument/fallback {
 function ble/complete/source:argument {
   local comp_opts=:ble/default:
 
-  # failglob で展開に失敗した時は * を付加して再度展開を試みる
+  # If expansion fails with failglob, add * and try to expand again.
   if [[ $comps_flags == *f* && $COMPS != *\* && :$comp_type: != *:[maA]:* ]]; then
     local ret simple_flags simple_ibrace
     ble/syntax:bash/simple-word/reconstruct-incomplete-word "$COMPS"
@@ -6385,7 +6385,7 @@ function ble/complete/source/compgen {
 
   ble/complete/source/test-limit "${#arr[@]}" || return 1
 
-  # 既に完全一致している場合は、より前の起点から補完させるために省略
+  # If there is already an exact match, omit it to complete from an earlier starting point.
   [[ $1 != '=' && ${#arr[@]} == 1 && $arr == "$COMPV" ]] && return 0
 
   local cand "${_ble_complete_yield_varnames[@]/%/=}" # WA #D1570 checked
@@ -6436,7 +6436,7 @@ function ble/complete/complete/determine-context-from-opts {
 ##   @var[in] comp_text comp_index
 ##   @var[in,out] sources
 function ble/complete/context/filter-prefix-sources {
-  # 現在位置より前に始まる補完文脈だけを選択する
+  # Select only completion contexts that start before the current position
   local -a filtered_sources=()
   local src asrc
   for src in "${sources[@]}"; do
@@ -6586,30 +6586,30 @@ function ble/complete/source:dynamic-history {
 
 # 
 #==============================================================================
-# 候補生成
+# Candidate generation
 
 ## @var[out] cand_count
-##   候補の数
+## number of candidates
 ## @arr[out] cand_cand
-##   候補文字列
+## candidate string
 ## @arr[out] cand_word
-##   挿入文字列 (～ エスケープされた候補文字列)
+## Insert string (~ escaped candidate string)
 ##
 ## @arr[out] cand_pack
-##   補完候補のデータを一つの配列に纏めたもの。
-##   要素を使用する際は以下の様に変数に展開して使う。
+## Completion candidate data is compiled into one array.
+## When using elements, expand them into variables as shown below.
 ##
 ##     local "${_ble_complete_cand_varnames[@]/%/=}" # WA #D1570 checked
 ##     ble/complete/cand/unpack "${cand_pack[0]}"
 ##
-##   先頭に ACTION が格納されているので
-##   ACTION だけ参照する場合には以下の様にする。
+## ACTION is stored at the beginning, so
+## To reference only ACTION, do as follows.
 ##
 ##     local ACTION=${cand_pack[0]%%:*}
 ##
 
 ## @fn ble/complete/util/construct-ambiguous-regex text fixlen
-##   曖昧一致に使う正規表現を生成します。
+## Generates a regular expression for fuzzy matching.
 ##   @param[in] text
 ##   @param[in,out] fixlen=1
 ##   @var[in] comp_type
@@ -6635,7 +6635,7 @@ function ble/complete/util/construct-ambiguous-regex {
   IFS= builtin eval 'ret="${buff[*]}"'
 }
 ## @fn ble/complete/util/construct-glob-pattern text
-##   部分一致に使うグロブを生成します。
+## Generates a glob for partial matching.
 function ble/complete/util/construct-glob-pattern {
   local text=$1
   if [[ :$comp_type: == *:i:* ]]; then
@@ -6675,17 +6675,17 @@ function ble/complete/.fignore/filter {
 }
 
 ## @fn ble/complete/candidates/.pick-nearest-sources
-##   一番開始点に近い補完源の一覧を求めます。
+## Find a list of completion sources closest to the starting point.
 ##
 ##   @var[in] comp_index
 ##   @arr[in,out] remaining_sources
 ##   @arr[out]    nearest_sources
 ##   @var[out] COMP1 COMP2
-##     補完範囲
+## Complementary range
 ##   @var[out] COMPS
-##     補完範囲の (クオートが含まれうる) コマンド文字列
+## Complement range command string (may include quotes)
 ##   @var[out] COMPV
-##     補完範囲のコマンド文字列が意味する実際の文字列
+## The actual string that the command string in the completion range means
 ##   @var[out] comps_flags comps_fixed
 function ble/complete/candidates/.pick-nearest-sources {
   COMP1= COMP2=$comp_index
@@ -6716,7 +6716,7 @@ function ble/complete/candidates/.pick-nearest-sources {
   elif local ret simple_flags simple_ibrace; ble/syntax:bash/simple-word/reconstruct-incomplete-word "$COMPS"; then
     local reconstructed=$ret
     if [[ :$comp_type: == *:raw:* ]]; then
-      # 展開前の値を COMPV に格納する。ブレース展開内部の場合は失敗
+      # Store the value before expansion in COMPV. Fails if inside brace expansion
       if ((${simple_ibrace%:*})); then
         COMPV=
       else
@@ -6725,10 +6725,10 @@ function ble/complete/candidates/.pick-nearest-sources {
       fi
     elif
       if ble/complete/source/eval-simple-word "$reconstructed" && ((${#ret[@]})) || { (($?==148)) && return 148; }; then
-        # 展開後の値を COMPV に格納する (既定)
+        # Store expanded value in COMPV (default)
         COMPV=("${ret[@]}")
       elif ble/complete/source/eval-simple-word "$reconstructed*" && ((${#ret[@]})) || { (($?==148)) && return 148; }; then
-        # failglob で失敗したが続きを入力すれば一致する可能性があるとき
+        # When failglob fails but there is a possibility of a match if you continue typing
         COMPV=()
         local word suffix
         for word in "${ret[@]}"; do
@@ -6756,7 +6756,7 @@ function ble/complete/candidates/.pick-nearest-sources {
         ble/array#push comps_fixed "${#s}:${path[i]}"
       done
     else
-      # Note: failglob により simple-word/eval が失敗した時にここに来る。
+      # Note: Come here when simple-word/eval fails due to failglob.
       COMPV=
       comps_flags=$comps_flags${simple_flags}f
     fi
@@ -6775,17 +6775,17 @@ function ble/complete/candidates/clear {
 }
 
 ## @fn ble/complete/candidates/filter-by-command command [start]
-##   生成された候補 (cand_*) に対して指定したコマンドを実行し、
-##   成功した候補のみを残して他を削除します。
+## Execute the specified command on the generated candidates (cand_*),
+## Keep only successful candidates and remove others.
 ##   @param[in] command
 ##   @param[in,opt] start
 ##   @var[in,out] cand_count
 ##   @arr[in,out] cand_{prop,cand,word,show,data}
 ##   @exit
-##     ユーザ入力によって中断された時に 148 を返します。
+## Returns 148 when interrupted by user input.
 function ble/complete/candidates/filter-by-command {
   local command=$1 start=${2:-0}
-  # todo: 複数の配列に触る非効率な実装だが後で考える
+  # todo: Inefficient implementation that touches multiple arrays, but I'll think about it later
   local i j=$start
   local -a prop=() cand=() word=() show=() data=()
   for ((i=start;i<cand_count;i++)); do
@@ -6802,12 +6802,12 @@ function ble/complete/candidates/filter-by-command {
   cand_pack=("${data[@]}")
 }
 ## @fn ble/complete/candidates/.filter-by-regex rex_filter
-##   生成された候補 (cand_*) において指定した正規表現に一致する物だけを残します。
+## Only the generated candidates (cand_*) that match the specified regular expression are retained.
 ##   @param[in] rex_filter
 ##   @var[in,out] cand_count
 ##   @arr[in,out] cand_{prop,cand,word,show,data}
 ##   @exit
-##     ユーザ入力によって中断された時に 148 を返します。
+## Returns 148 when interrupted by user input.
 function ble/complete/candidates/.filter-by-regex {
   local rex_filter=$1
   ble/complete/candidates/filter-by-command '[[ ${cand_cand[i]} =~ $rex_filter ]]'
@@ -6827,7 +6827,7 @@ function ble/complete/candidates/.initialize-rex_raw_paramx {
   rex_raw_paramx='^('$element'*('$open_dquot')?)\$[_a-zA-Z][_a-zA-Z0-9]*$'
 }
 
-## 候補フィルタ (candidate filters) は以下の関数を通して実装される。
+## Candidate filters are implemented through the following functions.
 ##
 ##   @fn ble/complete/candidates/filter:FILTER_TYPE/init compv
 ##   @fn ble/complete/candidates/filter:FILTER_TYPE/test cand
@@ -6837,10 +6837,10 @@ function ble/complete/candidates/.initialize-rex_raw_paramx {
 ##   @fn ble/complete/candidates/filter:FILTER_TYPE/match needle text
 ##     @param[in] needle text
 ##
-##   関数 ble/complete/candidates/filter:FILTER_TYPE/count-match-chars value
+## Function ble/complete/candidates/filter:FILTER_TYPE/count-match-chars value
 ##     @var[in] COMPV
 ##
-## 使用するときには以下の関数を通して呼び出す (match, count-match-chars は直接呼び出す)。
+## When used, call it through the following function (match, count-match-chars are called directly).
 ##
 ##   @fn ble/complete/candidates/filter#init type compv
 ##   @fn ble/complete/candidates/filter#test value
@@ -6965,7 +6965,7 @@ function ble/complete/candidates/filter:hsubseq/init {
   comp_filter_pattern=^$ret
 }
 ## @fn ble/complete/candidates/filter:hsubseq/count-match-chars value [fixlen]
-##   指定した文字列が COMPV の何処まで一致するかを返します。
+## Returns how far in COMPV the specified string matches.
 ##   @var[out] ret
 function ble/complete/candidates/filter:hsubseq/count-match-chars {
   local value=$1 compv=$COMPV
@@ -7066,7 +7066,7 @@ function ble/complete/candidates/generate-with-filter {
       ble/string#split-words asrc "$src"
       ble/string#split source : "${asrc[0]}"
 
-      local COMP_PREFIX= # 既定値 (yield-candidate で参照)
+      local COMP_PREFIX= #Default value (referenced by yield-candidate)
       ble/complete/source:"${source[@]}"
       ble/complete/check-cancel && return 148
     done
@@ -7125,7 +7125,7 @@ function ble/complete/candidates/generate {
 
   local cand_iloop=0
   ble/complete/candidates/clear
-  # #D1416 filter:none にするのは ~[TAB] の時など COMPV ではなく COMPS で補完したい事がある為
+  # #D1416 Filter:none is used because there are times when you want to complete with COMPS instead of COMPV, such as when using ~[TAB]
   ble/complete/candidates/generate-with-filter none "$opts" || return "$?"
   ((cand_count)) && return 0
 
@@ -7173,23 +7173,23 @@ function ble/complete/candidates/determine-common-prefix/.apply-partial-comps {
   common=$fixed$word1
 }
 
-# Note (#D1978): progcomp (syntax-raw) による単一確定の場合には遡って書き換わっ
-#   ている場合でも、元の単語の部分を復元しようとはしない。
+# Note (#D1978): In case of single determination by progcomp (syntax-raw), it is rewritten retroactively.
+# It does not attempt to restore parts of the original word, even if they are.
 function ble/completion/candidates/determine-common-prefix/.is-progcomp-raw {
   ((cand_count==1)) && [[ ${cand_pack[0]} == progcomp:*:ble/syntax-raw:* ]] || return 0
 
-  # 念の為、本当に DATA に :ble/syntax-raw: が含まれている事を確認する
+  # Just to be sure, check that DATA really includes :ble/syntax-raw:
   local "${_ble_complete_cand_varnames[@]/%/=}" # WA #D1570 checked
   ble/complete/cand/unpack "${cand_pack[0]}"
   [[ $DATA == *:ble/syntax-raw:* ]]
 }
 
 ## @fn ble/complete/candidates/determine-common-prefix
-##   cand_* を元に common prefix を算出します。
+## Calculate common prefix based on cand_*.
 ##   @var[in] cand_*
 ##   @var[out] ret
 function ble/complete/candidates/determine-common-prefix {
-  # 共通部分
+  # common part
   local common=${cand_word[0]}
   local clen=${#common}
   if ((cand_count>1)); then
@@ -7228,20 +7228,20 @@ function ble/complete/candidates/determine-common-prefix {
 
   if [[ $common != "$COMPS"* && ! ( $cand_count -eq 1 && $comp_type == *:i:* ) ]]; then
     if ! ble/completion/candidates/determine-common-prefix/.is-progcomp-raw; then
-      # common を部分的に COMPS に置換する試み
-      # Note: ignore-case で一意確定の時は case を候補に合わせたいので COMPS に
-      #   は置換しない。
+      # Attempt to partially replace common with COMPS
+      # Note: When using ignore-case, we want to match the case to the candidate, so we use COMPS.
+      # is not replaced.
       ble/complete/candidates/determine-common-prefix/.apply-partial-comps
     fi
   fi
 
   if ((cand_count>1)) && [[ $common != "$COMPS"* ]]; then
     local common0=$common
-    common=$COMPS # 取り敢えず補完挿入をキャンセル
+    common=$COMPS #Cancel completion insertion for now
 
     if [[ :$comp_type: == *:[maAi]:* ]]; then
-      # 曖昧一致の時は遡って書き換えを起こし得る、
-      # 一致する部分までを置換し一致しなかった部分を末尾に追加する。
+      # When there is a fuzzy match, rewriting can occur retroactively.
+      # Replaces the matching parts and adds the unmatched parts to the end.
 
       local simple_flags simple_ibrace
       if ble/syntax:bash/simple-word/reconstruct-incomplete-word "$common0"; then
@@ -7259,9 +7259,9 @@ function ble/complete/candidates/determine-common-prefix {
         if ((ext==0)) && ble/complete/candidates/filter:"$filter_type"/count-match-chars "$ret"; then
           if [[ $filter_type == head ]] && ((ret<${#COMPV})); then
             is_processed=1
-            # Note: #D1181 ここに来たという事は外部の枠組みで
-            #   生成された先頭一致しない候補があるという事。
-            #   入力済み文字列が失われてしまう危険性を承知の上と思われるので書き換えを許可する。
+            # Note: #D1181 The reason you came here is from an external framework.
+            # This means that there are candidates that are not matched at the beginning.
+            # It seems that the user is aware of the risk of losing the input string, so rewriting is allowed.
             [[ $bleopt_complete_allow_reduction ]] && common=$common0
           elif ((ret)); then
             is_processed=1
@@ -7270,14 +7270,14 @@ function ble/complete/candidates/determine-common-prefix {
           fi
         fi
 
-        # #D1417 チルダ展開やパス名展開など途中で切ると全く異なる展開になる物について
-        #   より正しく処理する為に、完全解ではないが notilde, noglob でも部分一致を調べる。
+        # #D1417 Regarding things such as tilde expansion and path name expansion that result in completely different expansion if cut in the middle
+        # In order to process it more correctly, we also check partial matches for notilde and noglob, although they are not complete solutions.
         #
-        #   例えば既に ~nouser と入力して共通一致部分が ~ だった時に
-        #   ~ の何処までが ~nouser に部分一致するか調べる時、チルダ展開が有効だと
-        #   ~ が /home/user に展開されてから部分一致が調べられる為、
-        #   一致が起こらずに "~nouser" の全てが追加で挿入されて "~~nouser" になってしまう。
-        #   なのでチルダ展開・パス名展開を無効にして部分一致を試みる必要がある。
+        # For example, if you have already entered ~nouser and the common match is ~
+        # When checking how much of ~ partially matches ~nouser, if tilde expansion is effective,
+        # Since ~ is expanded to /home/user and then checked for partial matches,
+        # No match occurs, and all of "~nouser" is additionally inserted, resulting in "~~nouser".
+        # Therefore, it is necessary to disable tilde expansion and path name expansion and try partial matching.
         if [[ ! $is_processed ]] &&
              local notilde=\'\' &&
              ble/syntax:bash/simple-word/safe-eval "$notilde$COMPS" reconstruct:noglob &&
@@ -7290,10 +7290,10 @@ function ble/complete/candidates/determine-common-prefix {
             is_processed=1
             [[ $bleopt_complete_allow_reduction ]] && common=$common0
           elif ((ret)); then
-            # Note: 今の実装では展開結果に含まれている *?[ は全て glob として取
-            #   り扱う事になっている。つまり 'a*b' が曖昧部分一致した時には元々
-            #   の quote が外れて a*b になってしまうという事。これは現在の実装
-            #   の制限である。
+            # Note: In the current implementation, all *?[ included in the expansion result are treated as globs.
+            # It is supposed to be handled as follows. In other words, when 'a*b' is an ambiguous match, originally
+            # The quote is removed and becomes a*b. This is the current implementation
+            # This is the limit.
             is_processed=1
             ble/string#escape-for-bash-specialchars "${compv_notilde:ret}" TG
             common=$common0$ret
@@ -7304,8 +7304,8 @@ function ble/complete/candidates/determine-common-prefix {
       fi
 
     else
-      # Note: #D0768 文法的に単純であれば (構造を破壊しなければ) 遡って書き換えが起こることを許す。
-      # Note: #D1181 外部の枠組みで生成された先頭一致しない共通部分の時でも書き換えを許す。
+      # Note: #D0768 Allow retroactive rewriting to occur if it is grammatically simple (as long as it does not destroy the structure).
+      # Note: #D1181 Allow rewriting even if the common part generated by an external framework does not match the beginning.
       if ble/syntax:bash/simple-word/is-simple-or-open-simple "$common"; then
         local flag_reduction=
         if [[ $bleopt_complete_allow_reduction ]]; then
@@ -7329,7 +7329,7 @@ function ble/complete/candidates/determine-common-prefix {
 
 # 
 #==============================================================================
-# 候補一覧
+# List of candidates
 
 _ble_complete_menu_active=
 _ble_complete_menu_style=
@@ -7344,11 +7344,11 @@ _ble_complete_menu_comp=()
 
 ## @fn ble/complete/menu-complete.class/render-item pack opts
 ##   @param[in] pack
-##     cand_pack の要素と同様の形式の文字列です。
+## A string in the same format as the cand_pack elements.
 ##   @param[in] opts
-##     コロン区切りのオプションです。
+## Colon-separated options.
 ##     selected
-##       選択されている候補の描画シーケンスを生成します。
+## Generates a drawing sequence for the selected candidate.
 ##   @var[in,out] x y
 ##   @var[out] ret
 ##   @var[in] cols lines
@@ -7356,8 +7356,8 @@ _ble_complete_menu_comp=()
 function ble/complete/menu-complete.class/render-item {
   local opts=$2
 
-  # Note: select は menu 表示の文脈ではないので、
-  #   補完文脈を復元しなければ参照できない。
+  # Note: select is not in the context of displaying a menu, so
+  # It cannot be referenced unless the completion context is restored.
   if [[ :$opts: == *:selected:* ]]; then
     local COMP1=${_ble_complete_menu_comp[0]}
     local COMP2=${_ble_complete_menu_comp[1]}
@@ -7381,12 +7381,12 @@ function ble/complete/menu-complete.class/render-item {
     return 0
   fi
 
-  # 色の設定・表示内容・前置詞・後置詞を取得
+  # Get color settings, display contents, prepositions, and suffixes
   local g=0 show=$filter_target suffix= prefix=
   ble/function#try ble/complete/action:"$ACTION"/init-menu-item
   local g0=$g; [[ :$comp_type: == *:menu-color:* ]] || g0=0
 
-  # 一致部分の抽出
+  # Extracting matching parts
   local m
   if [[ :$comp_type: == *:menu-color-match:* && $_ble_complete_menu_common_part && $show == *"$filter_target"* ]]; then
     local filter_type=head
@@ -7399,7 +7399,7 @@ function ble/complete/menu-complete.class/render-item {
     local needle=${_ble_complete_menu_common_part:prefix_len}
     ble/complete/candidates/filter:"$filter_type"/match "$needle" "$filter_target"; m=("${ret[@]}")
 
-    # 表示文字列の部分文字列で絞り込みが起こっている場合
+    # When narrowing down is occurring using a substring of the display string
     if [[ $show != "$filter_target" ]]; then
       local show_prefix=${show%%"$filter_target"*}
       local offset=${#show_prefix}
@@ -7410,7 +7410,7 @@ function ble/complete/menu-complete.class/render-item {
     m=()
   fi
 
-  # 基本色の初期化 (Note: 高速化の為、直接 _ble_color_g2sgr を参照する)
+  # Initialization of basic colors (Note: For faster speed, refer to _ble_color_g2sgr directly)
   if [[ :$opts: == *:selected:* ]]; then
     ble/color/face2g menu_complete_selected
     ble/color/g#append g0 "$ret"
@@ -7426,7 +7426,7 @@ function ble/complete/menu-complete.class/render-item {
   # @var sgrB0 sgrB1
   #   The graphics for matching part of the completion item.
   if ((${#m[@]})); then
-    # 一致色の初期化
+    # Initialize matching color
     g=$g0
     ret=$_ble_syntax_highlight_lscolors_rl_colored_completion_prefix
     [[ $ret ]] || ble/color/face2g menu_complete_match
@@ -7435,14 +7435,14 @@ function ble/complete/menu-complete.class/render-item {
     ble/color/g2sgr "$((g^_ble_color_gflags_Revert))"; sgrB1=$ret
   fi
 
-  # 前置部分の出力
+  # Prefix output
   local out= flag_overflow= p0=0
   if [[ $prefix ]]; then
     ble/canvas/trace-text "$prefix" nonewline || flag_overflow=1
     out=$out$_ble_term_sgr0$ret
   fi
 
-  # 一致部分の出力
+  # Match output
   if ((${#m[@]})); then
     local i iN=${#m[@]} p p0=0
     for ((i=0;i<iN;i++)); do
@@ -7460,14 +7460,14 @@ function ble/complete/menu-complete.class/render-item {
     done
   fi
 
-  # 残りの出力
+  # remaining output
   if ((p0<${#show})); then
     local sgr0=$sgrN0 sgr1=$sgrN1
     ble/canvas/trace-text "${show:p0}" nonewline:external-sgr || flag_overflow=1
     out=$out$sgr0$ret
   fi
 
-  # 後置部分の出力
+  # Postfix output
   if [[ $suffix ]]; then
     ble/canvas/trace-text "$suffix" nonewline || flag_overflow=1
     out=$out$_ble_term_sgr0$ret
@@ -7505,7 +7505,7 @@ function ble/complete/menu/clear {
     _ble_complete_menu_active=
     ble/complete/menu#clear
     [[ $_ble_highlight_layer_menu_filter_beg ]] &&
-      ble/textarea#invalidate str # layer:menu_filter 解除 (#D0995)
+      ble/textarea#invalidate str # cancel layer:menu_filter (#D0995)
   fi
   return 0
 }
@@ -7619,7 +7619,7 @@ function ble/complete/menu/show {
 
   case :$opts: in
   (*:init:*)
-    local beg=$COMP1 end=$_ble_edit_ind # COMP2 でなく補完挿入後の位置
+    local beg=$COMP1 end=$_ble_edit_ind #Position after inserting complement instead of COMP2
     local str=$_ble_edit_str
     [[ $_ble_decode_keymap == auto_complete ]] &&
       str=${str::_ble_edit_ind}${str:_ble_edit_mark}
@@ -7634,15 +7634,15 @@ function ble/complete/menu/show {
     _ble_complete_menu_footprint=$footprint ;;
 
   (*:update-context:*)
-    # menu に既に表示されている内容を元にした補完後のメニュー再表示。
-    # 補完開始時の情報を保持したまま調整を行う。
+    # Redisplaying the menu after completion based on what is already displayed in menu.
+    # Adjustments are made while retaining the information at the start of completion.
 
-    # 編集領域左側の文字列が曖昧補完によって書き換わる可能性がある
+    # The string on the left side of the editing area may be rewritten by ambiguous completion.
     local left0=${_ble_complete_menu0_str::_ble_complete_menu0_end}
     local left1=${_ble_edit_str::_ble_edit_ind}
     local ret; ble/string#common-prefix "$left0" "$left1"; left0=$ret
 
-    # 編集領域右側の文字列が吸収されて書き換わる可能性がある
+    # There is a possibility that the string on the right side of the editing area will be absorbed and rewritten.
     local right0=${_ble_complete_menu0_str:_ble_complete_menu0_end}
     local right1=${_ble_edit_str:_ble_edit_ind}
     local ret; ble/string#common-suffix "$right0" "$right1"; right0=$ret
@@ -7682,7 +7682,7 @@ function ble/complete/menu/get-active-range {
 }
 
 ## @fn ble/complete/menu/generate-candidates-from-menu
-##   現在表示されている menu 内容から候補を再抽出します。
+## Re-extracts candidates from the currently displayed menu contents.
 ##   @var[out] COMP1 COMP2 COMPS COMPV comp_type comps_flags comps_fixed
 ##   @var[out] cand_count cand_cand cand_word cand_pack
 function ble/complete/menu/generate-candidates-from-menu {
@@ -7710,7 +7710,7 @@ function ble/complete/menu/generate-candidates-from-menu {
 
 # 
 #==============================================================================
-# 補完
+# complement
 
 ## @fn ble/complete/generate-candidates-from-opts opts
 ##   @var[out] COMP1 COMP2 COMPS COMPV comp_type comps_flags comps_fixed
@@ -7719,10 +7719,10 @@ function ble/complete/menu/generate-candidates-from-menu {
 function ble/complete/generate-candidates-from-opts {
   local opts=$1
 
-  # 文脈の決定
+  # Determining the context
   local context; ble/complete/complete/determine-context-from-opts "$opts"
 
-  # 補完源の生成
+  # Generation of complementary sources
   comp_type=
   [[ :$opts: == *:auto_menu:* ]] && comp_type=auto_menu
   local comp_text=$_ble_edit_str comp_index=$_ble_edit_ind
@@ -7739,14 +7739,14 @@ function ble/complete/insert {
   local original_text=${_ble_edit_str:insert_beg:insert_end-insert_beg}
   local ret
 
-  # 編集範囲の最小化
+  # Minimize edit range
   local insert_replace=
   if [[ $insert == "$original_text"* ]]; then
-    # 既存部分の置換がない場合
+    # If there is no replacement of existing part
     insert=${insert:insert_end-insert_beg}
     ((insert_beg=insert_end))
   else
-    # 既存部分の置換がある場合
+    # If there is replacement of existing part
     ble/string#common-prefix "$insert" "$original_text"
     if [[ $ret ]]; then
       insert=${insert:${#ret}}
@@ -7755,20 +7755,20 @@ function ble/complete/insert {
   fi
 
   if [[ $bleopt_complete_skip_matched ]]; then
-    # カーソルの右のテキストの吸収
+    # Absorb text to the right of the cursor
     if [[ $insert ]]; then
       local right_text=${_ble_edit_str:insert_end}
       right_text=${right_text%%[$IFS]*}
       if ble/string#common-prefix "$insert" "$right_text"; [[ $ret ]]; then
-        # カーソルの右に先頭一致する場合に吸収
+        # Absorb if the first match is to the right of the cursor
         ((insert_end+=${#ret}))
       elif ble/complete/string#common-suffix-prefix "$insert" "$right_text"; [[ $ret ]]; then
-        # カーソルの右に末尾一致する場合に吸収
+        # Absorb if there is a trailing match to the right of the cursor
         ((insert_end+=${#ret}))
       fi
     fi
 
-    # suffix の吸収
+    # Absorption of suffix
     if [[ $suffix ]]; then
       local right_text=${_ble_edit_str:insert_end}
       if ble/string#common-prefix "$suffix" "$right_text"; [[ $ret ]]; then
@@ -7802,7 +7802,7 @@ function ble/complete/insert-common {
   [[ $insert == "$COMPS"* ]] || insert_flags=r
 
   if ((cand_count==1)); then
-    # 一意確定の時
+    # Uniqueness confirmed
     local ACTION=${cand_pack[0]%%:*}
     if ble/is-function ble/complete/action:"$ACTION"/complete; then
       local "${_ble_complete_cand_varnames[@]/%/=}" # WA #D1570 checked
@@ -7811,19 +7811,19 @@ function ble/complete/insert-common {
       (($?==148)) && return 148
     fi
   else
-    # 候補が複数ある時
+    # When there are multiple candidates
     insert_flags=${insert_flags}m
   fi
 
   local do_insert=1
   if ((cand_count>1)) && [[ $insert_flags == *r* ]]; then
-    # 既存部分を置換し、かつ一意確定でない場合は置換しない。
-    # 曖昧補完の時は determine-common-prefix 内で調整されるので挿入する。
+    # Replaces the existing part, and does not replace it if it is not unique.
+    # When using ambiguous completion, it is adjusted within determine-common-prefix, so insert it.
     if [[ :$comp_type: != *:[maAi]:* ]]; then
       do_insert=
     fi
   elif [[ $insert$suffix == "$COMPS" ]]; then
-    # 何も変化がない時は、挿入しない。
+    # If there is no change, do not insert.
     do_insert=
   fi
   if [[ $do_insert ]]; then
@@ -7832,10 +7832,10 @@ function ble/complete/insert-common {
   fi
 
   if [[ $insert_flags == *m* ]]; then
-    # menu_common_part (メニュー強調文字列)
-    #   もし insert が単純単語の場合には
-    #   menu_common_part を挿入後の評価値とする。
-    #   そうでなければ仕方がないので挿入前の値 COMPV とする。
+    # menu_common_part (menu emphasis string)
+    # If insert is a simple word, then
+    # Set menu_common_part as the evaluation value after insertion.
+    # If not, there is no other choice, so let's use the value before insertion as COMPV.
     local menu_common_part=$COMPV
     local ret simple_flags simple_ibrace
     if ble/syntax:bash/simple-word/reconstruct-incomplete-word "$insert"; then
@@ -7881,13 +7881,13 @@ function ble/complete/insert-all {
 }
 
 ## @fn ble/complete/insert-braces/.compose words...
-##   指定した単語をブレース展開に圧縮します。
+## Compresses the specified word into a brace expansion.
 ##   @var[in] comp_type
 ##   @stdout
-##     圧縮したブレース展開を返します。
+## Returns the compressed brace expansion.
 function ble/complete/insert-braces/.compose {
-  # Note: awk が RS = "\0" に対応していれば \0 で区切る。
-  #   それ以外の場合には \x1E (ASCII RS) で区切る。
+  # Note: If awk supports RS = "\0", separate with \0.
+  # Otherwise, separate with \x1E (ASCII RS).
   if ble/bin/awk0.available; then
     local printf_format='%s\0' char_RS='"\0"' awk=ble/bin/awk0
   else
@@ -8317,37 +8317,37 @@ function ble/complete/insert-braces {
   local comps_len=${#COMPS} loop=0
   local -a tails=()
 
-  # 共通部分 (大文字・小文字は区別する)
+  # Common parts (case sensitive)
   local common=${cand_word[0]}
   ble/array#push tails "${common:comps_len}"
   local word clen=${#common}
   for word in "${cand_word[@]:1}"; do
     ((loop++%bleopt_complete_polling_cycle==0)) && ble/complete/check-cancel && return 148
 
-    # 共通部分
+    # common part
     ((clen>${#word}&&(clen=${#word})))
     while [[ ${word::clen} != "${common::clen}" ]]; do
       ((clen--))
     done
     common=${common::clen}
 
-    # COMPS 以降の部分
+    # Part after COMPS
     ble/array#push tails "${word:comps_len}"
   done
 
   local fixed=$COMPS
   if [[ $common != "$COMPS"* ]]; then
-    # 遡って書き換えが起こる場合
+    # When retroactive rewriting occurs
     tails=()
 
-    # 前方固定部分
+    # Front fixed part
     local fixed= fixval=
     {
-      # comps_fixed 迄は確実に固定する
+      # Make sure to fix up to comps_fixed
       [[ $comps_fixed ]] &&
         fixed=${COMPS::${comps_fixed%%:*}} fixval=${comps_fixed#*:}
 
-      # もし COMPS を部分的に適用できればそれを用いる
+      # If COMPS can be applied partially, use it
       local ret simple_flags simple_ibrace
       ble/complete/candidates/determine-common-prefix/.apply-partial-comps # var[in,out] common
       if ble/syntax:bash/simple-word/reconstruct-incomplete-word "$common"; then
@@ -8357,7 +8357,7 @@ function ble/complete/insert-braces {
       fi
     }
 
-    # cand_cand から cand_word を再構築
+    # Rebuild cand_word from cand_cand
     local cand ret fixval_len=${#fixval}
     for cand in "${cand_cand[@]}"; do
       ((loop++%bleopt_complete_polling_cycle==0)) && ble/complete/check-cancel && return 148
@@ -8396,39 +8396,39 @@ _ble_complete_state=
 
 ## @widget complete opts
 ##   @param[in] opts
-##     コロン区切りのリストです。
-##     以下は動作を指定するオプションです。
+## A colon-separated list.
+## Below are the options that specify the behavior.
 ##
-##     insert_common (既定)
-##       共通一致部分を挿入します。
+## insert_common (default)
+## Insert common match.
 ##     insert_all
-##       候補を全て挿入します。
+## Insert all suggestions.
 ##     insert_braces
-##       候補をブレース展開にまとめて挿入します。
+## Inserts candidates together into a brace expansion.
 ##     insert_unique
-##       候補が一意のときメニュー補完に入らずに挿入します。
+## When the candidate is unique, it is inserted without entering menu completion.
 ##     show_menu
-##       メニューを表示します。
+## Display the menu.
 ##     enter_menu
-##       メニュー補完に入ります。
+## Enter menu completion.
 ##     menu-style=*
 ##       Specify the menu style when the menu is shown (with show_menu,
 ##       enter_menu).  This overrides the default specified by "bleopt
 ##       complete_menu_style".
 ##
 ##     context=*
-##       候補生成の文脈を指定します。
+## Specifies the context for candidate generation.
 ##     backward
-##       メニュー補完に入る時に最後の候補に移動します。
+## Move to the last candidate when entering menu completion.
 ##     no-empty
-##       空の COMPV による補完を抑制します。
+## Suppress completion with empty COMPV.
 ##     no-bell
-##       候補が存在しなかった時のベルを発生させません。
+## Does not generate a bell when there are no candidates.
 ##
 ##     auto_menu
-##       auto-menu 経由で呼び出されている事を指定します。
-##       補完候補数の制限に complete_limit_auto_menu を使います。
-##       一部の補完源で complete_limit に達した時に補完全体を中止します。
+## Specifies that it is being called via auto-menu.
+## Use complete_limit_auto_menu to limit the number of completion candidates.
+## Abort the entire completion when complete_limit is reached for some completion sources.
 ##
 function ble/widget/complete {
   local opts=$1 arg=
@@ -8488,7 +8488,7 @@ function ble/widget/complete {
     fi
   fi
   if ((cand_count==0)); then
-    local bleopt_complete_menu_style=$bleopt_complete_menu_style # source 等に一次変更を認める。
+    local bleopt_complete_menu_style=$bleopt_complete_menu_style #Allow temporary changes to source etc.
     ble/complete/generate-candidates-from-opts "$opts"; local ext=$?
     ((ext==148)) && return 148
     if [[ $cand_limit_reached ]]; then
@@ -8559,7 +8559,7 @@ function ble/widget/complete/.select-menu-with-arg {
   [[ :$opts: == *:enter-menu:* ]] && arg_opts=always
   [[ :$opts: == *:nobell:* ]] && arg_opts=$arg_opts:nobell
 
-  # 現在のキーが実際に引数の一部として解釈され得る時のみ menu に入る
+  # Enter menu only if the current key can actually be interpreted as part of the argument
   ble/widget/menu/append-arg/.is-argument "$arg_opts" || return 1
   ble/complete/menu-complete/enter
   ble/widget/menu/append-arg "$arg_opts"
@@ -8628,7 +8628,7 @@ function ble/complete/menu-filter {
     ble/syntax:bash/simple-word/is-never-word "$input" && return 1
     return 0
   fi
-  [[ $simple_ibrace ]] && ((${simple_ibrace%%:*}>10#0${_ble_complete_menu0_comp[6]%%:*})) && return 1 # 別のブレース展開要素に入った時
+  [[ $simple_ibrace ]] && ((${simple_ibrace%%:*}>10#0${_ble_complete_menu0_comp[6]%%:*})) && return 1 # When entering another brace expansion element
   ble/syntax:bash/simple-word/eval "$ret" single; (($?==148)) && return 148
   local COMPV=$ret
 
@@ -8706,7 +8706,7 @@ function ble/highlight/layer:menu_filter/update {
       [[ ${str:beg:end-beg} != "${_ble_complete_menu0_comp[2]}" ]] || beg= end=
   fi
 
-  # 変更のない場合スキップ
+  # Skip if no changes
   [[ ! $obeg && ! $beg ]] && return 0
   ((PREV_UMIN<0)) && [[ $beg == "$obeg" && $end == "$oend" ]] &&
     PREV_BUFF=_ble_highlight_layer_menu_filter_buff && return 0
@@ -8770,7 +8770,7 @@ fi
 # menu-complete
 #
 
-## メニュー補完では以下の変数を参照する
+## Menu completion refers to the following variables
 ##
 ##   @var[in] _ble_complete_menu0_beg
 ##   @var[in] _ble_complete_menu0_end
@@ -8779,7 +8779,7 @@ fi
 ##   @var[in] _ble_complete_menu_common_part
 ##   @arr[in] _ble_complete_menu_page_icons
 ##
-## 更に以下の変数を使用する
+## Additionally, use the following variables:
 ##
 ##   @var[in,out] _ble_complete_menu_original=
 
@@ -8808,7 +8808,7 @@ function ble/complete/menu-complete/enter {
     ((_ble_edit_mark+=comps_fixed_length))
   fi
 
-  # 一意確定時。menu の処理も含めて menu-complete の枠組みの中で確定を実行する。
+  # When unique. Execute confirmation within the framework of menu-complete, including menu processing.
   if [[ :$opts: == *:insert_unique:* ]] && ((${#_ble_complete_menu_items[@]}==1)); then
     ble/complete/menu#select 0
     ble/decode/keymap/push menu_complete
@@ -8842,7 +8842,7 @@ function ble/widget/menu_complete/exit {
   local opts=$1
 
   if ((_ble_complete_menu_selected>=0)); then
-    # 置換情報を再構成
+    # Reconfigure replacement information
     local new=${_ble_edit_str:_ble_complete_menu0_beg:_ble_edit_ind-_ble_complete_menu0_beg}
     if [[ :$bleopt_complete_menu_complete_opts: != *:insert-selection:* ]]; then
       local "${_ble_complete_cand_varnames[@]/%/=}" # WA #D1570 checked
@@ -8856,7 +8856,7 @@ function ble/widget/menu_complete/exit {
     local insert=$new
     local insert_flags=
 
-    # suffix の決定と挿入
+    # Determining and inserting suffix
     local suffix=
     if [[ :$opts: == *:complete:* ]]; then
       local icon=${_ble_complete_menu_page_icons[_ble_complete_menu_selected-_ble_complete_menu_page_offset]}
@@ -8866,7 +8866,7 @@ function ble/widget/menu_complete/exit {
 
       local ACTION=${pack%%:*}
       if ble/is-function ble/complete/action:"$ACTION"/complete; then
-        # 補完文脈の復元
+        # Restore completion context
         local COMP1=${_ble_complete_menu0_comp[0]}
         local COMP2=${_ble_complete_menu0_comp[1]}
         local COMPS=${_ble_complete_menu0_comp[2]}
@@ -8875,7 +8875,7 @@ function ble/widget/menu_complete/exit {
         local comps_flags=${_ble_complete_menu0_comp[5]}
         local comps_fixed=${_ble_complete_menu0_comp[6]}
 
-        # 補完候補のロード
+        # Loading completion suggestions
         local "${_ble_complete_cand_varnames[@]/%/=}" # WA #D1570 checked
         ble/complete/cand/unpack "$pack"
 
@@ -8884,7 +8884,7 @@ function ble/widget/menu_complete/exit {
       ble/complete/insert "$_ble_complete_menu0_beg" "$_ble_edit_ind" "$insert" "$suffix"
     fi
 
-    # 通知
+    # notification
     blehook/invoke complete_insert
   fi
 
@@ -8998,8 +8998,8 @@ _ble_complete_menu_arg=
 function ble/widget/menu/append-arg {
   [[ ${LASTWIDGET%%' '*} == */append-arg ]] || _ble_complete_menu_arg=
 
-  # 引数入力が開始されていなくて (修飾なしの) 数字キーの時はそのまま通常の数字
-  # 入力として扱う。
+  # If argument input has not started and (unmodified) number keys are used, they are just normal numbers.
+  # Treat as input.
   local i=${#KEYS[@]}; ((i&&i--))
   local flag=$((KEYS[i]&_ble_decode_MaskFlag))
   if ! [[ :$1: == *:always:* || flag -ne 0 || $_ble_complete_menu_arg ]]; then
@@ -9012,7 +9012,7 @@ function ble/widget/menu/append-arg {
   local ret; ble/util/c2s "$code"; local ch=$ret
   ((_ble_complete_menu_arg=10#0$_ble_complete_menu_arg$ch))
 
-  # 番号が範囲内になければ頭から数字を削っていく
+  # If the number is not within the range, delete the number from the beginning.
   local count=${#_ble_complete_menu_items[@]}
   while ((_ble_complete_menu_arg>count)); do
     ((_ble_complete_menu_arg=10#0${_ble_complete_menu_arg:1}))
@@ -9023,7 +9023,7 @@ function ble/widget/menu/append-arg {
     return 0
   fi
 
-  # 移動
+  # move
   ble/complete/menu#select "$((_ble_complete_menu_arg-1))"
 }
 
@@ -9062,39 +9062,39 @@ _ble_complete_ac_suffix=
 
 ## @fn ble/complete/auto-complete/enter type comp1 suggest cand word [insert suffix]
 ##   @param[in] type
-##     c ... 接頭辞補完
-##     h ... 履歴による接頭辞補完。c と同じ取り扱い
-##     m ... 部分文字列補完
-##     a ... 曖昧補完(1文字目確定)
-##     A ... 曖昧補完
+## c ... prefix completion
+## h ... prefix completion with history. Same treatment as c
+## m ... substring completion
+## a ... Ambiguous completion (first character confirmed)
+## A ... Ambiguous completion
 ##   @param[in] comp1
-##     補完開始点
+## Completion starting point
 ##   @param[in] suggest
-##     提示文字列
+## Presentation string
 ##   @param[in] cand
-##     元の単語
+## original word
 ##   @param[in] word
-##     挿入文字列(確定前)
+## Insert string (before confirmation)
 ##   @param[in,opt] insert
-##     挿入文字列(確定時)。省略時は word と同じと見做されます。
+## Insert string (when confirmed). If omitted, it is assumed to be the same as word.
 ##   @param[in] suffix
-##     接尾挿入文字列。省略時は空文字列と見做されます。
+## Suffix insertion string. If omitted, it is assumed to be an empty string.
 ##
 ##   @var[in] _ble_edit_ind
-##     提示文字列挿入位置を指定します。
+## Specify the insertion position of the suggested string.
 ##   @var[out] _ble_edit_mark
-##     提示文字列の終端点を返します。
+## Returns the ending point of the suggested string.
 ##
 function ble/complete/auto-complete/enter {
   local type=$1 COMP1=$2 suggest=$3 cand=$4 word=$5 insert1=${6-$5} suffix=${7-}
 
   local limit=$((bleopt_line_limit_length))
   if ((limit&&${#_ble_edit_str}+${#suggest}>limit)); then
-    # 文字数制限に引っかかる場合には単純に auto-complete は失敗する
+    # auto-complete simply fails if it hits the character limit.
     return 1
   fi
 
-  # 提示
+  # presentation
   local insert; ble-edit/content/replace-limited "$_ble_edit_ind" "$_ble_edit_ind" "$suggest" nobell
   ((_ble_edit_mark=_ble_edit_ind+${#suggest}))
 
@@ -9112,7 +9112,7 @@ function ble/complete/auto-complete/enter {
 }
 
 ## @fn ble/complete/auto-complete/source:history/.search-light text
-##   !string もしくは !?string を用いて履歴の検索を行います
+## Search history using !string or !?string
 ##   @param[in] text
 ##   @var[out] ret
 function ble/complete/auto-complete/source:history/.search-light {
@@ -9121,8 +9121,8 @@ function ble/complete/auto-complete/source:history/.search-light {
   local text=$1
   [[ ! $text ]] && return 1
 
-  # !string による一致を試みる
-  #   string には [$wordbreaks] は含められない。? はOK
+  # Attempt to match by !string
+  # string cannot contain [$wordbreaks]. ? is OK
   local wordbreaks="<>();&|:$_ble_term_IFS"
   local word= expand
   if [[ $text != [-0-9#?!]* ]]; then
@@ -9134,10 +9134,10 @@ function ble/complete/auto-complete/source:history/.search-light {
     fi
   fi
 
-  # !?string による一致を試みる
-  #   string には "?" は含められない
+  # Attempt to match by !?string
+  # string cannot contain "?"
   if [[ $word != "$text" ]]; then
-    # ? を含まない最長一致部分
+    # Longest match not containing ?
     local fragments; ble/string#split fragments '?' "$text"
     local frag longest_fragments len=0; longest_fragments=('')
     for frag in "${fragments[@]}"; do
@@ -9170,7 +9170,7 @@ function ble/complete/auto-complete/source:history/.search-heavy {
   local index=$((count-1))
   local needle=$text
 
-  # 途中からの検索再開
+  # Resume search from midway
   ((start==_ble_complete_ac_history_start)) &&
     [[ $needle == "$_ble_complete_ac_history_needle"* ]] &&
     index=$_ble_complete_ac_history_index
@@ -9222,7 +9222,7 @@ function ble/complete/auto-complete/source:syntax {
   ble/complete/context:syntax/generate-sources "$comp_text" "$comp_index" &&
     ble/complete/context/filter-prefix-sources || return 1
 
-  # ble/complete/candidates/generate 設定
+  # ble/complete/candidates/generate settings
   local bleopt_complete_contract_function_names=
   local bleopt_complete_menu_style=$bleopt_complete_menu_style # source local settings
   ((bleopt_complete_polling_cycle>25)) &&
@@ -9244,7 +9244,7 @@ function ble/complete/auto-complete/source:syntax {
   local word=${cand_word[0]} cand=${cand_cand[0]}
   [[ $word == "$COMPS" ]] && return 1
 
-  # addtail 等の修飾
+  # Modifications such as addtail
   local insert=$word suffix=
   local ACTION=${cand_pack[0]%%:*}
   if ble/is-function ble/complete/action:"$ACTION"/complete; then
@@ -9256,7 +9256,7 @@ function ble/complete/auto-complete/source:syntax {
 
   local type= suggest=
   if [[ $insert == "$COMPS"* ]]; then
-    # 入力候補が既に続きに入力されている時は提示しない
+    # Do not present when input candidates have already been entered as a continuation.
     [[ ${comp_text:COMP1} == "$insert"* ]] && return 1
 
     type=c
@@ -9277,8 +9277,8 @@ _ble_complete_auto_source=(history syntax)
 
 ## @fn ble/complete/auto-complete.impl opts
 ##   @param[in] opts
-#      コロン区切りのオプションのリストです。
-##     sync   ユーザ入力があっても処理を中断しない事を指定します。
+# A colon-separated list of options.
+## sync Specifies that processing should not be interrupted even if there is user input.
 function ble/complete/auto-complete.impl {
   local opts=$1
   local comp_type=auto
@@ -9287,7 +9287,7 @@ function ble/complete/auto-complete.impl {
   local comp_text=$_ble_edit_str comp_index=$_ble_edit_ind
   [[ $comp_text ]] || return 0
 
-  # menu-filter 編集領域内部では auto-complete は抑制する
+  # auto-complete is suppressed inside the menu-filter editing area
   if local beg end; ble/complete/menu/get-active-range "$_ble_edit_str" "$_ble_edit_ind"; then
     ((_ble_edit_ind<end)) && return 0
   fi
@@ -9300,9 +9300,9 @@ function ble/complete/auto-complete.impl {
   done
 }
 
-## 背景関数 ble/complete/auto-complete.idle
+## Background function ble/complete/auto-complete.idle
 function ble/complete/auto-complete.idle {
-  # ※特に上書きしなければ常に wait-user-input で抜ける。
+  # *If you don't overwrite it, you can always exit with wait-user-input.
   ble/util/idle.wait-user-input
 
   [[ $bleopt_complete_auto_complete ]] || return 1
@@ -9323,13 +9323,13 @@ function ble/complete/auto-complete.idle {
     [[ ${_ble_edit_str:_ble_edit_ind:1} == [!$' \t\n"'\'';&|<>()=:'] ]] && return 0
   fi
 
-  # bleopt_complete_auto_delay だけ経過してから処理
+  # Process after bleopt_complete_auto_delay has elapsed
   ble/util/idle.sleep-until "$((_ble_idle_clock_start+bleopt_complete_auto_delay))" checked && return 0
 
   ble/complete/auto-complete.impl
 }
 
-## 背景関数 ble/complete/auto-menu.idle
+## Background function ble/complete/auto-menu.idle
 function ble/complete/auto-menu.idle {
   ble/util/idle.wait-user-input
   [[ $_ble_complete_menu_active ]] && return 0
@@ -9345,7 +9345,7 @@ function ble/complete/auto-menu.idle {
 
   [[ $_ble_edit_str ]] || return 0
 
-  # bleopt_complete_auto_delay だけ経過してから処理
+  # Process after bleopt_complete_auto_delay has elapsed
   local until=$((_ble_idle_clock_start+bleopt_complete_auto_menu))
   ble/util/idle.sleep-until "$until" checked && return 0
 
@@ -9358,9 +9358,9 @@ ble/function#try ble/util/idle.push-background ble/complete/auto-menu.idle
 ## @widget auto-complete-enter
 ##
 ##   Note:
-##     キーボードマクロで自動補完を明示的に起動する時に用いる編集関数です。
-##     auto-complete.idle に於いて ble-decode-key を用いてキー ac_enter を発生
-##     させ、再生時にはこのキーを通して自動補完が起動されます。
+## This is an editing function used when explicitly starting auto-completion with a keyboard macro.
+## Generate key ac_enter using ble-decode-key in auto-complete.idle
+## and auto-completion is activated through this key during playback.
 ##
 function ble/widget/auto-complete-enter {
   ble/complete/auto-complete.impl sync
@@ -9400,7 +9400,7 @@ function ble/widget/auto_complete/cancel-default {
 
 ## @fn ble/widget/auto_complete/self-insert/.is-magic-space
 ##   @var[in] KEYS
-##   現在のキー入力が親 keymap で magic-space に対応するかどうかを判定します。
+## Determines whether the current keystroke corresponds to a magic-space in the parent keymap.
 
 function ble/widget/auto_complete/self-insert/.is-magic-space {
   ((${#KEYS[@]}==1)) || return 1
@@ -9425,30 +9425,30 @@ function ble/widget/auto_complete/self-insert {
 
   local ret
 
-  # もし挿入によって現在の候補が変わらないのであれば、
-  # 候補を表示したまま挿入を実行する。
+  # If the insertion does not change the current candidate, then
+  # Insert while displaying suggestions.
   ble/util/c2s "$code"; local ins=$ret
   local comps_cur=${_ble_edit_str:_ble_complete_ac_comp1:_ble_edit_ind-_ble_complete_ac_comp1}
   local comps_new=$comps_cur$ins
   local processed=
   if [[ $_ble_complete_ac_type == [ch] ]]; then
-    # c: 入力済み部分が補完結果の先頭に含まれる場合
-    #   挿入した後でも補完結果の先頭に含まれる場合、その文字数だけ確定。
+    # c: If the entered part is included at the beginning of the completion result
+    # Even after insertion, if it is included at the beginning of the completion result, that number of characters is confirmed.
     if [[ $_ble_complete_ac_word == "$comps_new"* ]]; then
       ((_ble_edit_ind+=${#ins}))
 
-      # Note: 途中で完全一致した場合は tail を挿入せずに終了する事にする
+      # Note: If there is an exact match midway through, we will exit without inserting tail.
       [[ $_ble_complete_ac_word == "$comps_new" ]] && ble/widget/auto_complete/cancel
       processed=1
     fi
   elif [[ $_ble_complete_ac_type == [rmaA] && $ins != [{,}] ]]; then
     if local ret simple_flags simple_ibrace; ble/syntax:bash/simple-word/reconstruct-incomplete-word "$comps_new"; then
       if ble/complete/source/eval-simple-word "$ret" single && local compv_new=$ret; then
-        # r: 遡って書き換わる時
-        #   挿入しても展開後に一致する時、そのまま挿入。
-        #   元から展開後に一致していない場合もあるが、その場合は一旦候補を消してやり直し。
-        # a: 曖昧一致の時
-        #   文字を挿入後に展開してそれが曖昧一致する時、そのまま挿入。
+        # r: When rewritten retroactively
+        # Even if inserted, if it matches after expansion, insert it as is.
+        # There may be cases where they do not match after expansion, but in that case, delete the candidate and try again.
+        # a: Fuzzy match
+        # After inserting a character, expand it and if it is a fuzzy match, insert it as is.
 
         local filter_type=head
         case $_ble_complete_ac_type in
@@ -9514,12 +9514,12 @@ function ble/widget/auto_complete/.insert-prefix {
     else
       local ins=$prefix
 
-      # Note: 以下の様に _ble_edit_ind だけずらす。
+      # Note: Shift by _ble_edit_ind as shown below.
       #   <C>he<I>llo world<M> → <C>hello <I>world<M>
       #   (<C> = comp1, <I> = _ble_edit_ind, <M> = _ble_edit_mark)
       ((_ble_edit_ind+=${#ins}))
 
-      # 通知
+      # notification
       local comp_text=$_ble_edit_str
       local insert_beg=$_ble_complete_ac_comp1
       local insert_end=$_ble_edit_ind
@@ -9535,16 +9535,16 @@ function ble/widget/auto_complete/.insert-prefix {
     else
       local ins=$prefix
 
-      # Note: 以下の様に内容を書き換える。
+      # Note: Rewrite the content as follows.
       #   <C>hll<I> [hello world] <M> → <C>hello <I>world<M>
       #   (<C> = comp1, <I> = _ble_edit_ind, <M> = _ble_edit_mark)
       _ble_complete_ac_type=c
-      # Note: 内容としては短くなるので replace-limited は使わなくて良い。
+      # Note: There is no need to use replace-limited as the content will be shorter.
       ble-edit/content/replace "$_ble_complete_ac_comp1" "$_ble_edit_mark" "$_ble_complete_ac_insert"
       ((_ble_edit_ind=_ble_complete_ac_comp1+${#ins},
         _ble_edit_mark=_ble_complete_ac_comp1+${#_ble_complete_ac_insert}))
 
-      # 通知
+      # notification
       local comp_text=$_ble_edit_str
       local insert_beg=$_ble_complete_ac_comp1
       local insert_end=$_ble_edit_ind
@@ -9646,24 +9646,24 @@ function ble/complete/sabbrev/.print-definition {
 }
 
 ## @fn ble/complete/sabbrev/register key value
-##   静的略語展開を登録します。
+## Register static abbreviation expansion.
 ##   @param[in] key value
 ##
 ## @fn ble/complete/sabbrev/list type [keys...]
-##   登録されている静的略語展開の一覧を表示します。
+## Displays a list of registered static abbreviation expansions.
 ##   @var[in] flags
 ##
 ## @fn ble/complete/sabbrev/reset type [keys...]
-##   登録されている静的略語展開を削除します。
+## Delete a registered static abbreviation expansion.
 ##   @var[in] flags
 ##
 ## @fn ble/complete/sabbrev/wordwise.get key
-##   静的略語展開の展開値を取得します。
+## Gets the expansion value for static abbreviation expansion.
 ##   @param[in] key
 ##   @var[out] ret
 ##
 
-# Note: _ble_complete_sabbrev は core-complete-def.sh で定義
+# Note: _ble_complete_sabbrev is defined in core-complete-def.sh
 function ble/complete/sabbrev/register {
   local key=$1 value=$2
   ((_ble_complete_sabbrev_version++))
@@ -9674,7 +9674,7 @@ function ble/complete/sabbrev/list {
   local keys ret; keys=("$@")
   if ((${#keys[@]}==0)); then
     if [[ $type ]]; then
-      # type が指定されている時は、その type の sabbrev だけ表示する
+      # When type is specified, only sabbrevs of that type are displayed.
       local ret key
       ble/gdict#keys _ble_complete_sabbrev
       for key in "${ret[@]}"; do
@@ -9712,7 +9712,7 @@ function ble/complete/sabbrev/reset {
     done
     ((_ble_complete_sabbrev_version++))
   elif [[ $type ]]; then
-    # type が指定されている時は、その type の sabbrev だけ削除する
+    # When type is specified, delete only sabbrev of that type
 
     local ret key
     ble/gdict#keys _ble_complete_sabbrev
@@ -9789,18 +9789,18 @@ function ble/complete/sabbrev/suffix.construct-regex {
 
 ## @fn ble/complete/sabbrev/literal.find str [opts]
 ## @fn ble/complete/sabbrev/suffix.find str [opts]
-##   最長一致するリテラル略語とその値を取得します。
+## Get the longest matching literal abbreviation and its value.
 ##   @param[in] str
 ##   @param[in,opt] opts
-##     コロン区切りのオプションです。
+## Colon-separated options.
 ##
 ##     filter-by-patterns
-##       patterns 配列に指定されているパターンに一致する sabbrev だけを一致対象
-##       とします。
+## Match only sabbrevs that match the patterns specified in the patterns array
+## Let's say.
 ##       @arr[in] patterns
 ##
 ##     literal
-##       指定された単語が既に展開済みの値であることを示します。
+## Indicates that the specified word is already an expanded value.
 ##
 ##   @var[out] key1 ent1
 ##
@@ -9943,7 +9943,7 @@ function ble/complete/sabbrev/read-arguments {
 }
 
 ## @fn ble-sabbrev key=value
-##   静的略語展開を登録します。
+## Register static abbreviation expansion.
 function ble/complete/sabbrev {
   local flags type specs print
   ble/complete/sabbrev/read-arguments "$@"
@@ -9983,7 +9983,7 @@ function ble/complete/sabbrev {
 
   local spec key value
   for spec in "${specs[@]}"; do
-    # spec は key=value の形式
+    # spec is of the form key=value
     key=${spec%%=*} value=${spec#*=}
     ble/complete/sabbrev/register "$key" "${type:-w}:$value"
   done
@@ -10008,18 +10008,18 @@ function ble/complete/sabbrev/locate-key {
     [[ ${asrc[0]} =~ $rex_source_type ]] || continue
 
     if [[ ${asrc[0]} == argument ]]; then
-      # source:argument かつ変数代入形式の時は右辺を sabbrev の対象とする。
-      # wtype を (恰も declare の引数の様に) ATTR_VAR にして find-rhs を呼び出
-      # す。
+      # When source:argument and variable assignment format, the right side is the target of sabbrev.
+      # Call find-rhs with wtype set to ATTR_VAR (just like an argument to declare)
+      # vinegar.
       local wtype=$_ble_attr_VAR wbeg=${asrc[1]} wlen=$((comp_index-asrc[1])) ret
       ble/syntax:bash/find-rhs "$wtype" "$wbeg" "$wlen" long-option &&
         asrc[0]=rhs asrc[1]=$ret
     fi
 
     if [[ ${asrc[0]} == rhs ]]; then
-      # 変数代入形式の右辺では : で区切った最後のフィールドを対象とする。最後の
-      # unquoted colon まで読み飛ばす。[Note: 文法情報の参照をすればより厳密に
-      # 決定できるかもしれないが今は実装しない]
+      # On the right side of the variable assignment format, the last field separated by : is targeted. the last
+      # Skip to unquoted colon. [Note: If you refer to the grammar information, it will be more precise.
+      # I may be able to decide, but I won't implement it for now]
       local rex_element
       ble/syntax:bash/simple-word/get-rex_element :
       local rex='^:*('$rex_element':+)'
@@ -10034,22 +10034,22 @@ function ble/complete/sabbrev/locate-key {
 
 ## @fn ble/complete/sabbrev/expand [opts]
 ##   @param[in,opt] opts
-##     コロン区切りのオプションです。
+## Colon-separated options.
 ##
 ##     wordwise
 ##     literal
-##       それぞれ wordwise sabbrev および literal sabbrev (line, inline) の展開
-##       を実行します。どちらも指定されていない場合は両方実行します。
+## Expanding wordwise sabbrev and literal sabbrev (line, inline) respectively
+## Execute. If neither is specified, both will be executed.
 ##
 ##     pattern=PATTERN
-##       これが一つ以上指定されていた時は何れかの PATTERN で指定された名前を持
-##       つ sabbrev だけ有効にします。
+## If one or more of these is specified, it will have the name specified by any PATTERN.
+## Enable only one sabbrev.
 ##
 ##     strip-slash
-##       展開後の末尾に含まれる / を削除します。
+## Delete the trailing / after expansion.
 ##
 ##     type-status
-##       実行した sabbrev の種類を終了ステータスで返します。
+## Returns the type of sabbrev executed in the exit status.
 ##
 function ble/complete/sabbrev/expand {
   local opts=$1
@@ -10126,8 +10126,8 @@ function ble/complete/sabbrev/expand {
     local bleopt_sabbrev_menu_opts=
 
     # generate candidates
-    #   COMPREPLY に候補を追加してもらうか、
-    #   或いは手動で ble/complete/cand/yield 等を呼び出してもらう。
+    # Ask COMPREPLY to add suggestions, or
+    # Or have them call ble/complete/cand/yield etc. manually.
     local -a COMPREPLY=()
     builtin eval -- "$value"
 
@@ -10147,7 +10147,7 @@ function ble/complete/sabbrev/expand {
       return "$exit"
     fi
 
-    # Note: 既存の内容 (key) は削除する
+    # Note: Existing content (key) will be deleted
     ble/widget/.replace-range "$pos" "$comp_index" ''
 
     local bleopt_complete_menu_style=$bleopt_sabbrev_menu_style
@@ -10166,7 +10166,7 @@ function ble/widget/sabbrev-expand {
   return "$ext"
 }
 
-# sabbrev の補完候補
+# Completion candidates for sabbrev
 function ble/complete/action:sabbrev/initialize { CAND=$value; }
 function ble/complete/action:sabbrev/complete { return 0; }
 function ble/complete/action:sabbrev/init-menu-item {
@@ -10187,7 +10187,7 @@ function ble/complete/source:sabbrev {
   [[ $filter_type == none ]] && filter_type=head
   local comps_fixed=
 
-  # フィルタリング用設定を COMPS で再初期化
+  # Reinitialize filtering settings with COMPS
   local comp_filter_type
   local comp_filter_pattern
   ble/complete/candidates/filter#init "$filter_type" "$COMPS"
@@ -10197,7 +10197,7 @@ function ble/complete/source:sabbrev {
     ble/complete/candidates/filter#test "$cand" || continue
     ble/complete/string#match-patterns "$cand" "${_ble_complete_source_sabbrev_ignore[@]}" && continue
 
-    # filter で除外されない為に cand には評価後の値を入れる必要がある。
+    # In order to not be excluded by filter, it is necessary to enter the value after evaluation in cand.
     local ret simple_flags simple_ibrace
     ble/syntax:bash/simple-word/reconstruct-incomplete-word "$cand" &&
       ble/complete/source/eval-simple-word "$ret" single || continue
@@ -10299,7 +10299,7 @@ function ble/complete/dabbrev/erase-status {
 
 ## @fn ble/complete/dabbrev/initialize-variables
 function ble/complete/dabbrev/initialize-variables {
-  # Note: _ble_term_IFS を前置しているので ! や ^ が先頭に来ない事は保証される
+  # Note: Since _ble_term_IFS is prefixed, it is guaranteed that ! or ^ does not come at the beginning.
   local wordbreaks; ble/complete/get-wordbreaks
   _ble_complete_dabbrev_wordbreaks=$wordbreaks
 
@@ -10331,22 +10331,22 @@ function ble/complete/dabbrev/reset {
 
 ## @fn ble/complete/dabbrev/search-in-history-entry line index
 ##   @param[in] line
-##     検索対象の内容を指定します。
+## Specify the content to search for.
 ##   @param[in] index
-##     検索対象の履歴番号を指定します。
+## Specify the history number to search.
 ##   @var[in] dabbrev_current_match
-##     現在の一致内容を指定します。
+## Specifies the current match.
 ##   @var[in] dabbrev_pos
-##     履歴項目内の検索開始位置を指定します。
+## Specifies the starting position within the history item.
 ##   @var[out] dabbrev_match
-##     一致した場合に、一致した内容を返します。
+## If there is a match, return the matched content.
 ##   @var[out] dabbrev_match_pos
-##     一致した場合に、一致範囲の最後の位置を返します。
-##     これは次の検索開始位置に対応します。
+## If there is a match, returns the last position of the matching range.
+## This corresponds to the next search start position.
 function ble/complete/dabbrev/search-in-history-entry {
   local line=$1 index=$2
 
-  # 現在編集している行自身には一致させない。
+  # Does not match the currently edited line itself.
   local index_editing; ble/history/get-index -v index_editing
   if ((index!=index_editing)); then
     local pos=$dabbrev_pos
@@ -10372,13 +10372,13 @@ function ble/complete/dabbrev/.search.fib {
     local index=$_ble_complete_dabbrev_index
     local pos=$_ble_complete_dabbrev_pos
 
-    # Note: start は最初に backward-history-search が呼ばれる時の index。
-    #   backward-history-search が呼び出される前に index-- されるので、
-    #   start は最初から 1 減らして定義しておく。
-    #   これにより cyclic 検索で再度自分に一致する事が保証される。
-    # Note: start がこれで負になった時は "履歴項目の数" を設定する。
-    #   未だ "履歴" に登録されていない最新の項目 (_ble_history_edit
-    #   には格納されている) も検索の対象とするため。
+    # Note: start is the index at which backward-history-search is called for the first time.
+    # index-- before backward-history-search is called, so
+    # Define start by decreasing it by 1 from the beginning.
+    # This ensures that a cyclic search will match you again.
+    # Note: If start is now negative, set the "number of history items".
+    # The latest item not yet registered in "history" (_ble_history_edit
+    # ) is also included in the search.
     ((--start>=0)) || ble/history/get-count -v start
   else
     local start index pos; builtin eval -- "$fib_suspend"
@@ -10396,15 +10396,15 @@ function ble/complete/dabbrev/.search.fib {
     local isearch_time=0
     local isearch_opts=stop_check:cyclic
 
-    # 条件による一致判定の設定
+    # Setting match judgment based on conditions
     isearch_opts=$isearch_opts:condition
     local dabbrev_original=$_ble_complete_dabbrev_original
     local dabbrev_regex1=$_ble_complete_dabbrev_regex1
     local needle='[[ $LINE =~ $dabbrev_regex1 ]] && ble/complete/dabbrev/search-in-history-entry "$LINE" "$INDEX"'
-    # Note: glob で先に枝刈りした方が速い。
+    # Note: It is faster to prune with glob first.
     [[ $dabbrev_original ]] && needle='[[ $LINE == *"$dabbrev_original"* ]] && '$needle
 
-    # 検索進捗の表示
+    # Displaying search progress
     isearch_opts=$isearch_opts:progress
     local isearch_progress_callback=ble/complete/dabbrev/.show-status.fib
 
@@ -10412,10 +10412,10 @@ function ble/complete/dabbrev/.search.fib {
     ((ext==148)) && fib_suspend="start=$start index=$index pos=$pos"
     if ((ext)); then
       if ((${#_ble_complete_dabbrev_stack[@]})); then
-        ble/widget/.bell # 周回したので鳴らす
+        ble/widget/.bell #It's gone around so I'll ring it.
         return 0
       else
-        # 一つも見つからない場合
+        # If none are found
         return "$ext"
       fi
     fi
@@ -10427,7 +10427,7 @@ function ble/complete/dabbrev/.search.fib {
   ((_ble_edit_ind=_ble_edit_mark+${#insert}))
 
   ((index>_ble_complete_dabbrev_index)) &&
-    ble/widget/.bell # 周回
+    ble/widget/.bell #laps
   _ble_complete_dabbrev_index=$index
   _ble_complete_dabbrev_pos=$dabbrev_match_pos
 
@@ -10461,7 +10461,7 @@ function ble/widget/dabbrev/next {
 }
 function ble/widget/dabbrev/prev {
   if ((${#_ble_util_fiberchain[@]})); then
-    # 処理中の物がある時はひとつずつ取り消す
+    # If there are items being processed, cancel them one by one.
     local ret; ble/array#pop _ble_util_fiberchain
     if ((${#_ble_util_fiberchain[@]})); then
       ble/util/fiberchain#resume
@@ -10469,7 +10469,7 @@ function ble/widget/dabbrev/prev {
       ble/complete/dabbrev/show-status
     fi
   elif ((${#_ble_complete_dabbrev_stack[@]})); then
-    # 前の一致がある時は遡る
+    # Go back when there is a previous match
     local ret; ble/array#pop _ble_complete_dabbrev_stack
     local rec str=${ret#*:}
     ble/string#split rec , "${ret%%:*}"
@@ -10524,26 +10524,26 @@ function ble-decode/keymap:dabbrev/define {
 # default cmdinfo/complete
 
 ## @fn ble/cmdinfo/complete/yield-flag cmd flags [opts]
-##   "-${flags}X" の X を補完する。
+## Complete the X in "-${flags}X".
 ##   @param[in] cmd
-##     mandb 検索に用いるコマンド名
+## mandb Command name used for search
 ##   @param[in] flags
-##     可能なオプション文字の一覧
+## List of possible option characters
 ##   @param[in,opt] opts
-##     コロン区切りのリスト
+## colon separated list
 ##
 ##     dedup[=XFLAGS]
-##       既に指定されている排他的フラグは除外します。XFLAGS には排他的フラグの
-##       集合を指定します。省略または空文字列を指定した場合は全てのフラグが排他
-##       的であると見なします。
+## Excludes any exclusive flags that have already been specified. XFLAGS has exclusive flags
+## Specify a set. If omitted or an empty string is specified, all flags are exclusive.
+## considered to be the target.
 ##
 ##     cancel-on-empty
-##       候補のフラグがもうない場合に補完候補生成をキャンセルします。既定では、
-##       候補のフラグがもうない場合には現在入力済みの内容で補完確定します。
+## Cancel completion candidate generation if there are no more candidate flags. By default,
+## If there are no more candidate flags, the currently entered content will be completed.
 ##
 ##     hasarg=AFLAGS
-##       オプション引数を持つフラグの集合を指定します。この文字集合に含まれる文
-##       字が既に COMPV に指定されている場合にはオプションは補完しません。
+## Specifies a collection of flags with optional arguments. sentences contained in this character set
+## The option is not completed if the character is already specified in COMPV.
 ##
 ##   @var[in] COMPV
 
@@ -10577,7 +10577,7 @@ function ble/cmdinfo/complete/yield-flag {
   if [[ ! $flags ]]; then
     [[ :$opts: == *:cancel-on-empty:* ]] && return 1
 
-    # 候補のフラグがもうない場合は現在の内容で一意確定
+    # If there are no more candidate flags, the current content is determined as unique.
     local "${_ble_complete_yield_varnames[@]/%/=}" # WA #D1570 checked
     ble/complete/cand/yield.initialize word
     ble/complete/cand/yield word "$COMPV"
@@ -10586,7 +10586,7 @@ function ble/cmdinfo/complete/yield-flag {
 
   local COMP_PREFIX=$COMPV
 
-  # desc が mandb に見つかればそれを適用する
+  # If desc is found in mandb, apply it
   local has_desc=
   if local ret; ble/complete/mandb/load-cache "$cmd"; then
     local entry fs=$_ble_term_FS
@@ -10602,7 +10602,7 @@ function ble/cmdinfo/complete/yield-flag {
     [[ $has_desc ]] && bleopt complete_menu_style=desc
   fi
 
-  # 見つからない場合には説明なしで生成する
+  # If not found, generate without explanation
   local i
   for ((i=0;i<${#flags};i++)); do
     ble/complete/cand/yield mandb.flag "$COMPV${flags:i:1}"
@@ -10610,7 +10610,7 @@ function ble/cmdinfo/complete/yield-flag {
 }
 
 
-# action:cdpath (action:file を修正)
+# action:cdpath (fix action:file)
 
 function ble/complete/action:cdpath/initialize {
   DATA=$cdpath_basedir
@@ -10665,8 +10665,8 @@ function ble/cmdinfo/complete:cd/generate-cdable_vars {
 
 ## @fn ble/cmdinfo/complete:cd/.impl
 ##   @remarks
-##     この実装は ble/complete/source:file を元にしている。
-##     実装に関する注意点はこの元の実装も参照の事。
+## This implementation is based on ble/complete/source:file.
+## Please also refer to this original implementation for notes on implementation.
 function ble/cmdinfo/complete:cd/.impl {
   local type=$1
   [[ $comps_flags == *v* ]] || return 1
@@ -10675,8 +10675,8 @@ function ble/cmdinfo/complete:cd/.impl {
 
   case $type in
   (pushd|popd|dirs)
-    # todo: -- より後の [-+]* は処理しない
-    # todo: 実は -N/+N はオプションではなく通常引数
+    # todo: do not process [-+]* after --
+    # todo: Actually -N/+N is not an option but a regular argument
     if [[ $COMPV == [-+]* ]]; then
       # yield options
       local flags=n
@@ -10710,7 +10710,7 @@ function ble/cmdinfo/complete:cd/.impl {
     fi
     [[ $type == pushd ]] || return 0 ;;
   (*)
-    # todo: -- より後の [-+]* は処理しない
+    # todo: do not process [-+]* after --
     if [[ $COMPV == -* ]]; then
       local list=LP
       ((_ble_bash>=40200)) && list=${list}e
@@ -10754,7 +10754,7 @@ function ble/cmdinfo/complete:cd/.impl {
     [[ $name ]] || continue
     name=${name%/}/
 
-    # カレントディレクトリが CDPATH に含まれている時は action=file で登録
+    # If the current directory is included in CDPATH, register with action=file
     local action=cdpath
     [[ ${name%/} == . || ${name%/} == "${PWD%/}" ]] &&
       is_pwd_visited=1 action=file
@@ -10786,7 +10786,7 @@ function ble/cmdinfo/complete:cd/.impl {
     bleopt complete_menu_style=desc
 
   # Check PWD next
-  # カレントディレクトリが CDPATH に含まれていなかった時に限り通常の候補生成
+  # Normal candidate generation only when current directory is not included in CDPATH
   if [[ ! $is_pwd_visited ]]; then
     local -a candidates=()
     local ret cand

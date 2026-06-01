@@ -68,10 +68,10 @@ function ble/widget/emacs/revert { ble/widget/revert "$@"; }
 #------------------------------------------------------------------------------
 # mode name
 #
-#   mode name の更新は基本的に __after_widget__ で行う。
-#   但し、_ble_decode_{char,key}__hook 経由で実行されると、
-#   __after_widget__ は実行されないので、
-#   その様な編集コマンドについてだけは個別に update-mode-indicator を呼び出す。
+#   The mode name is basically updated using __after_widget__.
+#   However, when executed via _ble_decode_{char,key}__hook,
+#   __after_widget__ is not executed, so
+#   Call update-mode-indicator individually for such editing commands.
 #
 
 function ble/keymap:emacs/.get-emacs-keymap {
@@ -136,7 +136,7 @@ function ble/prompt/backslash:keymap:emacs/mode-indicator {
   ble/prompt/unit/add-hash '$bleopt_keymap_emacs_mode_string_multiline'
   local str=$bleopt_keymap_emacs_mode_string_multiline
 
-  # 他の付加情報がない時にだけ keybinding のヒントを出す
+  # Show keybinding hint only when no other additional information is available
   ble/prompt/unit/add-hash '${_ble_edit_arg:+1}${_ble_edit_kbdmacro_record:+1}'
   if [[ ! ${_ble_edit_arg:+1}${_ble_edit_kbdmacro_record:+1} ]]; then
     local keybinding_C_m=${_ble_decode_emacs_kmap_[_ble_decode_Ctrl|0x6d]}

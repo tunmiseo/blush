@@ -1,9 +1,9 @@
 # -*- mode: sh; mode: sh-bash -*-
 
 ## @fn ble/debug/leakvar#check
-##   [デバグ用] 宣言忘れに依るグローバル変数の汚染位置を特定するための関数。
+##   [For debugging] A function to identify the location of global variable pollution caused by forgetting to declare it.
 ##
-##   使い方
+##   How to use
 ##
 ##   ```
 ##   eval "${_ble_debug_check_leak_variable//@var/ret}"
@@ -532,7 +532,7 @@ function ble/debug/profiler/stop {
       for (dp = idepth[pid]; dp >= depth; dp--) {
         if (dp == depth && fname == func_stk[pid, dp, "fname"]) {
           idepth[pid] = dp;
-          return 0; # 前の関数の続き
+          return 0; # Continuation of previous function
         }
 
         fname = func_stk[pid, dp, "fname"];

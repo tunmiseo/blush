@@ -3,7 +3,7 @@
 ble/is-function ble/util/idle.push && ble-import -d "$_ble_base/lib/core-complete.sh"
 
 #------------------------------------------------------------------------------
-# 公開関数と公開関数
+# Public functions and public functions
 
 ble/util/autoload "$_ble_base/lib/core-complete.sh" \
                   ble/widget/complete \
@@ -36,7 +36,7 @@ if ! declare -p _ble_complete_sabbrev &>/dev/null; then # reload #D0875
 fi
 
 #------------------------------------------------------------------------------
-# 設定変数
+# configuration variables
 
 bleopt/declare -n complete_polling_cycle 50
 bleopt/declare -o complete_stdin_frequency complete_polling_cycle
@@ -68,7 +68,7 @@ function bleopt/check:complete_auto_history {
 }
 
 ## @bleopt complete_menu_style
-##   補完候補のリスト表示のスタイルを指定します。
+## Specifies the style for displaying the list of completion candidates.
 ##
 ##   dense, dense-nowrap, align, align-nowrap
 ##   desc, desc-text
@@ -147,7 +147,7 @@ function bleopt/check:complete_source_sabbrev_ignore {
 }
 
 #------------------------------------------------------------------------------
-# 描画設定
+# drawing settings
 
 ble/color/defface auto_complete bg=254,fg=238
 ble/color/defface cmdinfo_cd_cdpath fg=26,bg=155

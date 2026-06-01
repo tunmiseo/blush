@@ -163,7 +163,7 @@ $(OUTDIR)/lib/benchmark.ksh: lib/benchmark.ksh src/benchmark.sh | $(OUTDIR)/lib
 #$(OUTDIR)/lib/init-msleep.sh: lib/init-msleep.sh lib/init-msleep.c | $(OUTDIR)/lib
 #	$(MWGPP) $< > $@
 
-# いつか削除する
+# I'll delete it someday
 removedfiles += \
   keymap/emacs.rlfunc.txt \
   keymap/emacs.sh \
@@ -220,9 +220,16 @@ $(OUTDIR)/doc/%: docs/% | $(OUTDIR)/doc
 #------------------------------------------------------------------------------
 # contrib
 
+# contrib is vendored locally (no git submodule).  `make update-contrib`
+# re-fetches the pinned snapshot of github.com/akinomyoga/blesh-contrib via
+# make/fetch-contrib.sh.  contrib/contrib.mk is expected to exist in-tree; if it
+# is missing, fail with a clear hint instead of reaching for a submodule.
 .PHONY: update-contrib
-update-contrib contrib/contrib.mk:
-	git submodule update --init --recursive
+update-contrib:
+	bash make/fetch-contrib.sh
+
+contrib/contrib.mk:
+	@printf 'ble.sh: %s\n' 'contrib/ is missing; run `make update-contrib` to fetch the vendored blesh-contrib snapshot.' >&2; exit 1
 
 include contrib/contrib.mk
 

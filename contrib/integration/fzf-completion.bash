@@ -2,7 +2,7 @@
 
 [[ $- == *i* ]] || return 0
 
-# fzf/shell/completion.bash を未ロードの時のみロードする
+# Load fzf/shell/completion.bash only if it is not already loaded
 if ! ble/is-function _fzf_complete; then
   ble-import contrib/integration/fzf-initialize || return 1
   if [[ -f $_ble_contrib_fzf_base/completion.bash ]]; then

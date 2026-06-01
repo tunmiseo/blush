@@ -2,43 +2,43 @@
 
 ble-import keymap.vi
 
-# surround.vim (https://github.com/tpope/vim-surround) の模倣実装
+# Mimic implementation of surround.vim (https://github.com/tpope/vim-surround)
 #
-# 現在以下のみに対応している。
+# Currently only the following are supported.
 #
 #   nmap: ys{move}{ins}
 #   nmap: yss{ins}
 #   nmap: yS{move}{ins}
-#   nmap: ySS{ins} または ySs{ins}
+#   nmap: ySS{ins} or ySs{ins}
 #   xmap: S{ins}
 #   xmap: gS{ins}
 #
 #     {ins} ~ / ?./
 #
-#       空白を前置した場合は、囲まれる文字列の両端に半角空白を1つずつ付加する。
-#       最後の文字によって囲み文字を指定する。
+#       If a space is placed at the beginning, one half-width space is added to each end of the enclosed string.
+#       Specifies the enclosing character by the last character.
 #
-#       <, t        (未対応) タグで囲む
-#       右括弧類    括弧で囲む
-#       左括弧類    括弧で囲む
-#       [a-zA-Z]    エラー
-#       他の文字    その文字で囲む
+#       <, t (not supported) Surround with tags
+#       right parentheses enclose in parentheses
+#       left parentheses enclose in parentheses
+#       [a-zA-Z] error
+#       Other characters Surround with those characters
 #
-#   注意: surround.vim と違って、
-#     テキストオブジェクト等に対する引数は有効である。
-#     または、aw は iw と異なる位置に挿入する。
+#   Note: Unlike surround.vim,
+#     Arguments for text objects etc. are valid.
+#     Or insert aw in a different position than iw.
 #
-#   注意: surround.vim と違って、
-#     2ys3s のような引数の指定を行うことができる。
-#     これは 2y3y と同様に現在行から 6 行に亘って作用する。
+#   Note: Unlike surround.vim,
+#     You can specify arguments like 2ys3s.
+#     Like 2y3y, this affects 6 lines from the current line.
 #
-#   注意: . によってこのオペレータを繰り返すとき、
-#     再度入力を求める surround.vim と違って、
-#     前回使用した区切り文字を使用する。
+#   Note: When repeating this operator with .
+#     Unlike surround.vim, which asks for input again.
+#     Use the last delimiter used.
 #
-#   注意: surround.vim では矩形選択の末尾拡張を判定できないため、
-#     S は非末尾拡張で gS は末尾拡張として働くが、
-#     この実装では S は現在末尾拡張状態を使い gS は末尾拡張を常に行う。
+#   Note: surround.vim cannot determine the trailing extension of a rectangle selection, so
+#     S is a non-tail extension and gS acts as a tail extension, but
+#     In this implementation, S currently has a tail extension state, and gS always does tail extension.
 #
 #   nmap: ds{del}
 #   nmap: cs{del}{ins}
@@ -46,28 +46,28 @@ ble-import keymap.vi
 #
 #     {del} ~ /([0-9]+| )?./
 #
-#       削除される囲み文字を指定する。
-#       [0-9]+ を指定した場合は引数に対する倍率となる。
-#       空白を前置した場合は囲まれた文字列の両端の空白を trim する。
+#       Specifies the enclosing characters to be removed.
+#       If [0-9]+ is specified, it will be a multiplier for the argument.
+#       If a blank is placed at the beginning, the blanks at both ends of the enclosed string are trimmed.
 #
-#       最後の文字によって囲み文字を指定する。
+#       Specifies the enclosing character by the last character.
 #
-#       b()B{}r[]a<>    括弧を削除する。左括弧を指定したとき囲まれた文字列は trim される。
-#       wW              範囲を指定するのみで、何も削除しない。
-#       ps (未対応)     範囲を指定するのみで、何も削除しない。
-#       tT              タグ。T を用いたとき囲まれた文字列は trim される。
-#       /               /* ... */ で囲まれた領域を削除する。
-#       他の文字        その文字を、行内で左右に探して対で削除する。
+#       b()B{}r[]a<> Remove the parentheses. When a left parenthesis is specified, the enclosed string will be trimmed.
+# wW Just specify the range, don't delete anything.
+#       ps (unsupported) Only specifies a range, does not delete anything.
+#       tT tag. When using T, the enclosed string is trimmed.
+#       / /* ... Delete the area surrounded by */.
+#       Other characters Delete the characters in pairs, searching left and right within the line.
 #
 #     {ins} ~ / ?./
 #
-#       代わりに挿入される囲み文字を指定する。ys, yss と同じ。
+#       Specifies the enclosing character to be inserted instead. Same as ys, yss.
 #
-#   注意: . によってこの操作を繰り返すとき、
-#     surround.vim では {del} を空文字列とし {ins} について入力を求めるが、
-#     この実装では前回使用した {del} と {ins} を使用して動作する。
+#   Note: When repeating this operation with .
+#     surround.vim sets {del} to an empty string and prompts for {ins}, but
+#     This implementation works using {del} and {ins} that were used last time.
 #
-# 以下には対応していない。
+# The following are not supported.
 #
 #   imap: <C-S>
 #   imap: <C-G>s
@@ -189,10 +189,10 @@ function ble/lib/vim-surround.sh/load-template {
 ##   @param[in] ins
 ##   @param[in] opts
 ##     linewise
-##       囲まれた文字列を新しい独立した業にします。
-##       cS yS VS VgS などで使用します。
+##       Makes the enclosed string a new independent operation.
+##       Used in cS yS VS VgS etc.
 ##     indent
-##       linewise のとき、新しい行のインデントを追加します。
+##       When linewise, adds new line indentation.
 ##
 ##   @var[in] beg
 ##   @var[out] ret
@@ -237,8 +237,8 @@ function ble/lib/vim-surround.sh/surround {
       ble/keymap:vi/string#increase-indent "$text" "$bleopt_indent_offset"; text=$ret
     fi
     text=$'\n'$text$'\n'$indent
-    # ToDo: 初めから text に改行が含まれていた場合は、
-    #   更にここで = による自動インデントを実行する?
+    # ToDo: If text contains line breaks from the beginning,
+    #   Furthermore, do you want to perform automatic indentation using = here?
   elif [[ $has_space ]]; then
     text=' '$text' '
   fi
@@ -271,7 +271,7 @@ _ble_lib_vim_surround_ys_args=()
 _ble_lib_vim_surround_ys_ranges=()
 
 ## @fn ble/highlight/layer:region/mark:vi_surround/get-selection
-##   入力待ち状態の時の領域着色を定義します。
+##   Defines the area coloring when waiting for input.
 ##   @arr[out] selection
 function ble/highlight/layer:region/mark:vi_surround/get-selection {
   local type=$_ble_lib_vim_surround_ys_type
@@ -331,7 +331,7 @@ function ble/widget/vim-surround.sh/ysurround.hook2 {
 }
 function ble/widget/vim-surround.sh/ysurround.core {
   local ins=$1
-  _ble_edit_mark_active= # mark:vi_surround を解除
+  _ble_edit_mark_active= # unset mark:vi_surround
 
   local ret
 
@@ -371,13 +371,13 @@ function ble/widget/vim-surround.sh/ysurround.core {
     local text=${_ble_edit_str:beg:end-beg}
     if [[ $type == ys ]]; then
       if local rex=$'[ \t\n]+$'; [[ $text =~ $rex ]]; then
-        # 範囲末端の空白は囲む対象としない
+        # Spaces at the end of the range are not included.
         ((end-=${#BASH_REMATCH}))
         text=${_ble_edit_str:beg:end-beg}
       fi
     fi
 
-    # Note: char から linewise への昇格条件の変更は以下の関数にも反映させる必要がある:
+    # Note: Changes in promotion conditions from char to linewise must also be reflected in the following functions:
     #  ble/highlight/layer:region/mark:vi_surround/get-selection
     local opts=
     if [[ $type == yS || $type == ySS || $context == char && $type == vgS ]]; then
@@ -418,11 +418,11 @@ function ble/widget/vim-surround.sh/vsurround { # vS
 }
 function ble/widget/vim-surround.sh/vgsurround { # vgS
   [[ $_ble_decode_keymap == vi_xmap ]] &&
-    ble/keymap:vi/xmap/add-eol-extension # 末尾拡張
+    ble/keymap:vi/xmap/add-eol-extension # trailing extension
   ble/widget/vi-command/operator vgS
 }
 
-# repeat (nmap .) 用の変数・関数
+# Variables and functions for repeat (nmap .)
 _ble_lib_vim_surround_ys_repeat=()
 function ble/lib/vim-surround.sh/ysurround.repeat/entry {
   local -a _ble_keymap_vi_repeat _ble_keymap_vi_repeat_irepeat
@@ -458,31 +458,31 @@ function ble/keymap:vi/operator:ysurround.repeat {
 #------------------------------------------------------------------------------
 # ds cs
 
-# 仕様: surround.vim の実装は杜撰なのでここで vim-surround.sh の独自仕様を定める。
+# Specifications: The implementation of surround.vim is sloppy, so we will define the original specifications of vim-surround.sh here.
 #
-#   ds, cs は続いて /([0-9]+| )?./ の形式の引数を受け取る。
+#   ds and cs then receive arguments in the form /([0-9]+| )?./.
 #
-#     /[0-9]+/ が指定された時は引数に対する倍率を表す。
+#     When /[0-9]+/ is specified, it represents the multiplier for the argument.
 #
-#     / / が指定された時は囲みの内側にある空白も削除することを表す。
+#     / When / is specified, it means that the spaces inside the enclosure are also deleted.
 #
-#     /./ として wW を指定したときは何も削除しない。
-#     c = b)B}r]a> を指定した時は text-object {arg}ic を残して {arg}ac を削除する。
-#     c = ({[< を指定した時は更に内側の空白も削除する。
-#     c = '"` を指定した場合には引数は無視する。ic を残して ac を削除する。
-#     それ以外の c = a-zA-Z は既定として text-object {arg}ic を残し {arg}ac を削除する。
-#     それ以外の文字に関しては行内で一致を検索する。
+#     When wW is specified as /./, nothing is deleted.
+#     When c = b)B}r]a> is specified, text-object {arg}ic is left and {arg}ac is deleted.
+#     c = (When {[< is specified, inner spaces are also removed.
+#     If c = '"` is specified, the argument is ignored. ic is left and ac is deleted.
+#     Other c = a-zA-Z leave text-object {arg}ic as default and delete {arg}ac.
+#     For other characters, search within the line for a match.
 #
-#   更に cs は続いて / ?./ の形式の引数を受け取る。
+#   Furthermore, cs subsequently receives arguments in the form / ?./.
 #
-#     / / が指定されたtときは左右内側に空白を 1 つずつ付加する。
+#     / When / is specified, one space is added to the left and right inner sides.
 #
-#   オリジナルの surround.vim とはところどころで振る舞いが異なる。
-#   振る舞いの違いに関しては ble.sh/memo.txt #D0457 を参照のこと。
+#   The behavior differs in some places from the original surround.vim.
+#   See ble.sh/memo.txt #D0457 for the difference in behavior.
 #
-#   ToDo: ds, cs において囲まれている対象に改行が含まれる場合、
-#     置換を行った後に関係する行を == でインデントする。
-#     現在、本体で = に対応していないのでこれも未対応である。
+#   ToDo: If the enclosed object in ds or cs contains a line break,
+#     Indent related lines with == after making substitutions.
+#     Currently, = is not supported in the main body, so this is also not supported.
 #
 
 ## @fn ble/keymap:vi/operator:surround
@@ -490,7 +490,7 @@ function ble/keymap:vi/operator:ysurround.repeat {
 ##   @var[in] surround_ins
 ##   @var[in] surround_trim
 ##   @var[in] surround_type
-##     ds cs cS の何れかの値
+##     Any value of ds cs cS
 function ble/keymap:vi/operator:surround.record { return 0; }
 function ble/keymap:vi/operator:surround {
   local beg=$1 end=$2 context=$3
@@ -517,17 +517,17 @@ function ble/keymap:vi/operator:surround {
   return 0
 }
 ## @fn ble/keymap:vi/operator:surround-extract-region
-##   着色の為に範囲を抽出するオペレータ
+##   Operator to extract range for coloring
 ##   @var[out] surround_beg
 ##   @var[out] surround_end
 function ble/keymap:vi/operator:surround-extract-region {
   surround_beg=$beg surround_end=$end
-  return 147 # 強制中断する為
+  return 147 # To force a break
 }
 
 ## @arr _ble_lib_vim_surround_cs
-##   処理途中の情報はここに記録する。
-##   以下の要素は指定された引数を記録する。
+##   Information during processing is recorded here.
+##   The following elements record the specified arguments.
 ##
 ##   [0]=type
 ##     ds | cs | cS
@@ -535,7 +535,7 @@ function ble/keymap:vi/operator:surround-extract-region {
 ##   [2]=reg
 ##   [3]=del
 ##
-##   以下の要素は引数から計算される途中の変数を保持する。
+##   The following elements hold variables that are being calculated from arguments.
 ##
 ##   [11]=del2
 ##   [12]=obj1 [13]=obj2
@@ -576,13 +576,13 @@ function ble/widget/vim-surround.sh/nmap/csurround.set-delimiter {
 
   local beg end
   if [[ $obj1 && $obj2 ]]; then
-    # テキストオブジェクトによって指定される範囲
+    # Range specified by text object
 
     local surround_beg=$_ble_edit_ind surround_end=$_ble_edit_ind
     ble/keymap:vi/text-object.impl "$arg" surround-extract-region '' "$obj2"
     beg=$surround_beg end=$surround_end
   elif [[ $del == / ]]; then
-    # /* ..  */ で囲まれた部分
+    # The part surrounded by /* .. */
 
     local rex='(/\*([^/]|/[^*])*/?){1,'$arg'}$'
     [[ ${_ble_edit_str::_ble_edit_ind+2} =~ $rex ]] || return 1
@@ -591,7 +591,7 @@ function ble/widget/vim-surround.sh/nmap/csurround.set-delimiter {
     ble/string#index-of "${_ble_edit_str:beg+2}" '*/' || return 1
     end=$((beg+ret+4))
   elif [[ $del ]]; then
-    # 指定した文字で囲まれた部分
+    # Part surrounded by specified characters
 
     local ret
     ble-edit/content/find-logical-bol; local bol=$ret
@@ -644,7 +644,7 @@ function ble/widget/vim-surround.sh/nmap/csurround.replace {
   local surround_trim=${_ble_lib_vim_surround_cs[17]}
 
   if [[ $obj1 && $obj2 ]]; then
-    # テキストオブジェクトによって指定される範囲
+    # Range specified by text object
     local ind=$_ble_edit_ind
 
     local _ble_edit_kill_ring _ble_edit_kill_type
@@ -655,12 +655,12 @@ function ble/widget/vim-surround.sh/nmap/csurround.replace {
     local surround_content=$_ble_edit_kill_ring
     ble/keymap:vi/text-object.impl "$arg2" surround '' "$obj2" || return 1
   elif [[ $del2 == / ]]; then
-    # /* ..  */ で囲まれた部分
+    # The part surrounded by /* .. */
     local surround_content=${_ble_edit_str:beg+2:end-beg-4}
     ble/keymap:vi/call-operator surround "$beg" "$end" char '' ''
     _ble_edit_ind=$beg
   elif [[ $del2 ]]; then
-    # 指定した文字で囲まれた部分
+    # Part surrounded by specified characters
     local surround_content=${_ble_edit_str:beg+${#del2}:end-beg-2*${#del2}}
     ble/keymap:vi/call-operator surround "$beg" "$end" char '' ''
     _ble_edit_ind=$beg
@@ -677,16 +677,16 @@ function ble/widget/vim-surround.sh/nmap/csurround.replace {
 
 ## @fn ble/widget/vim-surround.sh/nmap/csurround.record
 function ble/widget/vim-surround.sh/nmap/csurround.record {
-  # Note: ble/keymap:vi/repeat/record の実装に合わせた条件判定。
+  # Note: Conditional judgment according to the implementation of ble/keymap:vi/repeat/record.
   [[ $_ble_keymap_vi_mark_suppress_edit ]] && return 0
 
   local type=$1 arg=$2 reg=$3 del=$4 ins=$5
   local WIDGET=ble/widget/vim-surround.sh/nmap/csurround.repeat ARG=$arg FLAG= REG=$reg
   ble/keymap:vi/repeat/record
   if [[ $_ble_decode_keymap == vi_imap ]]; then
-    # Note: ble/keymap:vi/repeat/record の実装に合わせた条件判定。
-    #   この実装では vi_imap で呼び出される事はない筈だが念の為。
-    #   ble/keymap:vi/repeat/record は keymap が vi_imap の時は異なる場所に記録する。
+    # Note: Conditional judgment according to the implementation of ble/keymap:vi/repeat/record.
+    #   In this implementation, it should not be called by vi_imap, but just to be sure.
+    #   ble/keymap:vi/repeat/record records in a different location when keymap is vi_imap.
     _ble_keymap_vi_repeat_insert[10]=$type
     _ble_keymap_vi_repeat_insert[11]=$del
     _ble_keymap_vi_repeat_insert[12]=$ins
@@ -726,7 +726,7 @@ function ble/widget/vim-surround.sh/nmap/dsurround.hook {
 #---- cs ----
 
 ## @fn ble/highlight/layer:region/mark:vi_surround/get-selection
-##   入力待ち状態の時の領域着色を定義します。
+##   Defines the area coloring when waiting for input.
 ##   @arr[out] selection
 function ble/highlight/layer:region/mark:vi_csurround/get-selection {
   local beg=${_ble_lib_vim_surround_cs[14]}

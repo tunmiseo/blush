@@ -21,7 +21,7 @@ function _ble_measure__loop {
 ## @fn _ble_measure__time n command
 ##   @param[in] n command
 ##   @var[out] ret
-##     計測にかかった総時間を μs 単位で返します。
+##     Returns the total time taken for the measurement in μs.
 if ((BASH_VERSINFO[0]>=5)) ||
      { [[ ${ZSH_VERSION-} ]] && zmodload zsh/datetime &>/dev/null && [[ ${EPOCHREALTIME-} ]]; } ||
      [[ ${SECONDS-} == *.??? ]]
@@ -73,8 +73,8 @@ _ble_measure_base= # [nsec]
 _ble_measure_base_nestcost=0 # [nsec/10]
 typeset -a _ble_measure_base_real
 typeset -a _ble_measure_base_guess
-_ble_measure_count=1 # 同じ倍率で _ble_measure_count 回計測して最小を取る。
-_ble_measure_threshold=100000 # 一回の計測が threshold [usec] 以上になるようにする
+_ble_measure_count=1 # Measure _ble_measure_count times at the same magnification and take the minimum.
+_ble_measure_threshold=100000 # Ensure that one measurement is greater than or equal to threshold [usec]
 
 
 ## @fn _ble_measure__read_arguments_get_optarg
@@ -147,15 +147,15 @@ _ble_measure__read_arguments() {
 }
 
 ## @fn ble_measure [-q|-ac COUNT] command
-##   command を繰り返し実行する事によりその実行時間を計測します。
-##   -q を指定した時、計測結果を出力しません。
-##   -c COUNT を指定した時 COUNT 回計測して最小値を採用します。
-##   -a COUNT を指定した時 COUNT 回計測して平均値を採用します。
+##   Measures the execution time by repeatedly executing command.
+##   When -q is specified, measurement results are not output.
+##   When -c COUNT is specified, it measures COUNT times and uses the minimum value.
+##   -a When COUNT is specified, measurements are taken COUNT times and the average value is used.
 ##
 ##   @var[out] ret
-##     実行時間を usec 単位で返します。
+##     Returns the execution time in usec.
 ##   @var[out] nsec
-##     実行時間を nsec 単位で返します。
+##     Returns the execution time in nsec.
 ble_measure() {
   eval -- "${_ble_bash_POSIXLY_CORRECT_local_adjust-}"
   typeset __ble_level=${#FUNCNAME[@]} __ble_base=
@@ -194,10 +194,10 @@ ble_measure() {
 
   if [[ ! $__ble_base ]]; then
     if [[ $_ble_measure_base ]]; then
-      # ble_measure/calibrate 実行済みの時
+      # When ble_measure/calibrate has been executed
       __ble_base=$((_ble_measure_base+_ble_measure_base_nestcost*__ble_level/10))
     else
-      # それ以外の時は __ble_level 毎に計測
+      # Otherwise, measure every __ble_level
       if [[ ! $_ble_measure_calibrate && ! ${_ble_measure_base_guess[__ble_level]} ]]; then
         if [[ ! ${_ble_measure_base_real[__ble_level+1]} ]]; then
           if [[ ${_ble_measure_target-} == ksh ]]; then
@@ -214,9 +214,9 @@ ble_measure() {
           _ble_measure_base_guess[__ble_level+1]=$nsec
         fi
 
-        # 上の実測値は一つ上のレベル (__ble_level+1) での結果になるので現在のレベル
-        # (__ble_level) の値に補正する。レベル毎の時間が chatoyancy での線形フィッ
-        # トの結果に比例する仮定して補正を行う。
+        # The actual measured value above is the result at the next higher level (__ble_level+1), so it is the current level.
+        # Correct to the value of (__ble_level). Time per level is linear fit with chatoyancy.
+        # The correction is made on the assumption that it is proportional to the result.
         #
         # linear-fit result with $f(x) = A x + B$ in chatoyancy
         #   A = 65.9818 pm 2.945 (4.463%)
@@ -248,7 +248,7 @@ ble_measure() {
     prev_n=$n prev_utot=$utot
     typeset min_utot=$utot
 
-    # 繰り返し計測して最小値 (-a の時は平均値) を採用
+    # Measure repeatedly and use the minimum value (if -a, average value)
     if [[ $count ]]; then
       typeset sum_utot=$utot sum_count=1 i
       for ((i=2;i<=count;i++)); do

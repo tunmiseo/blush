@@ -1,9 +1,9 @@
 # -*- mode: sh; mode: sh-bash -*-
 
-# 本体は lib/core-syntax.sh にある。遅延読み込みする。
+# The main body is located in lib/core-syntax.sh. Lazy load.
 
 #------------------------------------------------------------------------------
-# 公開変数
+# public variables
 
 # exported variables
 _ble_syntax_VARNAMES=(
@@ -39,26 +39,26 @@ function ble/syntax/initialize-vars {
 }
 
 #------------------------------------------------------------------------------
-# 公開関数
+# public function
 
-# 関数 ble/syntax/parse は実際に import されるまで定義しない
+# The function ble/syntax/parse is not defined until it is actually imported.
 
-# 関数 ble/highlight/layer:syntax/* は import されるまではダミーの実装にする
+# The functions ble/highlight/layer:syntax/* are dummy implementations until they are imported.
 
-## @fn ble/highlight/layer:syntax/update (暫定)
-##   PREV_BUFF, PREV_UMIN, PREV_UMAX を変更せずにそのまま戻れば良い。
+## @fn ble/highlight/layer:syntax/update (tentative)
+##   Just return without changing PREV_BUFF, PREV_UMIN, PREV_UMAX.
 function ble/highlight/layer:syntax/update { return 0; }
-## @fn ble/highlight/layer:region/getg (暫定)
-##   g を設定せず戻ればそのまま上のレイヤーに問い合わせが行く。
+## @fn ble/highlight/layer:region/getg (tentative)
+##   If you return without setting g, the query will go directly to the layer above.
 function ble/highlight/layer:syntax/getg { return 0; }
 
 
 ## @fn ble/syntax:bash/is-complete
-##   syntax がロードされる迄は常に真値。
+##   Always true until syntax is loaded.
 function ble/syntax:bash/is-complete { return 0; }
 
 
-# 以下の関数に関しては遅延せずにその場で lib/core-syntax.sh をロードする
+# Load lib/core-syntax.sh on the fly without delay for the following functions:
 ble/util/autoload "$_ble_base/lib/core-syntax.sh" \
   ble/syntax/parse \
   ble/syntax/highlight \
@@ -79,7 +79,7 @@ ble/util/autoload "$_ble_base/lib/core-syntax.sh" \
   ble/syntax:bash/simple-word/get-rex_element
 
 #------------------------------------------------------------------------------
-# グローバル変数の定義 (関数内からではできないのでここで先に定義)
+# Defining global variables (define them here first as they cannot be done from within the function)
 
 bleopt/declare -v syntax_debug ''
 
@@ -100,12 +100,12 @@ builtin eval -- "${_ble_util_gdict_declare//NAME/_ble_syntax_bash_simple_eval}"
 builtin eval -- "${_ble_util_gdict_declare//NAME/_ble_syntax_bash_simple_eval_full}"
 
 #------------------------------------------------------------------------------
-# face の定義
+# Definition of face
 #
-# プロンプトで face を参照していると最初のプロンプト表示時に initialize-faces
-# が実行され、ユーザーが blerc に設定した setface も実行される。この時点では
-# core-syntax.sh は未だ読み込まれていないので、face の定義が core-syntax.sh の
-# 中にあると face が見つからないエラーになる。
+# initialize-faces on first prompt when face is referenced in prompt
+# is executed, and any setface you set in blerc is also executed. At this point
+# Since core-syntax.sh has not been loaded yet, the face definition is in core-syntax.sh.
+# If it is inside, you will get an error that face cannot be found.
 
 function ble/syntax/attr2g { ble/color/initialize-faces && ble/syntax/attr2g "$@"; }
 
@@ -178,15 +178,15 @@ function ble/syntax/defface.onload {
 blehook/eval-after-load color_defface ble/syntax/defface.onload
 
 #------------------------------------------------------------------------------
-# 遅延読み込みの設定
+# Configuring lazy loading
 
-# lib/core-syntax.sh の変数または ble/syntax/parse を使用する必要がある場合は、
-# 以下の関数を用いて lib/core-syntax.sh を必ずロードする様にする。
+# If you need to use variables in lib/core-syntax.sh or ble/syntax/parse, use
+# Make sure to load lib/core-syntax.sh using the following function.
 function ble/syntax/import {
   ble/util/import "$_ble_base/lib/core-syntax.sh"
 }
 
-# Note: 初期化順序の都合で一番最後に実行する。lib/core-syntax 内で登録
-# している ble/syntax/attr2iface/color_defface.onload は、上記で登録し
-# ている ble/syntax/defface.onload よりも後に実行する必要がある為。
+# Note: Due to initialization order, it is executed last. Registered in lib/core-syntax
+# ble/syntax/attr2iface/color_defface.onload is registered above.
+# This is because it needs to be executed after ble/syntax/defface.onload.
 ble-import -d lib/core-syntax

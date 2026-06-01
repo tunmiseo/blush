@@ -313,7 +313,7 @@ namespace compare_with_unicode {
     return 0;
   }
 
-  // Note: unused. gawk で実装する事にした。
+  // Note: unused. implemented this in gawk.
   // void generate_EastAsianWidth_table() {
   //   char_width_data data;
   //   const char* filename = "../out/data/unicode-EastAsianWidth-11.0.0.txt";

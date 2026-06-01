@@ -220,7 +220,7 @@ function sub:ignoreeof-messages {
     cd ~/local/build/bash-4.3/po
     sed -nr '/msgid "Use \\"%s\\" to leave the shell\.\\n"/{n;s/^[[:blank:]]*msgstr "(.*)"[^"]*$/\1/p;}' *.po | while builtin read -r line || [[ $line ]]; do
       [[ $line ]] || continue
-      echo $(printf "$line" exit) # $() は末端の改行を削除するため
+      echo $(printf "$line" exit) # $() removes the trailing newline
     done
   ) >| lib/core-edit.ignoreeof-messages.new
 }
@@ -327,22 +327,22 @@ function sub:scan/a.txt {
 
 function sub:scan/bash300bug {
   echo "--- $FUNCNAME ---"
-  # bash-3.0 では local arr=(1 2 3) とすると
-  # local arr='(1 2 3)' と解釈されてしまう。
+  # In bash-3.0, local arr=(1 2 3)
+  # It will be interpreted as local arr='(1 2 3)'.
   grc '(local|declare|typeset) [_a-zA-Z]+=\(' --exclude=./{test,debug,ext} --exclude=./make_command.sh --exclude=ChangeLog.md --color |
     sub:scan/.mark '#D0184'
 
-  # bash-3.0 では local -a arr=("$hello") とすると
-  # クォートしているにも拘らず $hello の中身が単語分割されてしまう。
+  # In bash-3.0, local -a arr=("$hello")
+  # Despite quoting, the contents of $hello are divided into words.
   grc '(local|declare|typeset) -a [[:alnum:]_]+=\([^)]*[\"'\''`]' --exclude=./{test,debug,ext} --exclude=./make_command.sh --color |
     sub:scan/.mark '#D0525'
 
-  # bash-3.0 では "${scalar[@]/xxxx}" は全て空になる
-  # bash-4.3 では "${scalar[@]/xxxx}" に内部エスケープ $'\001' が多数混入する。
+  # In bash-3.0, "${scalar[@]/xxxx}" are all empty.
+  # In bash-4.3, "${scalar[@]/xxxx}" contains many internal escapes $'\001'.
   grc '\$\{[_a-zA-Z0-9]+\[[*@]\]/' --exclude=./{text,ext} --exclude=./{debug,make_command.sh} --exclude=\*.md --color |
     sub:scan/.mark '#D1570'
 
-  # bash-3.0 では "..${var-$'hello'}.." は (var が存在しない時) "..'hello'..." になる。
+  # In bash-3.0, "..${var-$'hello'}.." becomes "..'hello'..." (when var does not exist).
   grc '".*\$\{[^{}]*\$'\''([^\\'\'']|\\.)*'\''\}.*"' --exclude={./make_command.sh,memo,\*.md} --color |
     sub:scan/.mark '#D1774'
 
@@ -350,8 +350,8 @@ function sub:scan/bash300bug {
 
 function sub:scan/bash301bug {
   echo "--- $FUNCNAME ---"
-  # bash-3.1, 3.2 では 10 以上の fd は既に使われている場合、リダイレクトに失敗
-  # する。
+  # In bash-3.1, 3.2, redirection fails if 10 or more fds are already in use.
+  # I will.
   grc ' [0-9]{2}&?[<>]' --exclude=./{test,ext} --exclude=./make_command.sh --exclude=ChangeLog.md --color |
     sed -E 'h;s/'"$_make_rex_escseq"'//g;s/^[^:]*:[0-9]+:[[:blank:]]*//
       /^#/d
@@ -359,7 +359,7 @@ function sub:scan/bash301bug {
       / [0-9]{2}[<>]&-/d
       g'
 
-  # bash-3.1 では 10 以上の fd は >&- 等で閉じる事ができない。
+  # In bash-3.1, fds larger than 10 cannot be closed using >&- etc.
   grc ' ([0-9]{2}|\$[a-zA-Z_0-9]+)&?[<>]&-' --exclude=./{test,ext} --exclude=./make_command.sh --exclude=ChangeLog.md --color |
     sed -E 'h;s/'"$_make_rex_escseq"'//g;s/^[^:]*:[0-9]+:[[:blank:]]*//
       /^#/d
@@ -367,8 +367,8 @@ function sub:scan/bash301bug {
       g'
 
   # array-element-length
-  # bash-3.1 で ${#arr[index]} を用いると、
-  # 日本語の文字数が変になる。
+  # Using ${#arr[index]} in bash-3.1,
+  # The number of Japanese characters becomes strange.
   grc '\$\{#[[:alnum:]]+\[[^@*]' --exclude={test,ChangeLog.md} --color |
     grep -Ev '^([^#]*[[:blank:]])?#' |
     sub:scan/.mark '#D0182'
@@ -377,8 +377,8 @@ function sub:scan/bash301bug {
 function sub:scan/bash400bug {
   echo "--- $FUNCNAME ---"
 
-  # bash-3.0..4.0 で $'' 内に \' を入れていると '' の入れ子状態が反転して履歴展
-  # 開が '' の内部で起こってしまう。
+  # In bash-3.0..4.0, if you put \' inside $'', the nesting state of '' is reversed and the history is expanded.
+  # The opening occurs inside ''.
   grc '\$'\''([^\'\'']|\\[^'\''])*\\'\''([^\'\'']|\\.|'\''([^\'\'']|\\*)'\'')*![^=[:blank:]]' --exclude={test,debug,ChangeLog.md} --color |
     grep -v '9f0644470'
 }
@@ -421,14 +421,14 @@ function sub:scan/bash404-no-argument-return {
 
 function sub:scan/bash501-arith-base {
   echo "--- $FUNCNAME ---"
-  # bash-5.1 で $((10#)) の取り扱いが変わった。
+  # The handling of $((10#)) has changed in bash-5.1.
   grc '\b10#\$' --exclude={test,debug,ChangeLog.md}
 }
 
 function sub:scan/bash502-patsub_replacement {
   echo "--- $FUNCNAME ---"
-  # bash-5.2 patsub_replacement で ${var/pat/string} の string 中の & が特別な
-  # 意味を持つ様になったので、特に意識する場合を除いては quote が必要になった。
+  # bash-5.2 In patsub_replacement, & in string of ${var/pat/string} is special
+  # Since it now has a meaning, quote is now necessary unless you are conscious of it.
   grc --color '\$\{[[:alnum:]_]+(\[[^][]*\])?//?([^{}]|\{[^{}]*\})+/[^{}"'\'']*([&$]|\\)' --exclude=./test |
     sed -E 'h;s/'"$_make_rex_escseq"'//g;s/^[^:]*:[0-9]+:[[:blank:]]*//
       \Z//?\$q/\$Q\}Zd
@@ -511,13 +511,13 @@ function sub:scan/memo-numbering {
   cat note.txt memo/done.txt | sed -n '0,/^[[:blank:]]\{1,\}Done/d;/  \* .*\[#D....\]$/d;/^  \* /p'
 }
 
-# 誤って ((${#arr[@]})) を ((${arr[@]})) などと書いてしまうミス。
+# The mistake of accidentally writing ((${#arr[@]})) as ((${arr[@]})).
 function sub:scan/array-count-in-arithmetic-expression {
   echo "--- $FUNCNAME ---"
   grc --exclude=./make_command.sh '\(\([^[:blank:]]*\$\{[[:alnum:]_]+\[[@*]\]\}'
 }
 
-# unset 変数名 としていると誤って関数が消えることがある。
+# If you use unset variable name, the function may disappear by mistake.
 function sub:scan/unset-variable {
   echo "--- $FUNCNAME ---"
   sub:scan/list-command unset --exclude-this |
@@ -564,8 +564,8 @@ function sub:scan/command-layout {
 
 function sub:scan/word-splitting-number {
   echo "--- $FUNCNAME ---"
-  # #D1835 一般には IFS に整数が含まれるている場合もあるので ${#...} や
-  # $((...)) や >&$fd であってもちゃんと quote する必要がある。
+  # #D1835 In general, IFS may contain integers, so ${#...} and
+  # Even $((...)) and >&$fd need to be properly quoted.
   grc '[<>]&\$|([[:blank:]]|=\()\$(\(\(|\{#|\?)' --exclude={docs,mwg_pp.awk,memo,debug} |
     sed -E '
       # remove lines without $ outside ((...)).
@@ -687,7 +687,7 @@ function sub:scan {
   local esc=$_make_rex_escseq
   local rex_grep_head="^$esc[[:graph:]]+$esc:$esc[[:digit:]]*$esc:$esc"
 
-  # builtin return break continue : eval echo unset は unset しているので大丈夫のはず
+  # builtin return break continue: eval echo unset is unset, so it should be okay
 
   #sub:scan/builtin 'history'
   sub:scan/builtin 'echo' --exclude=./ble.pp |
@@ -912,7 +912,7 @@ function sub:show-contrib {
 #------------------------------------------------------------------------------
 # sub:release-note
 #
-# 使い方
+# How to use
 # ./make_command.sh release-note v0.3.2..v0.3.3
 
 function sub:release-note/help {
@@ -981,9 +981,9 @@ function sub:release-note {
   sub:release-note/read-arguments "$@"
 
   ## @arr commits
-  ##   この配列は after:before の形式の要素を持つ。
-  ##   但し after は前の version から release までに加えられた変更の commit である。
-  ##   そして before は after に対応する master における commit である。
+  ##   This array has elements of the form after:before.
+  ##   However, after is a commit of changes made from the previous version to release.
+  ##   And before is the commit in master that corresponds to after.
   local -a commits
   IFS=$'\n' eval 'commits=($(sub:release-note/.find-commit-pairs "$@"))'
 
@@ -1016,7 +1016,7 @@ function sub:release-note {
   done | tac
 }
 
-# 以下の様な形式のファイルをセクション毎に分けて出力します。
+# Outputs files in the following format divided into sections.
 #
 # [Fixes] - foo bar
 # [New features] - foo bar
@@ -1139,7 +1139,7 @@ function sub:code-ages {
     }
   '
 
-  # どの程度古いコードが残っているのか?
+  # How much old code is left?
   #
   # 2025-05-13
   #   2015   4042 5.2%

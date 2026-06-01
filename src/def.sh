@@ -1,6 +1,6 @@
 # -*- mode: sh; mode: sh-bash -*-
 
-# Constants (様々な箇所から使うので此処に置く)
+# Constants (Place it here as it will be used in various places)
 _ble_term_nl=$'\n'
 _ble_term_FS=$'\034'
 _ble_term_SOH=$'\001'

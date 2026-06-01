@@ -1,6 +1,6 @@
 #!/usr/bin/gawk -f
 
-# 20120726 行番号出力機能 (例: '#line 12 a.cpp')
+# 20120726 Line number output function (e.g. '#line 12 a.cpp')
 
 function awk_getfiledir(_ret) {
   _ret = m_lineno_cfile;
@@ -1215,13 +1215,13 @@ function dctv_define(args, _, _cap, _name, _name2) {
   }
 }
 
-# 状態は何種類あるか?
+# How many types of states are there?
 #     END      CONDT CONDF ELSE
-# IF0 出力せず IF1   IF0   IF4  (not matched)
-# IF1 出力する IF2   IF2   IF3  (matched)
-# IF2 出力せず IF2   IF2   IF3  (finished)
-# IF3 出力せず !IF3  !IF3  !IF3 (else unmatched) 旧 "el0"
-# IF4 出力する !IF3  !IF3  !IF3 (else matched)   旧 "el1"
+# IF0 No output IF1 IF0 IF4 (not matched)
+# IF1 Output IF2 IF2 IF3 (matched)
+# IF2 No output IF2 IF2 IF3 (finished)
+# IF3 No output !IF3 !IF3 !IF3 (else unmatched) Old "el0"
+# IF4 Output !IF3 !IF3 !IF3 (else matched) Old "el1"
 
 function dctv_if(cond, _, _cap) {
   gsub(/^[ \t]+|[ \t]*(\([ \t]*)?$/, "", cond);
@@ -1399,7 +1399,7 @@ function data_print(key) {
 }
 function execute(command, _line, _caps, _n, _cfile) {
   if (match(command, /^(>>?)[[:blank:]]*([^[:blank:]]*)/, _caps) > 0) {
-    # 出力先の変更
+    # Change output destination
     fflush(m_outpath);
     m_outpath = _caps[2];
     m_addline_cfile = "";
@@ -1519,7 +1519,7 @@ function process_line(line, _line, _text, _ind, _len, _directive, _cap) {
       dctv_modify(_text);
     } else if (_directive == "include" || _directive == "<") {
       include_file(_text);
-    } else if (_directive == "data") { # obs → データ設定に有意。残す?
+    } else if (_directive == "data") { # obs → significant for data setting. Leave?
       data_define(_text);
     } else if (_directive == "print") { #obs
       data_print(_text);

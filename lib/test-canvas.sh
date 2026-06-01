@@ -63,7 +63,7 @@ ble/test/start-section 'ble/canvas' 52
   ble/test 'ble/util/c2w:musl  9703' ret=1
   ble/test 'ble/util/c2w:musl 11492' ret=1
   ble/test 'ble/util/c2w:musl 12529' ret=2
-  ble/test 'ble/util/c2w:musl 13055' ret=1 # "令和" 文字
+  ble/test 'ble/util/c2w:musl 13055' ret=1 # "Reiwa" character
   ble/test 'ble/util/c2w:musl 13481' ret=2
   ble/test 'ble/util/c2w:musl 24486' ret=2
   ble/test 'ble/util/c2w:musl 25480' ret=2
@@ -82,7 +82,7 @@ ble/test/start-section 'ble/canvas' 52
   ble/test 'ble/util/c2w:emacs  9703' ret=1
   ble/test 'ble/util/c2w:emacs 11492' ret=1
   ble/test 'ble/util/c2w:emacs 12529' ret=2
-  ble/test 'ble/util/c2w:emacs 13055' ret=2 # "令和" 文字
+  ble/test 'ble/util/c2w:emacs 13055' ret=2 # "Reiwa" character
   ble/test 'ble/util/c2w:emacs 13481' ret=2
   ble/test 'ble/util/c2w:emacs 24486' ret=2
   ble/test 'ble/util/c2w:emacs 25480' ret=2
@@ -100,9 +100,9 @@ uvwxyz[|]_\r
 ABCDEFGHIJ\r
 KLMNOPQRST\r
 UVWXYZ{\\}?\r
-壱弐参肆伍\r
-陸柒捌玖拾\r
-あいうえお'
+one two three four five\r
+six seven eight nine ten\r
+aiueo'
 
   function ble/test:canvas/put-clear-lines.contra {
     [[ $_ble_test_canvas_contra ]] || return 0 # skip
@@ -130,9 +130,9 @@ uvwxyz[|]_$
 ABCDEFGHIJ$
 KLMNOPQRST$
 UVWXYZ{\}?$
-壱弐参肆伍$
-陸柒捌玖拾$
-あいうえお$
+one two three four five$
+six seven eight nine ten$
+aiueo$
 EOF
 
   ble/test:canvas/put-clear-lines.contra 1 0 1 <<EOF
@@ -144,8 +144,8 @@ uvwxyz[|]_$
 ABCDEFGHIJ$
 KLMNOPQRST$
 UVWXYZ{\}?$
-壱弐参肆伍$
-陸柒捌玖拾$
+one two three four five$
+six seven eight nine ten$
 EOF
 
   ble/test:canvas/put-clear-lines.contra 1 0 2 <<EOF
@@ -158,7 +158,7 @@ uvwxyz[|]_$
 ABCDEFGHIJ$
 KLMNOPQRST$
 UVWXYZ{\}?$
-壱弐参肆伍$
+one two three four five$
 EOF
 
   ble/test:canvas/put-clear-lines.contra 1 0 4 <<EOF
@@ -181,9 +181,9 @@ uvwxyz[|]_$
 ABCDEFGHIJ$
 KLMNOPQRST$
 UVWXYZ{\}?$
-壱弐参肆伍$
-陸柒捌玖拾$
-あいうえお$
+one two three four five$
+six seven eight nine ten$
+aiueo$
           $
 EOF
 
@@ -195,9 +195,9 @@ uvwxyz[|]_$
 ABCDEFGHIJ$
 KLMNOPQRST$
 UVWXYZ{\}?$
-壱弐参肆伍$
-陸柒捌玖拾$
-あいうえお$
+one two three four five$
+six seven eight nine ten$
+aiueo$
 EOF
 
   ble/test:canvas/put-clear-lines.contra 1 1 2 <<EOF
@@ -209,8 +209,8 @@ uvwxyz[|]_$
 ABCDEFGHIJ$
 KLMNOPQRST$
 UVWXYZ{\}?$
-壱弐参肆伍$
-陸柒捌玖拾$
+one two three four five$
+six seven eight nine ten$
 EOF
 
   ble/test:canvas/put-clear-lines.contra 1 1 4 <<EOF
@@ -232,9 +232,9 @@ uvwxyz[|]_$
 ABCDEFGHIJ$
 KLMNOPQRST$
 UVWXYZ{\}?$
-壱弐参肆伍$
-陸柒捌玖拾$
-あいうえお$
+one two three four five$
+six seven eight nine ten$
+aiueo$
           $
           $
 EOF
@@ -246,9 +246,9 @@ uvwxyz[|]_$
 ABCDEFGHIJ$
 KLMNOPQRST$
 UVWXYZ{\}?$
-壱弐参肆伍$
-陸柒捌玖拾$
-あいうえお$
+one two three four five$
+six seven eight nine ten$
+aiueo$
           $
 EOF
 
@@ -260,9 +260,9 @@ uvwxyz[|]_$
 ABCDEFGHIJ$
 KLMNOPQRST$
 UVWXYZ{\}?$
-壱弐参肆伍$
-陸柒捌玖拾$
-あいうえお$
+one two three four five$
+six seven eight nine ten$
+aiueo$
 EOF
 
   ble/test:canvas/put-clear-lines.contra 1 2 4 <<EOF
@@ -275,16 +275,16 @@ uvwxyz[|]_$
 ABCDEFGHIJ$
 KLMNOPQRST$
 UVWXYZ{\}?$
-壱弐参肆伍$
+one two three four five$
 EOF
 
   ble/test:canvas/put-clear-lines.contra 1 4 0 <<EOF
 0123456789$
 KLMNOPQRST$
 UVWXYZ{\}?$
-壱弐参肆伍$
-陸柒捌玖拾$
-あいうえお$
+one two three four five$
+six seven eight nine ten$
+aiueo$
           $
           $
           $
@@ -296,9 +296,9 @@ EOF
           $
 KLMNOPQRST$
 UVWXYZ{\}?$
-壱弐参肆伍$
-陸柒捌玖拾$
-あいうえお$
+one two three four five$
+six seven eight nine ten$
+aiueo$
           $
           $
           $
@@ -310,9 +310,9 @@ EOF
           $
 KLMNOPQRST$
 UVWXYZ{\}?$
-壱弐参肆伍$
-陸柒捌玖拾$
-あいうえお$
+one two three four five$
+six seven eight nine ten$
+aiueo$
           $
           $
 EOF
@@ -325,9 +325,9 @@ EOF
           $
 KLMNOPQRST$
 UVWXYZ{\}?$
-壱弐参肆伍$
-陸柒捌玖拾$
-あいうえお$
+one two three four five$
+six seven eight nine ten$
+aiueo$
 EOF
 )
 
@@ -376,8 +376,8 @@ EOF
 [[ $_ble_test_canvas_contra ]] &&
   ble/test 'echo "$x1-$x2:$y1-$y2"' stdout='3-8:2-4'
 
-ble/test:canvas/trace.contra 10:2 日本語 measure-bbox << EOF
-日本語    $
+ble/test:canvas/trace.contra 10:2 Japanese measure-bbox << EOF
+Japanese    $
           $
 EOF
 [[ $_ble_test_canvas_contra ]] &&
@@ -484,8 +484,8 @@ EOF
 ble/test:canvas/trace.contra 30:1 'left-aligned' justify << EOF
 left-aligned                  $
 EOF
-ble/test:canvas/trace.contra 30:1 ' 日本語' justify << EOF
-                        日本語$
+ble/test:canvas/trace.contra 30:1 ' Japanese' justify << EOF
+                        Japanese$
 EOF
 ble/test:canvas/trace.contra 30:1 'a b c d e f' justify << EOF
 a    b     c     d     e     f$
@@ -500,7 +500,7 @@ zy dog. A brown fox jumped ove$
 r      the      lazy      dog.$
 EOF
 
-# ' ' による分割点は最低幅1を保持しつつ空白の分配が均等に行われるかのテスト。
+# The dividing point using ' ' is a test to see if the space is evenly distributed while maintaining a minimum width of 1.
 ble/test:canvas/trace.contra 30:2 $'hello blesh world\rHELLO WORLD\nhello world HELLO BLESH WORLD' justify=$' \r' << EOF
 hello blesh  worldHELLO  WORLD$
 hello world HELLO BLESH  WORLD$
@@ -514,13 +514,13 @@ ble/test 'echo "$x1,$y1:$x2,$y2"' stdout:'0,2:10,4'
 COLUMNS=10 LINES=10 x=3 y=2 ble/canvas/trace $' hello ' justify:measure-bbox
 ble/test 'echo "$x1,$y1:$x2,$y2"' stdout:'2,2:7,3'
 
-# フィールドの x1:x2 がそのまま出力すると画面外に出るという時に正しくシフトでき
-# ているか。
+# If the field x1:x2 is output as is, it will go off the screen, but it cannot be shifted correctly.
+# Are you there?
 ble/test:canvas/trace.contra 30:1 $'\e[3Dhello\rblesh\rworld\e[1D' justify=$'\r' x=5 << EOF
 hello      blesh         world$
 EOF
 
-# justify x clip のテスト
+# Testing justify x clip
 ble/test:canvas/trace.contra \
   30:5 $'hello world\nfoo bar buzz\nA quick brown fox\nLorem ipsum\n1 1 2 3 5 8 13 21 34 55 89 144' \
   justify:clip=2,1+24,5 << EOF
@@ -614,29 +614,29 @@ ble/test/start-section 'ble/canvas/trace-text' 11
   lines=1 cols=10 _ble_term_xenl=1 x=3 y=0
   ble/test 'ble/canvas/trace-text "Hello World";ret="$x,$y,$ret"' ret='10,0,Hello W'
 
-  # 折返し
+  # return
   lines=3 cols=10 _ble_term_xenl=1 x=3 y=0
   ble/test 'ble/canvas/trace-text "Hello Bash World";ret="$x,$y,$ret"' ret='9,1,Hello Bash World'
 
-  # 全角文字の折返し (nonewline on/off)
+  # Wrapping full-width characters (nonewline on/off)
   lines=3 cols=10 _ble_term_xenl=1 x=3 y=0
-  ble/test 'ble/canvas/trace-text "これは日本語の文章";ret="$x,$y,$ret"' ret=$'2,2,これは\n日本語の文章'
+  ble/test 'ble/canvas/trace-text "This is Japanese text";ret="$x,$y,$ret"' ret=$'2,2,This is\nJapanese text'
   lines=3 cols=10 _ble_term_xenl=1 x=3 y=0
-  ble/test 'ble/canvas/trace-text "これは日本語の文章" nonewline;ret="$x,$y,$ret"' ret='2,2,これは 日本語の文章'
+  ble/test 'ble/canvas/trace-text "This is Japanese text" nonewline;ret="$x,$y,$ret"' ret='2,2,This is Japanese text'
 
-  # 行末での改行 (nonewline)
+  # Newline at end of line (nonewline)
   lines=3 cols=10 _ble_term_xenl=1 x=0 y=0
-  ble/test 'ble/canvas/trace-text "これは日本";ret="$x,$y,$ret"' ret=$'0,1,これは日本\n'
+  ble/test 'ble/canvas/trace-text "This is Japan";ret="$x,$y,$ret"' ret=$'0,1,This is Japan\n'
   lines=3 cols=10 _ble_term_xenl=0 x=0 y=0
-  ble/test 'ble/canvas/trace-text "これは日本";ret="$x,$y,$ret"' ret=$'0,1,これは日本'
+  ble/test 'ble/canvas/trace-text "This is Japan";ret="$x,$y,$ret"' ret=$'0,1,This is Japan'
   lines=3 cols=10 _ble_term_xenl=1 x=0 y=0
-  ble/test 'ble/canvas/trace-text "これは日本" nonewline;ret="$x,$y,$ret"' ret=$'10,0,これは日本'
+  ble/test 'ble/canvas/trace-text "This is Japan" nonewline;ret="$x,$y,$ret"' ret=$'10,0,This is Japan'
   lines=3 cols=10 _ble_term_xenl=0 x=0 y=0
-  ble/test 'ble/canvas/trace-text "これは日本" nonewline;ret="$x,$y,$ret"' ret=$'0,1,これは日本'
+  ble/test 'ble/canvas/trace-text "This is Japan" nonewline;ret="$x,$y,$ret"' ret=$'0,1,This is Japan'
 
-  # 改行は ^J と表示
+  # Line breaks are displayed as ^J
   lines=1 cols=12 _ble_term_xenl=1 x=0 y=0
-  ble/test $'ble/canvas/trace-text "あ\nい\nう" external-sgr;ret="$x,$y,$ret"' ret=$'10,0,あ^Jい^Jう'
+  ble/test $'ble/canvas/trace-text "a\ni\nu" external-sgr;ret="$x,$y,$ret"' ret=$'10,0,a^Ji^Ju'
 )
 
 ble/test/end-section

@@ -1,25 +1,25 @@
 #!/bin/bash
 
 ## @bleopt history_limit_length
-##   履歴に登録するコマンドの最大文字数を指定します。
-##   この値を超える長さのコマンドは履歴に登録されません。
+##   Specify the maximum number of characters for commands to be registered in the history.
+##   Commands longer than this value will not be registered in the history.
 bleopt/declare -v history_limit_length 10000
 
 #==============================================================================
 # ble/history:bash                                                @history.bash
 
 ## @arr _ble_history
-##   コマンド履歴項目を保持する。
+##   Preserve command history entries.
 ##
 ## @arr _ble_history_edit
 ## @arr _ble_history_dirt
-##   _ble_history_edit 編集されたコマンド履歴項目を保持する。
-##   _ble_history の各項目と対応し、必ず同じ数・添字の要素を持つ。
-##   _ble_history_dirt は編集されたかどうかを保持する。
-##   _ble_history の各項目と対応し、変更のあったい要素にのみ値 1 を持つ。
+##   _ble_history_edit Holds edited command history items.
+## It corresponds to each item in _ble_history and always has elements with the same number and index.
+##   _ble_history_dirt retains whether it has been edited or not.
+##   It corresponds to each item in _ble_history and has a value of 1 only for elements that need to be changed.
 ##
 ## @var _ble_history_index
-##   現在の履歴項目の番号
+##   Number of current history item
 ##
 _ble_history=()
 _ble_history_edit=()
@@ -27,27 +27,27 @@ _ble_history_dirt=()
 _ble_history_index=0
 
 ## @var _ble_history_count
-##   現在の履歴項目の総数
+##   Total number of current history items
 ##
-## これらの変数はコマンド履歴を対象としているときにのみ用いる。
+## These variables are only used when targeting command history.
 ##
 _ble_history_count=
 
 function ble/builtin/history/is-empty {
-  # Note #D1629: 以前の実装 (#D1120) では ! builtin history -p '!!' を使ってい
-  #   たが、状況によって history -p で履歴項目が減少するのでサブシェルの中で評
-  #   価する必要がある。サブシェルの中に既にいる時にはこの fork は省略できると
-  #   考えていたが、サブシェルの中にいる場合でも後で履歴を使う為に履歴項目が変
-  #   化すると困るので、結局この手法だと常にサブシェルを起動する必要がある。代
-  #   わりに history 1 の出力を確認する実装に変更する事にした。
+  # Note #D1629: Previous implementation (#D1120) used ! builtin history -p '!!'
+  #   However, depending on the situation, history -p may reduce the number of history items, so it is not possible to evaluate it in a subshell.
+  #   need to be valued. This fork can be omitted when you are already in a subshell.
+  #   I was thinking, but even if you are inside a subshell, the history items will change to use the history later.
+  #   If you use this method, you will have to start a subshell all the time. teenager
+  #   Instead, I decided to change the implementation to check the output of history 1.
   ! ble/util/assign.has-output 'builtin history 1'
 }
 
 ## @fn ble/builtin/history/.check-timestamp-sigsegv status
-##   #D1831: Bash 4.4 以下では履歴ファイル (HISTFILE) に不正な timestamp
-##   (0x7FFFFFFF+1900年より後を指す巨大な unix time) が含まれていると segfault
-##   する。実際に SIGSEGV で終了した時に履歴ファイルを確認して問題の行番号を出
-##   力する。
+##   #D1831: Invalid timestamp in history file (HISTFILE) in Bash 4.4 and below
+##   (0x7FFFFFFF+huge unix time pointing after 1900) contains segfault
+##   I will. When you actually exit with SIGSEGV, check the history file and print the line number in question.
+##   Strengthen.
 if ((_ble_bash>=50000)); then
   function ble/builtin/history/.check-timestamp-sigsegv { return 0; }
 else
@@ -79,15 +79,15 @@ else
 fi
 
 ## @fn ble/builtin/history/.dump args...
-##   #D1831: timestamp に不正な値が含まれていた時のメッセージを検出する為、一時
-##   的に LC_MESSAGES を設定して builtin history を呼び出します。更にこの状況で、
-##   bash-3.2 以下で無限ループになる問題を回避する為に、bash-3.2 以下では
-##   conditional-sync 経由で呼び出します。
+##   #D1831: Temporarily to detect messages when timestamp contains invalid values.
+##   Set LC_MESSAGES and call builtin history. Furthermore, in this situation,
+##   In order to avoid the problem of infinite loop in bash-3.2 and below, in bash-3.2 and below,
+##   Call via conditional-sync.
 if ((_ble_bash<40000)); then
-  # Note (#D1831): bash-3.2 以下では不正な timestamp が history に含まれている
-  #   と無限ループになるので timeout=3000 で強制終了する。然し、実際に確認して
-  #   みると、conditional-sync 経由で呼び出した時には無限ループにならずに
-  #   timeout する前に SIGSEGV になる様である
+  # Note (#D1831): In bash-3.2 and below, invalid timestamp is included in history.
+  #   It becomes an infinite loop, so forcefully terminate it with timeout=3000. However, actually check
+  #   As you can see, when called via conditional-sync, it does not become an infinite loop.
+  #   It seems to become SIGSEGV before timeout.
   function ble/builtin/history/.dump.proc {
     local LC_ALL= LC_MESSAGES=C 2>/dev/null
     builtin history "${args[@]}"
@@ -162,7 +162,7 @@ function ble/history:bash/clear-background-load {
 
 ## @fn ble/history:bash/load
 if ((_ble_bash>=40000)); then
-  # _ble_bash>=40000 で利用できる以下の機能に依存する
+  # Depends on the following features available in _ble_bash>=40000
   #   ble/util/is-stdin-ready (via ble/util/idle/IS_IDLE)
   #   ble/util/mapfile
 
@@ -175,34 +175,34 @@ if ((_ble_bash>=40000)); then
   ##   @var[in] load_strategy
   function ble/history:bash/load/.background-initialize {
     if ble/builtin/history/is-empty; then
-      # Note: rcfile から呼び出すと history が未ロードなのでロードする。
+      # Note: When called from rcfile, history is not loaded, so it is loaded.
       #
-      # Note: 当初は親プロセスで history -n にした方が二度手間にならず効率的と考えたが
-      #   以下の様な問題が生じたので、やはりサブシェルの中で history -n する事にした。
+      # Note: Initially, I thought it would be more efficient to use history -n in the parent process without having to do it twice.
+      #   Since the following problem occurred, I decided to run history -n in the subshell.
       #
-      #   問題1: bashrc の謎の遅延 (memo.txt#D0702)
-      #     shopt -s histappend の状態で親シェルで history -n を呼び出すと、
-      #     bashrc を抜けてから Bash 本体によるプロンプトが表示されて、
-      #     入力を受け付けられる様になる迄に、謎の遅延が発生する。
-      #     特に履歴項目の数が HISTSIZE の丁度半分より多い時に起こる様である。
+      #   Problem 1: Mysterious bashrc delay (memo.txt#D0702)
+      #     If you call history -n in the parent shell with shopt -s histappend ,
+      #     After exiting bashrc, you will be prompted by Bash itself,
+      #     A mysterious delay occurs before input can be accepted.
+      #     This especially seems to happen when the number of history items is more than exactly half HISTSIZE.
       #
-      #     history -n を呼び出す瞬間だけ shopt -u histappend して
-      #     直後に shopt -s histappend とすると、遅延は解消するが、
-      #     実際の動作を観察すると histappend が無効になってしまっている。
+      #     Just run shopt -u histappend at the moment you call history -n
+      #     If you run shopt -s histappend immediately after, the delay disappears, but
+      #     When observing the actual operation, histappend is disabled.
       #
-      #     対策として、一時的に HISTSIZE を大きくして bashrc を抜けて、
-      #     最初のユーザからの入力の時に HISTSIZE を復元する事にした。
-      #     これで遅延は解消できる様である。
+      #     As a countermeasure, temporarily increase HISTSIZE, exit bashrc,
+      #     I decided to restore HISTSIZE upon first user input.
+      #     This seems to resolve the delay.
       #
-      #   問題2: 履歴の数が倍加する問題 (memo.txt#D0732)
-      #     親シェルで history -n を実行すると、
-      #     shopt -s histappend の状態だと履歴項目の数が2倍になってしまう。
-      #     bashrc を抜ける直前から最初にユーザの入力を受けるまでに倍加する。
-      #     bashrc から抜けた後に Readline が独自に履歴を読み取るのだろう。
-      #     一方で shopt -u histappend の状態だとシェルが動作している内は問題ないが、
-      #     シェルを終了した時に2倍に .bash_history の内容が倍になってしまう。
+      #   Problem 2: Problem where the number of history items doubles (memo.txt#D0732)
+      #     When I run history -n in the parent shell, I get
+      #     If you run shopt -s histappend, the number of history items will double.
+      #     It doubles from just before exiting bashrc until it first receives user input.
+      #     Readline probably reads the history on its own after exiting bashrc.
+      #     On the other hand, with shopt -u histappend, there is no problem as long as the shell is running, but
+      #     When I exit the shell, the contents of .bash_history are doubled.
       #
-      #     これの解決方法は不明。(HISTFILE 等を弄ったりすれば可能かもれないが試していない)
+      #     The solution to this is unknown. (It may be possible to do so by playing around with HISTFILE, etc., but I haven't tried it.)
       #
       builtin history -n
     fi
@@ -311,11 +311,11 @@ if ((_ble_bash>=40000)); then
   ## @fn ble/history:bash/load opts
   ##   @param[in] opts
   ##     async
-  ##       非同期で読み取ります。
+  ##       Read asynchronously.
   ##     append
-  ##       現在読み込み済みの履歴情報に追加します。
+  ##       Adds to the currently loaded history information.
   ##     count=NUMBER
-  ##       最近の NUMBER 項目だけ読み取ります。
+  ##       Read only the most recent NUMBER entries.
   function ble/history:bash/load {
     local opts=$1
     local opt_async=; [[ :$opts: == *:async:* ]] && opt_async=1
@@ -340,8 +340,8 @@ if ((_ble_bash>=40000)); then
     while ((1)); do
       case $_ble_history_load_resume in
 
-      # 42ms 履歴の読み込み
-      (0) # 履歴ファイル生成を Background で開始
+      # 42ms Load history
+      (0) # Start history file generation with Background
           if [[ $_ble_history_load_bgpid ]]; then
             builtin kill -9 "$_ble_history_load_bgpid" &>/dev/null
             _ble_history_load_bgpid=
@@ -362,7 +362,7 @@ if ((_ble_bash>=40000)); then
             ((_ble_history_load_resume+=3))
           fi ;;
 
-      # 515ms ble/history:bash/load/.background-initialize 待機
+      # 515ms ble/history:bash/load/.background-initialize wait
       (1) if [[ $opt_async ]] && ble/util/is-running-in-idle; then
             ble/util/idle.wait-condition ble/history:bash/load/.background-initialize-completed
             ((_ble_history_load_resume++))
@@ -370,21 +370,21 @@ if ((_ble_bash>=40000)); then
           fi
           ((_ble_history_load_resume++)) ;;
 
-      # Note: async でバックグラウンドプロセスを起動した後に、直接 (sync で)
-      #   呼び出された時、未だ処理が完了していなくても次のステップに進んでしまうので、
-      #   此処で条件が満たされるのを待つ (#D0745)
+      # Note: Directly (with sync) after starting a background process with async
+      #   When called, it will proceed to the next step even if the processing is not completed yet.
+      #   Wait for the conditions to be met here (#D0745)
       (2) while ! ble/history:bash/load/.background-initialize-completed; do
             ble/util/msleep 50
             [[ $opt_async ]] && ! ble/util/idle/IS_IDLE && return 148
           done
           ((_ble_history_load_resume++)) ;;
 
-      # 47ms _ble_history 初期化 (37000項目)
+      # 47ms _ble_history initialization (37000 items)
       (3) _ble_history_load_bgpid=
           ((arg_offset==0)) && _ble_history=()
           if [[ $load_strategy == source ]]; then
             # Cygwin #D0701 #D1605
-            #   620ms 99000項目 @ #D0701
+            #   620ms 99000 items @ #D0701
             source -- "$history_tmpfile"
           elif [[ $load_strategy == nlfix ]]; then
             builtin mapfile -O "$arg_offset" -t _ble_history < "$history_tmpfile"
@@ -394,10 +394,10 @@ if ((_ble_bash>=40000)); then
           ble/builtin/history/erasedups/update-base
           ((_ble_history_load_resume++)) ;;
 
-      # 47ms _ble_history_edit 初期化 (37000項目)
+      # 47ms _ble_history_edit initialization (37000 items)
       (4) ((arg_offset==0)) && _ble_history_edit=()
           if [[ $load_strategy == source ]]; then
-            # 504ms Cygwin (99000項目)
+            # 504ms Cygwin (99000 items)
             _ble_history_edit=("${_ble_history[@]}")
           elif [[ $load_strategy == nlfix ]]; then
             builtin mapfile -O "$arg_offset" -t _ble_history_edit < "$history_tmpfile"
@@ -413,7 +413,7 @@ if ((_ble_bash>=40000)); then
             ((_ble_history_load_resume++))
           fi ;;
 
-      # 11ms 複数行履歴修正 (107/37000項目)
+      # 11ms multiple line history correction (107/37000 items)
       (5) local -a indices_to_fix
           ble/util/mapfile indices_to_fix < "$history_indfile"
           local i rex='^eval -- \$'\''([^\'\'']|\\.)*'\''$'
@@ -423,7 +423,7 @@ if ((_ble_bash>=40000)); then
           done
           ((_ble_history_load_resume++)) ;;
 
-      # 11ms 複数行履歴修正 (107/37000項目)
+      # 11ms multiple line history correction (107/37000 items)
       (6) local -a indices_to_fix
           [[ ${indices_to_fix+set} ]] ||
             ble/util/mapfile indices_to_fix < "$history_indfile"
@@ -448,7 +448,7 @@ if ((_ble_bash>=40000)); then
 else
   function ble/history:bash/load/.generate-source {
     if ble/builtin/history/is-empty; then
-      # rcfile として起動すると history が未だロードされていない。
+      # When started as rcfile, history is not loaded yet.
       builtin history -n
     fi
     local HISTTIMEFORMAT=__ble_ext__
@@ -458,10 +458,10 @@ else
     ble/builtin/history/.dump ${arg_count:+"$arg_count"} | ble/bin/awk -v apos="'" '
       BEGIN { n = ""; }
 
-#%    # 何故かタイムスタンプがコマンドとして読み込まれてしまう
+#% # For some reason the timestamp is read as a command
       /^ *[0-9]+\*? +(__ble_ext__|\?\?)#[0-9]/ { next; }
 
-#%    # ※rcfile として読み込むと HISTTIMEFORMAT が ?? に化ける。
+#% # *When read as rcfile, HISTTIMEFORMAT turns into ??.
       /^ *[0-9]+\*? +(__ble_ext__|\?\?|.+: invalid timestamp)/ {
         if (n != "") {
           n = "";
@@ -478,11 +478,11 @@ else
         else
           gsub(apos, apos "\\" apos apos, line);
 
-#%      # 対策 #D1241: bash-3.2 以前では ^A, ^? が ^A^A, ^A^? に化ける
+#% # Solution #D1241: Before bash-3.2, ^A, ^? becomes ^A^A, ^A^?
         gsub(/\001/, "'"$apos"'${_ble_term_SOH}'"$apos"'", line);
         gsub(/\177/, "'"$apos"'${_ble_term_DEL}'"$apos"'", line);
 
-#%      # 対策 #D1270: MSYS2 で ^M を代入すると消える
+#% # Solution #D1270: Disappears when ^M is substituted in MSYS2
         gsub(/\015/, "'"$apos"'${_ble_term_CR}'"$apos"'", line);
 
         t = t != "" ? t "\n" line : line;
@@ -506,9 +506,9 @@ else
 
     blehook/invoke history_message "loading history..."
 
-    # * プロセス置換にしてもファイルに書き出しても大した違いはない。
-    #   270ms for 16437 entries (generate-source の時間は除く)
-    # * プロセス置換×source は bash-3 で動かない。eval に変更する。
+    # * There is no big difference whether you replace the process or write it to a file.
+    #   270ms for 16437 entries (excluding generate-source time)
+    # * Process replacement × source does not work in bash-3. Change to eval.
     local result=$(ble/history:bash/load/.generate-source) # subshell
     local IFS=$_ble_term_IFS
     if [[ $opt_append ]]; then
@@ -542,7 +542,7 @@ function ble/history:bash/initialize {
   _ble_history_index=$_ble_history_count
   ble/history/.update-position
 
-  # Note: 追加読み込みをした際に対応するデータを shift (history_share)
+  # Note: When additionally reading, shift the corresponding data (history_share)
   local delta=$((new_count-old_count))
   ((delta>0)) && blehook/invoke history_change insert "$old_count" "$delta"
 }
@@ -551,8 +551,8 @@ function ble/history:bash/initialize {
 # Bash history resolve-multiline                            @history.bash.mlfix
 
 if ((_ble_bash>=30100)); then
-  # Note: Bash 3.0 では history -s がまともに動かないので
-  # 複数行の履歴項目を builtin history に追加する方法が今の所不明である。
+  # Note: history -s does not work properly in Bash 3.0, so
+  # It is currently unclear how to add multi-line history items to builtin history.
 
   _ble_history_mlfix_done=
   _ble_history_mlfix_resume=0
@@ -561,16 +561,16 @@ if ((_ble_bash>=30100)); then
   ## @fn ble/history:bash/resolve-multiline/.awk reason
   ##
   ##   @param[in] reason
-  ##     呼び出しの用途を指定する文字列です。
+  ##     A string specifying the purpose of the call.
   ##
-  ##     resolve ... 初期化時の history 再構築
-  ##       history コマンドの出力形式で標準入力を解析します。
-  ##       各行は '番号 HISTTIMEFORMATコマンド' の形式をしている。
+  ##     resolve ... history reconstruction on initialization
+  ##       Parse standard input in the output format of the history command.
+  ##       Each line has the form 'number HISTTIMEFORMAT command'.
   ##
-  ##     read    ... history -r によるファイルからの読み出し
-  ##       履歴ファイルの形式で標準入力を解析します。
-  ##       各行は '#%s' または 'コマンド' の形式をしている。
-  ##       ble.sh では先頭行が '#%s' の時の複数行モードには対応しない。
+  ##     reading from a file with read ... history -r
+  ##       Parses standard input in the form of a history file.
+  ##       Each line has the form '#%s' or 'command'.
+  ##       ble.sh does not support multi-line mode when the first line is '#%s'.
   ##
   ##   @var[in] tmpfile_base
   function ble/history:bash/resolve-multiline/.awk {
@@ -615,7 +615,7 @@ if ((_ble_bash>=30100)); then
             if (t) print "#" t > filename_section;
             print c > filename_section;
           }
-#%        # Note: HISTTIMEFORMAT を指定するのは bash-4.4 で複数行読み取りを有効にする為。
+#% # Note: HISTTIMEFORMAT is specified to enable multi-line reading in bash-4.4.
           print "HISTTIMEFORMAT=%s builtin history -r " filename_section > filename_source;
         } else {
           for (i = 0; i < command_count; i++) {
@@ -775,7 +775,7 @@ if ((_ble_bash>=30100)); then
   ## @fn ble/history:bash/resolve-multiline opts
   ##   @param[in] opts
   ##     async
-  ##       非同期で読み取ります。
+  ##       Read asynchronously.
   function ble/history:bash/resolve-multiline.impl {
     local opts=$1
     local opt_async=; [[ :$opts: == *:async:* ]] && opt_async=1
@@ -789,15 +789,15 @@ if ((_ble_bash>=30100)); then
       case $_ble_history_mlfix_resume in
 
       (0) if [[ $opt_async ]] && ble/builtin/history/is-empty; then
-            # Note: bashrc の中では resolve-multiline はしない。
-            #   一旦 bash が履歴を読み込んだ後に再度試す。
+            # Note: Do not use resolve-multiline in bashrc.
+            #   Try again after bash has read the history.
             ble/util/idle.wait-user-input
             ((_ble_history_mlfix_resume++))
             return 147
           fi
           ((_ble_history_mlfix_resume++)) ;;
 
-      (1) # 履歴ファイル生成を Background で開始
+      (1) # Start history file generation with Background
         if [[ $_ble_history_mlfix_bgpid ]]; then
           builtin kill -9 "$_ble_history_mlfix_bgpid" &>/dev/null
           _ble_history_mlfix_bgpid=
@@ -825,16 +825,16 @@ if ((_ble_bash>=30100)); then
           fi
           ((_ble_history_mlfix_resume++)) ;;
 
-      # Note: async でバックグラウンドプロセスを起動した後に、直接 (sync で)
-      #   呼び出された時、未だ処理が完了していなくても次のステップに進んでしまうので、
-      #   此処で条件が満たされるのを待つ (#D0745)
+      # Note: Directly (with sync) after starting a background process with async
+      #   When called, it will proceed to the next step even if the processing is not completed yet.
+      #   Wait for the conditions to be met here (#D0745)
       (3) while ! ble/history:bash/resolve-multiline/.worker-completed; do
             ble/util/msleep 50
             [[ $opt_async ]] && ! ble/util/idle/IS_IDLE && return 148
           done
           ((_ble_history_mlfix_resume++)) ;;
 
-      # 80ms history 再構築 (47000項目)
+      # 80ms history reconstruction (47000 items)
       (4) _ble_history_mlfix_bgpid=
           ble/history:bash/resolve-multiline/.load
           [[ $opt_async ]] || blehook/invoke history_message
@@ -877,8 +877,8 @@ else
   function ble/history:bash/resolve-multiline { return 0; }
 fi
 
-# Note: 複数行コマンドは eval -- $'' の形に変換して
-#   書き込みたいので自前で処理する。
+# Note: Multi-line commands should be converted to eval -- $''
+#   I want to write it, so I'll handle it myself.
 function ble/history:bash/unload.hook {
   ble/util/is-running-in-subshell && return 0
   if shopt -q histappend &>/dev/null; then
@@ -897,12 +897,12 @@ function ble/history:bash/reset {
   elif ((_ble_bash>=30100)) && [[ $bleopt_history_lazyload ]]; then
     _ble_history_load_done=
   else
-    # * history-load は initialize ではなく attach で行う。
-    #   detach してから attach する間に
-    #   追加されたエントリがあるかもしれないので。
-    # * bash-3.0 では history -s は最近の履歴項目を置換するだけなので、
-    #   履歴項目は全て自分で処理する必要がある。
-    #   つまり、初めから load しておかなければならない。
+    # * History-load is performed with attach instead of initialize.
+    #   Between detach and attach
+    #   Because there may be entries added.
+    # * In bash-3.0, history -s only replaces recent history items, so
+    #   You must process all history items yourself.
+    #   In other words, it must be loaded from the beginning.
     ble/history:bash/initialize
   fi
 }
@@ -919,20 +919,20 @@ function ble/builtin/history/.touch-histfile {
 # in def.sh
 # @hook history_change
 
-# Note: #D1126 一度置き換えたら戻せない。二回は初期化しない。
+# Note: #D1126 Once replaced, it cannot be returned. Do not initialize twice.
 if [[ ! ${_ble_builtin_history_initialized+set} ]]; then
   _ble_builtin_history_initialized=
   _ble_builtin_history_histnew_count=0
   _ble_builtin_history_histapp_count=0
   ## @var _ble_builtin_history_wskip
-  ##   履歴のどの行までがファイルに書き込み済みの行かを管理する変数です。
+  ##   This is a variable that manages the number of lines in the history that have already been written to the file.
   ## @var _ble_builtin_history_prevmax
-  ##   最後の ble/builtin/history における builtin history の項目番号
+  ##   Builtin history item number in last ble/builtin/history
   _ble_builtin_history_wskip=0
   _ble_builtin_history_prevmax=0
 
   ##
-  ## 以下の関数は各ファイルに関して何処まで読み取ったかを記録します。
+  ## The following function records how far it has read for each file.
   ##
   ## @fn ble/builtin/history/.get-rskip file
   ##   @param[in] file
@@ -954,9 +954,9 @@ if [[ ! ${_ble_builtin_history_initialized+set} ]]; then
   }
   function ble/builtin/history/.add-rskip {
     local file=$1 ret
-    # Note: 当初 ((dict[\$file]+=$2)) の形式を使っていたが、これは
-    #   shopt -s assoc_expand_once の場合に動作しない事が判明したので、
-    #   一旦、別の変数で計算してから代入する事にする。
+    # Note: Initially we used the format ((dict[\$file]+=$2)), but this
+    #   It turned out that shopt -s assoc_expand_once does not work, so
+    #   First, calculate it using another variable and then substitute it.
     ble/gdict#get _ble_builtin_history_rskip_dict "$file"
     ((ret+=$2))
     ble/gdict#set _ble_builtin_history_rskip_dict "$file" "$ret"
@@ -965,8 +965,8 @@ fi
 
 ## @fn ble/builtin/history/.initialize opts
 ##   @param[in] opts
-##     skip0 ... Bash 初期化処理 (bashrc) を抜け出ていると判定できない状態で、
-##               履歴が一件も読み込まれていない時はスキップします。
+##     skip0 ... In a state where it cannot be determined that Bash initialization processing (bashrc) has been exited,
+## Skip when no history has been loaded.
 function ble/builtin/history/.initialize {
   [[ $_ble_builtin_history_initialized ]] && return 0
   local line; ble/util/assign line 'builtin history 1'
@@ -977,7 +977,7 @@ function ble/builtin/history/.initialize {
   >| "$histnew"
 
   if [[ $line ]]; then
-    # Note: #D1126 ble.sh ロード前に追加された履歴項目があれば保存する。
+    # Note: #D1126 Save any history items added before loading ble.sh.
     local histini=$_ble_base_run/$$.history.ini
     local histapp=$_ble_base_run/$$.history.app
     HISTTIMEFORMAT=1 builtin history -a "$histini"
@@ -986,7 +986,7 @@ function ble/builtin/history/.initialize {
       >| "$histini"
     fi
   else
-    # 履歴が読み込まれていなければ強制的に読み込む
+    # Force the history to load if it is not loaded
     ble/builtin/history/option:r
   fi
 
@@ -1014,15 +1014,15 @@ function ble/builtin/history/.delete-range {
   fi
 }
 ## @fn ble/builtin/history/.check-uncontrolled-change [filename opts]
-##   ble/builtin/history の管理外で履歴が読み込まれた時、
-##   それを history -a の対象から除外する為に wskip を更新する。
+##   When history is read outside of ble/builtin/history,
+##   Update wskip to exclude it from history -a.
 function ble/builtin/history/.check-uncontrolled-change {
   [[ $_ble_decode_bind_state == none ]] && return 0
   local filename=${1-} opts=${2-} prevmax=$_ble_builtin_history_prevmax
   local max; ble/builtin/history/.get-max
   if ((max!=prevmax)); then
     if [[ $filename && :$opts: == *:append:* ]] && ((_ble_builtin_history_wskip<prevmax&&prevmax<max)); then
-      # 最後に管理下で追加された事を確認した範囲 wskip..prevmax を書き込む。
+      # Write the range wskip..prevmax that was last confirmed to have been added under management.
       (
         ble/util/joblist/__suppress__
         ble/builtin/history/.delete-range "$((prevmax+1))" "$max"
@@ -1034,7 +1034,7 @@ function ble/builtin/history/.check-uncontrolled-change {
   fi
 }
 ## @fn ble/builtin/history/.load-recent-entries count
-##   history の最新 count 件を配列 _ble_history に読み込みます。
+##   Loads the latest count entries from history into the array _ble_history.
 function ble/builtin/history/.load-recent-entries {
   [[ $_ble_decode_bind_state == none ]] && return 0
 
@@ -1042,13 +1042,13 @@ function ble/builtin/history/.load-recent-entries {
   ((delta>0)) || return 0
 
   if [[ ! $_ble_history_load_done ]]; then
-    # history load が完了していなければ読み途中のデータを破棄して戻る
+    # If history load is not completed, discard the data being read and return.
     ble/history:bash/clear-background-load
     _ble_history_count=
     return 0
   fi
 
-  # 追加項目が大量にある場合には background で完全再初期化する
+  # If there are a large number of additional items, completely reinitialize with background
   if ((_ble_bash>=40000&&delta>=10000)); then
     ble/history:bash/reset
     return 0
@@ -1175,7 +1175,7 @@ function ble/builtin/history/.write {
 
 ## @fn ble/builtin/history/array#delete-hindex array_name index...
 ##   @param[in] index
-##     昇順に並んでいる事と重複がない事を仮定する。
+##     Assume that they are arranged in ascending order and that there are no duplicates.
 function ble/builtin/history/array#delete-hindex {
   local array_name=$1; shift
   local script='
@@ -1230,7 +1230,7 @@ function ble/builtin/history/change.hook {
   (clear)
     _ble_history_dirt=() ;;
   (insert)
-    # Note: _ble_history, _ble_history_edit は別に更新される
+    # Note: _ble_history, _ble_history_edit are updated separately.
     ble/builtin/history/array#insert-range _ble_history_dirt "$@" ;;
   esac
 }
@@ -1247,7 +1247,7 @@ function ble/builtin/history/option:c {
       _ble_history_count=0
       _ble_history_index=0
     else
-      # history load が完了していなければ読み途中のデータを破棄して戻る
+      # If history load is not completed, discard the data being read and return.
       ble/history:bash/clear-background-load
       _ble_history_count=
     fi
@@ -1292,7 +1292,7 @@ function ble/builtin/history/option:d {
       _ble_history_edit=("${_ble_history_edit[@]::b}" "${_ble_history_edit[@]:e}")
       _ble_history_count=${#_ble_history[@]}
     else
-      # history load が完了していなければ読み途中のデータを破棄して戻る
+      # If history load is not completed, discard the data being read and return.
       ble/history:bash/clear-background-load
       _ble_history_count=
     fi
@@ -1323,11 +1323,11 @@ function ble/builtin/history/option:a {
   ble/builtin/history/.write "$histfile" "$_ble_builtin_history_wskip" append:fetch
   [[ -r $histfile ]] && ble/builtin/history/.read "$histfile" "$rskip" fetch
   ble/builtin/history/.write "$histfile" "$_ble_builtin_history_wskip" append
-  builtin history -a /dev/null # Bash 終了時に書き込まない
+  builtin history -a /dev/null # Don't write on Bash exit
 }
 ## @fn ble/builtin/history/option:n [filename]
 function ble/builtin/history/option:n {
-  # HISTFILE が更新されていなければスキップ
+  # Skip if HISTFILE has not been updated
   local histfile; ble/builtin/history/.get-histfile "$@" || return "$?"
   if [[ $histfile == ${HISTFILE-} ]]; then
     local touch=$_ble_base_run/$$.history.touch
@@ -1346,7 +1346,7 @@ function ble/builtin/history/option:w {
   local rskip; ble/builtin/history/.get-rskip "$histfile"
   [[ -r $histfile ]] && ble/builtin/history/.read "$histfile" "$rskip" fetch
   ble/builtin/history/.write "$histfile" 0
-  builtin history -a /dev/null # Bash 終了時に書き込まない
+  builtin history -a /dev/null # Don't write on Bash exit
 }
 ## @fn ble/builtin/history/option:r [histfile]
 function ble/builtin/history/option:r {
@@ -1358,19 +1358,19 @@ function ble/builtin/history/option:r {
 ##   Workaround for bash-3.0 -- 5.0 bug
 ##   (See memo.txt #D0233, #D0801, #D1091)
 function ble/builtin/history/option:p {
-  # Note: auto-complete .search-history-light や
-  #   magic-space 等経由で history -p が呼び出されて、
-  #   その時に resolve-multiline が sync されると引っ掛かる。
-  #   従って history -p では sync しない事に決めた (#D1121)
-  # Note: bash-3 では background load ができないので
-  #   最初に history -p が呼び出されるタイミングで初期化する事にする (#D1122)
+  # Note: auto-complete .search-history-light and
+  #   history -p is called via magic-space etc.
+  #   If resolve-multiline is synced at that time, it will get caught.
+  #   Therefore, I decided not to sync with history -p (#D1121)
+  # Note: Background load is not possible in bash-3, so
+  #   Initialize when history -p is first called (#D1122)
   ((_ble_bash>=40000)) || ble/builtin/history/is-empty ||
     ble/history:bash/resolve-multiline sync
 
-  # Note: history -p '' によって 履歴項目が減少するかどうかをチェックし、
-  #   もし履歴項目が減る状態になっている場合は履歴項目を増やしてから history -p を実行する。
-  #   嘗てはサブシェルで評価していたが、そうすると置換指示子が記録されず
-  #   :& が正しく実行されないことになるのでこちらの実装に切り替える。
+  # Note: Check if history -p '' reduces history entries,
+  #   If the number of history items is decreasing, increase the number of history items and then execute history -p.
+  #   I used to evaluate it in a subshell, but then the substitution specifier was not recorded.
+  #   :& will not be executed correctly, so switch to this implementation.
   local line1= line2=
   ble/util/assign line1 'HISTTIMEFORMAT= builtin history 1'
   builtin history -p -- '' &>/dev/null
@@ -1381,9 +1381,9 @@ function ble/builtin/history/option:p {
       line1=${line1:${#BASH_REMATCH}}
 
     if ((_ble_bash<30100)); then
-      # Note: history -r するとそれまでの履歴項目が終了時に
-      #   .bash_history に反映されなくなるが、
-      #   Bash 3.0 では明示的に書き込んでいるので問題ない。
+      # Note: history -r will display previous history items at the end.
+      #   It will no longer be reflected in .bash_history, but
+      #   In Bash 3.0, it is written explicitly, so there is no problem.
       local tmp=$_ble_base_run/$$.history.tmp
       printf '%s\n' "$line1" "$line1" >| "$tmp"
       builtin history -r "$tmp"
@@ -1471,7 +1471,7 @@ function ble/builtin/history/erasedups/.impl-awk {
   ble/util/assign/mktmp; local itmp1=$_ble_local_tmpfile
   ble/util/assign/mktmp; local itmp2=$_ble_local_tmpfile
 
-  # Note: ジョブを無効にする為 subshell で実行
+  # Note: Run in subshell to disable job
   ( ble/util/writearray "${writearray_options[@]}" _ble_history      >| "$itmp1" & local pid1=$!
     ble/util/writearray "${writearray_options[@]}" _ble_history_edit >| "$itmp2"
     wait "$pid1" )
@@ -1614,9 +1614,9 @@ function ble/builtin/history/erasedups/.impl-ranged {
   shift_histindex_next=0
   shift_wskip=0
 
-  # Note: 自前で history -d を行って重複を削除するので erasedups は除去しておく。
-  # 但し、一番最後の一致する要素だけは自分では削除しないので、後のhistory -s で
-  # 余分な履歴項目が追加されない様に ignoredups を付加する。
+  # Note: Since you will run history -d yourself to delete duplicates, remove erasedups.
+  # However, since you will not delete only the last matching element yourself, use history -s later.
+  # Add ignoredups to prevent extra history items from being added.
   ble/path#remove HISTCONTROL erasedups
   HISTCONTROL=$HISTCONTROL:ignoredups
 
@@ -1648,14 +1648,14 @@ function ble/builtin/history/erasedups/.impl-ranged {
   fi
 }
 ## @fn ble/builtin/history/erasedups cmd
-##   指定したコマンドに一致する履歴項目を削除します。この呼出の後に history -s
-##   を呼び出す事を想定しています。但し、一番最後の一致する要素は削除しません。
+##   Deletes history entries that match the specified command. After this call history -s
+##   I am assuming that you will call. However, the last matching element will not be deleted.
 ##
 ##   @var[in,out] HISTCONTROL
 ##   @exit 9
-##     重複する要素が一番最後の要素のみの時に終了ステータス 9 を返します。この
-##     時、履歴追加を行っても履歴に変化は発生しないので、後続の history -s の呼
-##     び出しを省略してそのまま処理を終えても問題ありません。
+##     Returns exit status 9 when the only duplicated element is the last element. This
+##     When the history is added, no change occurs in the history, so subsequent calls to history -s
+##     There is no problem if you skip the extraction and finish the process as is.
 function ble/builtin/history/erasedups {
   local cmd=$1
 
@@ -1689,7 +1689,7 @@ function ble/builtin/history/erasedups {
     ((_ble_builtin_history_wskip-=shift_wskip))
     [[ ${HISTINDEX_NEXT+set} ]] && ((HISTINDEX_NEXT-=shift_histindex_next))
   else
-    # 単に今回の history/option:s を無視すれば良いだけの時
+    # When you just need to ignore the current history/option:s
     ((N)) && [[ ${_ble_history[N-1]} == "$cmd" ]] && return 9
   fi
 }
@@ -1709,19 +1709,19 @@ function ble/builtin/history/option:s {
     for pat in "${pats[@]}"; do
       [[ $cmd == $pat ]] && return 0
     done
-    # Note: 以降の処理では HISTIGNORE は無視する。trim した後のコマンドに対して
-    # 改めて作用するのを防ぐ為。
+    # Note: HISTIGNORE will be ignored in subsequent processing. For the command after trimming
+    # To prevent it from working again.
     local HISTIGNORE=
   fi
 
-  # Note: ble/builtin/history/erasedups によって後の builtin history -s の為に
-  # 時的に erasedups を除去する場合がある為ローカル変数に変えておく。また、
-  # ignoreboth の処理の便宜の為にも内部的に書き換える。
+  # Note: for later builtin history -s by ble/builtin/history/erasedups
+  # Since erasedups may be removed from time to time, change them to local variables. Also,
+  # It is also rewritten internally for the convenience of ignoreboth processing.
   local HISTCONTROL=$HISTCONTROL
 
-  # Note: HISTIGNORE 及び ignorespace は trim 前に処理する。何故なら行頭の空白
-  # などに意味を持たせたいから。ignoredups 及び erasedups は trim 後に作用させ
-  # る。何故なら実際に履歴に登録されたコマンドと比較したいから。
+  # Note: HISTIGNORE and ignorespace are processed before trim. Because the blank space at the beginning of the line
+  # Because I want to give meaning to things like that. ignoredups and erasedups are applied after trim.
+  # Ru. This is because I want to compare it with the command actually registered in the history.
   if [[ $HISTCONTROL ]]; then
     [[ :$HISTCONTROL: == *:ignoreboth:* ]] &&
       HISTCONTROL=$HISTCONTROL:ignorespace:ignoredups
@@ -1742,8 +1742,8 @@ function ble/builtin/history/option:s {
   if [[ $_ble_history_load_done ]]; then
     if [[ $HISTCONTROL ]]; then
       if [[ :$HISTCONTROL: == *:ignoredups:* ]]; then
-        # Note: plain Bash では ignoredups を検出した時には erasedups は発生し
-        # ない様なのでそれに倣う。
+        # Note: In plain Bash, erasedups are not generated when ignoredups are detected.
+        # It doesn't seem like there is, so I'll follow suit.
         local lastIndex=$((${#_ble_history[@]}-1))
         ((lastIndex>=0)) && [[ $cmd == "${_ble_history[lastIndex]}" ]] && return 0
       fi
@@ -1758,19 +1758,19 @@ function ble/builtin/history/option:s {
     _ble_history_count=$((topIndex+1))
     _ble_history_index=$_ble_history_count
 
-    # _ble_bash<30100 の時は必ずここを通る。
-    # 初期化時に _ble_history_load_done=1 になるので。
+    # When _ble_bash<30100, always pass through here.
+    # Because _ble_history_load_done=1 at initialization.
     ((_ble_bash<30100)) && use_bash300wa=1
   else
     if [[ $HISTCONTROL ]]; then
-      # 未だ履歴が初期化されていない場合は取り敢えず history -s に渡す。
-      # history -s でも HISTCONTROL に対するフィルタはされる。
-      # history -s で項目が追加されたかどうかはスクリプトからは分からないので
-      # _ble_history_count をクリアして再計算する
+      # If the history has not been initialized yet, pass it to history -s for now.
+      # history -s also filters for HISTCONTROL.
+      # Since the script does not know whether the item was added with history -s,
+      # Clear and recalculate _ble_history_count
       _ble_history_count=
     else
-      # HISTCONTROL がなければ多分 history -s で必ず追加される。
-      # _ble_history_count 取得済ならば更新。
+      # If HISTCONTROL is not present, history -s will probably add it.
+      # _ble_history_count Update if already obtained.
       [[ $_ble_history_count ]] &&
         ((_ble_history_count++))
     fi
@@ -1780,7 +1780,7 @@ function ble/builtin/history/option:s {
   if [[ $use_bash300wa ]]; then
     # bash < 3.1 workaround
     if [[ $cmd == *$'\n'* ]]; then
-      # Note: 改行を含む場合は %q は常に $'' の形式になる。
+      # Note: %q is always of the form $'' if it contains a newline.
       ble/util/sprintf cmd 'eval -- %q' "$cmd"
     fi
     local tmp=$_ble_base_run/$$.history.tmp
@@ -1902,30 +1902,30 @@ function history {
 
 ## @var _ble_history_prefix
 ##
-##   現在どの履歴を対象としているかを保持する。
-##   空文字列の時、コマンド履歴を対象とする。以下の変数を用いる。
+##   Maintains which history is currently targeted.
+##   When it is an empty string, the command history is targeted. The following variables are used.
 ##
 ##     _ble_history
 ##     _ble_history_index
 ##     _ble_history_edit
 ##     _ble_history_dirt
 ##
-##   空でない文字列 prefix のとき、以下の変数を操作対象とする。
+##   When prefix is a non-empty string, the following variables are subject to operation.
 ##
 ##     ${prefix}_history
 ##     ${prefix}_history_index
 ##     ${prefix}_history_edit
 ##     ${prefix}_history_dirt
 ##
-##   何れの関数も _ble_history_prefix を適切に処理する必要がある。
+##   All functions must handle _ble_history_prefix appropriately.
 ##
-##   実装のために配列 _ble_history_edit などを
-##   ローカルに定義して処理するときは、以下の注意点を守る必要がある。
+##   Array _ble_history_edit etc. for implementation
+##   When defining and processing locally, the following points must be observed.
 ##
-##   - その関数自身またはそこから呼び出される関数が、
-##     履歴項目に対して副作用を持ってはならない。
+##   - The function itself or a function called from it
+##     Must not have side effects on history items.
 ##
-##   この要請の下で、各関数は呼び出し元のすり替えを意識せずに動作できる。
+##   Under this requirement, each function can operate without being aware of switching callers.
 ##
 _ble_history_prefix=
 
@@ -1941,7 +1941,7 @@ function ble/history/.update-position {
     builtin eval -- "_ble_history_COUNT=\${#${_ble_history_prefix}_history[@]}"
     ((_ble_history_INDEX=${_ble_history_prefix}_history_index))
   else
-    # 履歴読込完了前の時
+    # Before history reading is complete
     if [[ ! $_ble_history_load_done ]]; then
       if [[ ! $_ble_history_count ]]; then
         local min max
@@ -2025,7 +2025,7 @@ function ble/history/set-edited-entry {
 function ble/history/revert-edits {
   if [[ $_ble_history_prefix ]]; then
     local code='
-      # PREFIX_history_edit を未編集状態に戻す
+      # Return PREFIX_history_edit to unedited state
       local index
       for index in "${!PREFIX_history_dirt[@]}"; do
         PREFIX_history_edit[index]=${PREFIX_history[index]}
@@ -2038,18 +2038,18 @@ function ble/history/revert-edits {
     builtin eval -- "${code//PREFIX/$_ble_history_prefix}"
   else
     if [[ $_ble_history_load_done ]]; then
-      # 登録・不登録に拘わらず取り敢えず初期化
+      # Initialize immediately regardless of registration or non-registration
       _ble_history_index=${#_ble_history[@]}
       ble/history/.update-position
 
-      # _ble_history_edit を未編集状態に戻す
+      # Return _ble_history_edit to unedited state
       local index
       for index in "${!_ble_history_dirt[@]}"; do
         _ble_history_edit[index]=${_ble_history[index]}
       done
       _ble_history_dirt=()
 
-      # 同時に _ble_edit_undo も初期化する。
+      # At the same time, _ble_edit_undo is also initialized.
       ble-edit/undo/clear-all
     fi
   fi
@@ -2059,10 +2059,10 @@ function ble/history/revert-edits {
 ## @var[in,out] HISTINDEX_NEXT
 ##   used by ble/widget/accept-and-next to get modified next-entry positions
 function ble/history/.add-command-history {
-  # 注意: bash-3.2 未満では何故か bind -x の中では常に history off になっている。
+  # Note: For some reason, history off is always set in bind -x in versions below bash-3.2.
   [[ -o history ]] || ((_ble_bash<30200)) || return 1
 
-  # Note: mc (midnight commander) が初期化スクリプトを送ってくる #D1392
+  # Note: mc (midnight commander) sends initialization script #D1392
   [[ $MC_SID == $$ && $_ble_edit_LINENO -le 2 && ( $1 == *PROMPT_COMMAND=* || $1 == *PS1=* ) ]] && return 1
 
   if [[ $bleopt_history_share ]]; then
@@ -2106,65 +2106,65 @@ function ble/history/add {
 ##   as a workaround for bash slow array access
 ##
 ##   @param[in] opts
-##     コロン区切りのオプションです。
+##     Colon-separated options.
 ##
-##     regex     正規表現による検索を行います。
-##     glob      グロブパターンによる一致を試みます。
-##     head      固定文字列に依る先頭一致を試みます。
-##     tail      固定文字列に依る終端一致を試みます。
-##     condition 述語コマンドを評価 (eval) して一致を試みます。
-##     predicate 述語関数を呼び出して一致を試みます。
-##       これらの内の何れか一つを指定します。
-##       何も指定しない場合は固定文字列の部分一致を試みます。
+##     regex Performs a search using regular expressions.
+##     glob Attempts to match by glob pattern.
+##     head Attempts to match the beginning of a fixed string.
+##     tail Attempts to match the end of a fixed string.
+##     condition Evaluate the predicate command to attempt a match.
+##     predicate Attempts to match by calling the predicate function.
+##       Specify one of these.
+##       If nothing is specified, a partial match of the fixed string will be attempted.
 ##
 ##     stop_check
-##       ユーザの入力があった時に終了ステータス 148 で中断します。
+##       Aborts with exit status 148 on user input.
 ##
 ##     progress
-##       検索の途中経過を表示します。
-##       後述の isearch_progress_callback 変数に指定された関数を呼び出します。
+##       Displays the progress of the search.
+##       Calls the function specified in the isearch_progress_callback variable described below.
 ##
 ##     backward
-##       内部使用のオプションです。
-##       forward-search-history に対して指定して、後方検索を行う事を指定します。
+##       Optional for internal use.
+##       Specify for forward-search-history to specify backward search.
 ##
 ##     cyclic
-##       履歴の端まで達した時、履歴の反対側の端から検索を続行します。
-##       一致が見つからずに start の直前の要素まで達した時に失敗します。
+##       When the end of the history is reached, the search continues from the opposite end of the history.
+##       Fails when it reaches the element immediately before start without finding a match.
 ##
 ##   @var[in] _ble_history_edit
-##     検索対象の配列と全体の検索開始位置を指定します。
+##     Specify the array to be searched and the overall search start position.
 ##   @var[in] start
-##     全体の検索開始位置を指定します。
+##     Specify the overall search start position.
 ##
 ##   @var[in] needle
-##     検索文字列を指定します。
+##     Specify the search string.
 ##
-##     opts に regex または glob を指定した場合は、
-##     それぞれ正規表現またはグロブパターンを指定します。
+##     If opts is regex or glob,
+##     Specify a regular expression or glob pattern, respectively.
 ##
-##     opts に condition を指定した場合は needle を述語コマンドと解釈します。
-##     変数 LINE 及び INDEX にそれぞれ行の内容と履歴番号を設定して eval されます。
+##     If condition is specified in opts, needle is interpreted as a predicate command.
+##     The line contents and history number are set in the variables LINE and INDEX, respectively, and eval is performed.
 ##
-##     opts に predicate を指定した場合は needle を述語関数の関数名と解釈します。
-##     指定する述語関数は検索が一致した時に成功し、それ以外の時に失敗する関数です。
-##     第1引数と第2引数に行の内容と履歴番号を指定して関数が呼び出されます。
+##     If predicate is specified in opts, needle is interpreted as the function name of the predicate function.
+##     The specified predicate function is a function that succeeds when the search matches and fails otherwise.
+##     The function is called with the row contents and history number specified as the first and second arguments.
 ##
 ##   @var[in,out] index
-##     今回の呼び出しの検索開始位置を指定します。
-##     一致が成功したとき見つかった位置を返します。
-##     一致が中断されたとき次の位置 (再開時に最初に検査する位置) を返します。
+##     Specifies the search starting position for this call.
+##     Returns the location found on a successful match.
+##     Returns the next position when matching is interrupted (the first position to check when restarting).
 ##
 ##   @var[in,out] isearch_time
 ##
 ##   @var[in] isearch_progress_callback
-##     progress の表示時に呼び出す関数名を指定します。
-##     第一引数には現在の検索位置 (history index) を指定します。
+##     Specify the name of the function to call when displaying progress.
+## The first argument specifies the current search position (history index).
 ##
 ##   @exit
-##     見つかったときに 0 を返します。
-##     見つからなかったときに 1 を返します。
-##     中断された時に 148 を返します。
+##     Returns 0 when found.
+##     Returns 1 if not found.
+##     Returns 148 when interrupted.
 ##
 function ble/history/.read-isearch-options {
   local opts=$1
@@ -2194,8 +2194,8 @@ function ble/history/isearch-backward-blockwise {
     builtin eval "_ble_history_edit=(\"\${${_ble_history_prefix}_history_edit[@]}\")"
   fi
 
-  local isearch_block=1000 # 十分高速なのでこれぐらい大きくてOK
-  local isearch_quantum=$((isearch_block*2)) # 倍数である必要有り
+  local isearch_block=1000 # It's fast enough so it's OK to be this big.
+  local isearch_quantum=$((isearch_block*2)) # Must be a multiple
   local irest block j i=$index
   index=
 

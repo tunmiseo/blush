@@ -144,9 +144,9 @@ function ble/contrib/integration:bash-preexec/detach.hook {
 
   builtin eval -- "$__bp_install_string"
 
-  # Note: 重複して登録される (古い bash-preexec.sh) かもしれないし、全
-  # く登録されない (bash-preexec.sh をロードしていない時) かもしれない
-  # ので、ble.sh 側で末尾で一回呼び出す形に修正する。
+  # Note: There may be duplicate registrations (old bash-preexec.sh), and all
+  # may not be registered properly (when bash-preexec.sh is not loaded)
+  # Therefore, modify it so that it is called once at the end of ble.sh.
   ble/contrib/integration:bash-preexec/add-convenience-functions
 }
 
@@ -165,7 +165,7 @@ blehook POSTEXEC-=ble/contrib/integration:bash-preexec/loader
 bash_preexec_imported=defined
 __bp_imported=defined
 
-# XXX: 以下は uninstall で削除しきれなかった時の為の保険。今の所不要に思われる。
+# XXX: The following is insurance in case it cannot be completely deleted with uninstall. Seems unnecessary for now.
 # __bp_blesh_check() {
 #   if [[ $BLE_ATTACHED && ! ${__bp_blesh_invoking_through_blesh-} ]]; then
 #     ble/contrib/integration:bash-preexec/attach.hook

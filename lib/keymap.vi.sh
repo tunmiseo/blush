@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Note: bind (INITIALIZE_DEFMAP) の中から再帰的に呼び出されうるので、
-# 先に ble-edit/bind/load-editing-mode:vi を上書きする必要がある。
+# Note: It can be called recursively from within bind (INITIALIZE_DEFMAP), so
+# You need to overwrite ble-edit/bind/load-editing-mode:vi first.
 ble/is-function ble-edit/bind/load-editing-mode:vi && return 0
 function ble-edit/bind/load-editing-mode:vi { return 0; }
 
@@ -36,16 +36,16 @@ function ble/keymap:vi/k2c {
 # utils
 
 ## @fn ble/string#index-of-chars text chars [index]
-##   文字集合に含まれる文字を、文字列中で順方向に探索します。
+##   Search forward in a string for characters in a character set.
 ## @fn ble/string#last-index-of-chars text chars [index]
-##   文字集合に含まれる文字を、文字列中で逆方向に探索します。
+##   Search backwards through a string for characters in a character set.
 ##
 ##   @param[in] text
-##     検索する対象の文字列を指定します。
+##     Specify the string to search for.
 ##   @param[in] chars
-##     検索する文字の集合を指定します
+##     specifies the set of characters to search for
 ##   @param[in] index
-##     text の内の検索開始位置を指定します。
+##     Specifies the starting position within text.
 ##   @var[out] ret
 ##
 function ble/string#index-of-chars {
@@ -110,19 +110,19 @@ _ble_keymap_vi_REX_WORD=$'[_a-zA-Z0-9]+|[!-/:-@[-`{-~]+|[^ \t\na-zA-Z0-9!-/:-@[-
 function ble/widget/vi_imap/__default__ {
   local flag=$((KEYS[0]&_ble_decode_MaskFlag)) code=$((KEYS[0]&_ble_decode_MaskChar))
 
-  # メタ修飾付きの入力 M-key は ESC + key に分解する
+  # Input M-key with meta-qualification is decomposed into ESC + key
   if ((flag&_ble_decode_Meta)); then
     ble/keymap:vi/imap-repeat/pop
 
     local esc=27 # ESC
-    # local esc=$((_ble_decode_Ctrl|0x5b)) # もしくは C-[
+    # local esc=$((_ble_decode_Ctrl|0x5b)) # or C-[
     ((flag&=~_ble_decode_Meta))
     ((flag==_ble_decode_Shft&&0x61<=code&&code<=0x7A&&(flag=0,code-=0x20)))
     ble/decode/widget/redispatch-by-keys "$esc" "$((flag|code))" "${KEYS[@]:1}"
     return 0
   fi
 
-  # Control 修飾された文字 C-@ - C-\, C-? は制御文字 \000 - \037, \177 に戻して挿入
+  # Control-qualified characters C-@ - C-\, C-? are inserted back into control characters \000 - \037, \177
   if local ret; ble/keymap:vi/k2c "${KEYS[0]}"; then
     local -a KEYS; KEYS=("$ret")
     ble/widget/self-insert
@@ -135,9 +135,9 @@ function ble/widget/vi_imap/__default__ {
 function ble/widget/vi-command/decompose-meta {
   local flag=$((KEYS[0]&_ble_decode_MaskFlag)) code=$((KEYS[0]&_ble_decode_MaskChar))
 
-  # メタ修飾付きの入力 M-key は ESC + key に分解する
+  # Input M-key with meta-qualification is decomposed into ESC + key
   if ((flag&_ble_decode_Meta)); then
-    local esc=$((_ble_decode_Ctrl|0x5b)) # C-[ (もしくは esc=27 ESC?)
+    local esc=$((_ble_decode_Ctrl|0x5b)) # C-[ (or esc=27 ESC?)
     ((flag&=~_ble_decode_Meta))
     ((flag==_ble_decode_Shft&&0x61<=code&&code<=0x7A&&(flag=0,code-=0x20)))
     ble/decode/widget/redispatch-by-keys "$esc" "$((flag|code))" "${KEYS[@]:1}"
@@ -160,16 +160,16 @@ function ble/widget/vi_omap/cancel {
 # repeat
 
 ## @var _ble_keymap_vi_irepeat_count
-##   挿入モードに入る時に指定された引数を記録する。
+##   Records the arguments specified when entering insert mode.
 _ble_keymap_vi_irepeat_count=
 
 ## @arr _ble_keymap_vi_irepeat
-##   挿入モードに入るときに指定された引数が 1 より大きい時、
-##   後で操作を繰り返すために操作内容を記録する配列。
+## If the argument specified when entering insert mode is greater than 1,
+##   An array that records the operation so that it can be repeated later.
 ##
-##   各要素は keys:widget の形式を持つ。
-##   keys は空白区切りの key (整数値) の列、つまり ${KEYS[*]} である。
-##   widget は実際に呼び出す WIDGET の内容である。
+##   Each element has the format keys:widget.
+##   keys is a space-separated string of keys (integer values), ie ${KEYS[*]}.
+##   widget is the contents of WIDGET that is actually called.
 ##
 _ble_keymap_vi_irepeat=()
 
@@ -214,7 +214,7 @@ function ble/keymap:vi/imap/invoke-widget {
 }
 
 ## @arr _ble_keymap_vi_imap_white_list
-##   引数を指定して入った挿入モードを抜けるときの繰り返しで許されるコマンドのリスト
+##   List of commands that are allowed to repeat when exiting insert mode entered with arguments
 _ble_keymap_vi_imap_white_list=(
   self-insert
   batch-insert
@@ -412,16 +412,16 @@ function ble/widget/vi-rlfunc/bash-vi-complete {
 # modes
 
 ## @var _ble_keymap_vi_insert_overwrite
-##   挿入モードに入った時の上書き文字
+##   Overtype character when entering insert mode
 _ble_keymap_vi_insert_overwrite=
 
 ## @var _ble_keymap_vi_insert_leave
-##   挿入モードから抜ける時に実行する関数を設定します
+##   Set the function to be executed when exiting insert mode
 _ble_keymap_vi_insert_leave=
 
 ## @var _ble_keymap_vi_single_command
-##   ノーマルモードにおいて 1 つコマンドを実行したら
-##   元の挿入モードに戻るモード (C-o) にいるかどうかを表します。
+##   After executing one command in normal mode
+##   Represents whether you are in return to original insert mode (C-o).
 _ble_keymap_vi_single_command=
 _ble_keymap_vi_single_command_overwrite=
 
@@ -432,8 +432,8 @@ ble/array#push _ble_textarea_local_VARNAMES \
                _ble_keymap_vi_single_command_overwrite
 
 ## @bleopt keymap_vi_mode_string_nmap
-##   ノーマルモードの時に表示する文字列を指定します。
-##   空文字列を指定したときは何も表示しません。
+##   Specify the string to display in normal mode.
+##   If you specify an empty string, nothing will be displayed.
 bleopt/declare -n keymap_vi_mode_string_nmap $'\e[1m~\e[m'
 bleopt/declare -o keymap_vi_nmap_name keymap_vi_mode_string_nmap
 
@@ -497,8 +497,8 @@ function bleopt/check:keymap_vi_mode_name_blockwise { ble/keymap:vi/update-mode-
 
 
 ## @fn ble/keymap:vi/script/get-vi-keymap
-##   現在の vi キーマップ名 (vi_?map) を取得します。
-##   もし現在 vi キーマップにない場合には失敗します。
+##   Get the current vi keymap name (vi_?map).
+##   Fails if it is not currently in the vi keymap.
 function ble/keymap:vi/script/get-vi-keymap {
   ble/prompt/unit/add-hash '$_ble_decode_keymap,${_ble_decode_keymap_stack[*]}'
   local i=${#_ble_decode_keymap_stack[@]}
@@ -623,9 +623,9 @@ function ble/keymap:vi/update-mode-indicator {
     ble/complete/menu/clear
   fi
 
-  # Note #D2062: mc-4.8.29 以降ではコマンド終了直後に "-- INSERT --" 等の mode
-  # indicator を出力すると、それをプロンプトと勘違いして抽出してしまう。仕方が
-  # ないので mc の中では imap に対しては mode indicator は表示しない様にする。
+  # Note #D2062: In mc-4.8.29 or later, the mode such as "-- INSERT --" is displayed immediately after the command ends.
+  # If you output an indicator, it will be mistaken for a prompt and extracted. How to do it
+  # Since there is no mode indicator for imap in mc, do not display it.
   if [[ $_ble_edit_integration_mc_precmd_stop && $keymap == vi_imap ]]; then
     ble/edit/info/clear
   else
@@ -636,7 +636,7 @@ blehook internal_PRECMD!=ble/keymap:vi/update-mode-indicator
 
 ## @fn ble/prompt/backslash:keymap:vi/mode-indicator
 ##   @var[in,opt] prompt_vi_keymap
-##     ble/keymap:vi/script/get-vi-keymap のキャッシュ
+##     ble/keymap:vi/script/get-vi-keymap cache
 function ble/prompt/backslash:keymap:vi/mode-indicator {
   [[ $bleopt_keymap_vi_mode_show ]] || return 0
 
@@ -750,8 +750,8 @@ function ble/widget/vi_imap/single-command-mode {
 
 ## @fn ble/keymap:vi/needs-eol-fix
 ##
-##   Note: この関数を使った後は ble/keymap:vi/adjust-command-mode を呼び出す必要がある。
-##     そうしないとノーマルモードにおいてありえない位置にカーソルが来ることになる。
+##   Note: You need to call ble/keymap:vi/adjust-command-mode after using this function.
+##     Otherwise, the cursor will be in an impossible position in normal mode.
 ##
 function ble/keymap:vi/needs-eol-fix {
   [[ $_ble_decode_keymap == vi_nmap || $_ble_decode_keymap == vi_omap ]] || return 1
@@ -761,8 +761,8 @@ function ble/keymap:vi/needs-eol-fix {
 }
 function ble/keymap:vi/adjust-command-mode {
   if [[ $_ble_decode_keymap == vi_[xs]map ]]; then
-    # 移動コマンドが来たら末尾拡張を無効にする。
-    # 移動コマンドはここを通るはず…
+    # Disable trailing expansion when a move command comes.
+    # Movement commands should go through here...
     ble/keymap:vi/xmap/remove-eol-extension
   fi
 
@@ -772,7 +772,7 @@ function ble/keymap:vi/adjust-command-mode {
     kmap_popped=1
   fi
 
-  # search による mark の設定・解除
+  # Setting/cancelling mark by search
   if [[ $_ble_keymap_vi_search_activate ]]; then
     if [[ $_ble_decode_keymap != vi_[xs]map ]]; then
       _ble_edit_mark_active=$_ble_keymap_vi_search_activate
@@ -862,7 +862,7 @@ function ble/widget/vi_nmap/insert-mode-at-first-non-space {
   local ARG FLAG REG; ble/keymap:vi/get-arg 1
   ble/widget/vi-command/first-non-space
   [[ ${_ble_edit_str:_ble_edit_ind:1} == [$' \t'] ]] &&
-    ((_ble_edit_ind++)) # 逆eol補正
+    ((_ble_edit_ind++)) # Reverse eol correction
   ble/widget/vi_nmap/.insert-mode "$ARG"
   ble/keymap:vi/repeat/record
   return 0
@@ -920,26 +920,26 @@ ble/array#push _ble_textarea_local_VARNAMES \
                _ble_keymap_vi_opfunc \
                _ble_keymap_vi_reg
 
-# ble/keymap:vi における _ble_edit_kill_ring の扱いついて
+# How to handle _ble_edit_kill_ring in ble/keymap:vi
 #
-# _ble_edit_kill_type=L のとき
-#   行指向の切り取り文字列であることを表し、
-#   _ble_edit_kill_ring の末端には必ず改行文字が来ると仮定して良い。
+# When _ble_edit_kill_type=L
+#   Indicates that it is a line-oriented cut string,
+#   You can assume that there is always a newline character at the end of _ble_edit_kill_ring.
 #
-# _ble_edit_kill_type=B:* の形式をしているとき、
-#   矩形の切り取り文字列であることを表し、
-#   _ble_edit_kill_ring は改行区切りで各行を連結したものである。
-#   末端には改行文字は付加しない。末端に改行文字があるときは、
-#   それは付加された改行ではなく、最後に空行があることを意味する。
+# When the format is _ble_edit_kill_type=B:*,
+#   Indicates that it is a rectangular cut string,
+#   _ble_edit_kill_ring is a concatenation of lines separated by line breaks.
+#   No newline character is added at the end. If there is a newline character at the end,
+#   That means there is a blank line at the end, not an appended newline.
 #
-#   _ble_edit_kill_type の 2 文字目以降は数字を空白区切りで並べたもので、
-#   各数字は _ble_edit_kill_ring 内の各行に対応する。
-#   意味は、行の途中に挿入する際に矩形を保つために右に補填するべき空白の数である。
-#   行末に挿入する際にはこの空白の補填は起こらないことに注意する。
+#   The second and subsequent characters of _ble_edit_kill_type are numbers separated by spaces,
+#   Each number corresponds to a row in _ble_edit_kill_ring.
+#   The meaning is the number of spaces to be filled on the right when inserting in the middle of a line to maintain a rectangular shape.
+#   Note that this blank padding does not occur when inserting at the end of a line.
 #
-# _ble_edit_kill_type= (空文字列) もしくは それ意外の場合は
-#   通常の切り取り文字列であることを表す。
-#   _ble_edit_kill_ring は任意の文字列である。
+# _ble_edit_kill_type= (empty string) or otherwise
+#   Indicates that it is a normal cut string.
+#   _ble_edit_kill_ring is any string.
 #
 _ble_keymap_vi_register=()
 _ble_keymap_vi_register_onplay=
@@ -953,12 +953,12 @@ function ble/keymap:vi/clear-arg {
 }
 ## @fn ble/keymap:vi/get-arg [default_value]; ARG FLAG REG
 ##
-## 引数の内容について
-##   vi_nmap, vi_xmap, vi_smap においては FLAG は空であると仮定して良い。
-##   vi_omap においては FLAG は非空である。
-##   get-arg{,-reg} を呼び出すことによって空になる。
-##   つまり vi_omap においてこの関数を呼び出したとき、vi_omap から vi_nmap に戻る必要がある。
-##   これは通例 ble/keymap:vi/adjust-command-mode によって実施される。
+## About the contents of the argument
+##   For vi_nmap, vi_xmap, and vi_smap, FLAG can be assumed to be empty.
+##   FLAG is non-empty in vi_omap.
+##   Empty by calling get-arg{,-reg}.
+##   In other words, when this function is called in vi_omap, it is necessary to return from vi_omap to vi_nmap.
+##   This is typically done with ble/keymap:vi/adjust-command-mode.
 ##
 function ble/keymap:vi/get-arg {
   local default_value=$1
@@ -994,17 +994,17 @@ function ble/keymap:vi/register#load {
 function ble/keymap:vi/register#set {
   local reg=$1 type=$2 content=$3
 
-  # type = L は行指向の値
-  # type = B は矩形指向の値
-  # type = '' は文字指向の値
-  # type = q はキーボードマクロ
+  # type = L is a row-oriented value
+  # type = B is a rectangular-oriented value
+  # type = '' is a character-oriented value
+  # type = q is a keyboard macro
   #
-  # Note: 実際に記録される type は以下の何れかである。
+  # Note: The type actually recorded is one of the following.
   #  type = L
   #  type = B:*
   #  type = ''
 
-  # 追記の場合
+  # In case of addition
   if [[ $reg == +* ]]; then
     local value=${_ble_keymap_vi_register[reg]}
     if [[ $value == */* ]]; then
@@ -1066,7 +1066,7 @@ function ble/keymap:vi/register#set {
 }
 
 ## @fn ble/keymap:vi/register#set-yank reg type content
-##   レジスタ "0 に文字列を登録します。
+##   Register a string in register "0.
 ##
 function ble/keymap:vi/register#set-yank {
   ble/keymap:vi/register#set "$@" || return 1
@@ -1076,12 +1076,12 @@ function ble/keymap:vi/register#set-yank {
   fi
 }
 ## @fn ble/keymap:vi/register#set-edit reg type content
-##   レジスタ "1 に文字列を登録します。
+##   Register a string in register "1.
 ##
-##   content に改行が含まれる場合、または、特定の WIDGET の時、
-##   元々レジスタ "1 - "8 にあった内容をレジスタ "2 - "9 に移動し、
-##   新しい文字列をレジスタ "1 に登録します。
-##   それ以外の時、新しい文字列はレジスタ "- に登録します。
+##   If content contains a line break or a specific WIDGET,
+##   Move the contents originally in registers "1 - "8 to registers "2 - "9,
+##   Register a new string in register "1.
+##   Otherwise, the new string is registered in register "-.
 ##
 _ble_keymap_vi_register_49_widget_list=(
   # %
@@ -1198,8 +1198,8 @@ function ble/widget/vi-command/register.hook {
       _ble_keymap_vi_reg=$c
       return 0
     elif ((c==34)); then # ""
-      # Note: vim の内部的には "" を指定するのと何も指定しないのは区別される。
-      # 例えば diw"y. は "y に記録されるが ""diw"y. は "" に記録される。
+      # Note: Vim internally distinguishes between specifying "" and not specifying anything.
+      # For example, diw"y. is recorded in "y", but ""diw"y. is recorded in "".
       _ble_keymap_vi_reg=$c
       return 0
     fi
@@ -1218,7 +1218,7 @@ ble/array#push _ble_textarea_local_VARNAMES \
 
 # nmap q
 function ble/widget/vi_nmap/record-register {
-  # レジスタに含まれる q は再生中には何も起こさない
+  # q contained in the register does nothing during playback
   if [[ $_ble_keymap_vi_register_onplay ]]; then
     ble/keymap:vi/clear-arg
     ble/keymap:vi/adjust-command-mode
@@ -1280,7 +1280,7 @@ function ble/widget/vi_nmap/play-register.hook {
 
   local depth=$_ble_keymap_vi_reg_record_play
   if ((depth>=bleopt_keymap_vi_macro_depth)) || ble/util/is-stdin-ready; then
-    return 1 # 無限ループを防ぐため
+    return 1 # To prevent infinite loops
   fi
 
   local _ble_keymap_vi_reg_record_play=$((depth+1))
@@ -1301,7 +1301,7 @@ function ble/widget/vi-command/operator {
 
   if [[ $_ble_decode_keymap == vi_[xs]map ]]; then
     local ARG FLAG REG; ble/keymap:vi/get-arg ''
-    # ※FLAG はユーザにより設定されているかもしれないが無視
+    # *FLAG may be set by the user, but it will be ignored.
 
     local a=$_ble_edit_ind b=$_ble_edit_mark
     ((a<=b||(a=_ble_edit_mark,b=_ble_edit_ind)))
@@ -1335,7 +1335,7 @@ function ble/widget/vi-command/operator {
   elif [[ $_ble_decode_keymap == vi_omap ]]; then
     local opname1=${_ble_keymap_vi_opfunc%%:*}
     if [[ $opname == "$opname1" ]]; then
-      # 2つの同じオペレータ (yy, dd, cc, etc.) = 行指向の処理
+      # Two same operators (yy, dd, cc, etc.) = row-oriented processing
       ble/widget/vi_nmap/linewise-operator "$_ble_keymap_vi_opfunc"
     else
       ble/keymap:vi/clear-arg
@@ -1394,41 +1394,41 @@ function ble/widget/vi-command/beginning-of-line {
 #------------------------------------------------------------------------------
 # Operators
 
-## オペレータは以下の形式の関数として定義される。
+## Operators are defined as functions of the form:
 ##
-## @fn ble/keymap:vi/operator:名称 a b context [count [reg]]
+## @fn ble/keymap:vi/operator:name a b context [count [reg]]
 ##
 ##   @param[in] a b
-##     範囲の開始点と終了点。終了点は開始点以降にあることが保証される。
-##     context が 'line' のとき、それぞれ行頭・行末にあることが保証される。
-##     ただし、行末に改行があるときは b は次の行頭を指す。
+##     The start and end points of the range. The ending point is guaranteed to be after the starting point.
+##     When context is 'line', it is guaranteed to be at the beginning and end of the line, respectively.
+##     However, if there is a newline at the end of a line, b points to the beginning of the next line.
 ##
 ##   @param[in] context
-##     範囲の種類を表す文字列。char, line, block の何れか。
+##     A string representing the range type. Either char, line, or block.
 ##
 ##   @param[in] count
-##     オペレータの操作に対する引数。
-##     これはビジュアルモードで指定される。
+##     Arguments for operator operations.
+##     This is specified in visual mode.
 ##
 ##   @var[in,out] beg end
-##     範囲の開始点と終了点。a b と同一の値。
-##     行指向オペレータのとき範囲が拡大されることがある。
-##     その時 beg に拡大後の開始点を返す。
+##     The start and end points of the range. a The same value as b.
+##     The range may be expanded for row-oriented operators.
+##     At that time, the starting point after expansion is returned to beg.
 ##
 ##   @var[out] ble_keymap_vi_operator_index
-##     オペレータ作用後のカーソル位置を明示するとき、
-##     オペレータ内部でこの変数に値を設定する。
+##     When specifying the cursor position after an operator action,
+##     Set a value to this variable inside the operator.
 ##
 ##   @exit
-##     operator 関数が終了ステータス 147 を返したとき、
-##     operator が非同期に入力を読み取ることを表す。
-##     147 を返した operator は、実際に操作が完了した時に:
+##     When the operator function returns an exit status of 147,
+##     Represents that operator reads input asynchronously.
+##     The operator that returned 147 when the operation actually completed:
 ##
-##     1 ble/keymap:vi/mark/end-edit-area を呼び出す必要がある。
-##     2 適切な位置にカーソルを移動する必要がある。
+##     1 Must call ble/keymap:vi/mark/end-edit-area.
+##     2 You need to move the cursor to the appropriate position.
 ##
 ##
-## オペレータは現在以下の4箇所で呼び出されている。
+## The operator is currently called in four places:
 ##
 ## - ble/widget/vi-command/linewise-range.impl
 ## - ble/keymap:vi/call-operator
@@ -1443,10 +1443,10 @@ function ble/widget/vi-command/beginning-of-line {
 ## @fn ble/keymap:vi/call-operator-blockwise op beg end arg reg
 ##
 ##   @var[in] ble_keymap_vi_mark_active
-##     オペレータ作用前の $_ble_edit_mark_active を指定する。
-##     call-operator-blockwise での矩形領域を決定するのに用いる。
-##     演算子の呼び出し時には既に $_ble_edit_mark_active は
-##     作用後の値に変わっていることに注意する。
+##     Specify $_ble_edit_mark_active before operator action.
+##     Used to determine the rectangular area in call-operator-blockwise.
+##     $_ble_edit_mark_active is already set when the operator is called.
+##     Note that the value has changed after the action.
 ##
 function ble/keymap:vi/call-operator {
   ble/keymap:vi/mark/start-edit-area
@@ -1497,7 +1497,7 @@ function ble/keymap:vi/call-operator-linewise {
     if [[ $ble_keymap_vi_operator_index ]]; then
       local index=$ble_keymap_vi_operator_index
     else
-      ble-edit/content/find-logical-bol "$beg"; beg=$ret # operator 中で beg が変更されているかも
+      ble-edit/content/find-logical-bol "$beg"; beg=$ret # beg may have been changed in operator
       ble-edit/content/find-non-space "$beg"; local index=$ret
     fi
     ble/keymap:vi/needs-eol-fix "$index" && ((index--))
@@ -1533,11 +1533,11 @@ function ble/keymap:vi/call-operator-blockwise {
 
 
 function ble/keymap:vi/operator:d {
-  local context=$3 arg=$4 reg=$5 # beg end は上書きする
+  local context=$3 arg=$4 reg=$5 # beg end overwrites
   if [[ $context == line ]]; then
     ble/keymap:vi/register#set-edit "$reg" L "${_ble_edit_str:beg:end-beg}" || return 1
 
-    # 最後の行が削除される時は前の行の非空白行頭まで後退
+    # When the last line is deleted, backtrack to the non-blank beginning of the previous line
     if ((end==${#_ble_edit_str}&&beg>0)); then
       # fix start position
       local ret
@@ -1559,7 +1559,7 @@ function ble/keymap:vi/operator:d {
       slpad=${sub[2]} srpad=${sub[3]}
       sfill=${sub[4]}
 
-      [[ $slpad0 ]] || slpad0=$slpad # 最初の slpad
+      [[ $slpad0 ]] || slpad0=$slpad # first slpad
 
       ble/array#push afill "$sfill"
       ble/array#push atext "$stext"
@@ -1586,8 +1586,8 @@ function ble/keymap:vi/operator:d {
     if ((beg<end)); then
 
       if [[ $ble_keymap_vi_opmode != vi_char && ${_ble_edit_str:beg:end-beg} == *$'\n'* ]]; then
-        # d の例外動作: 文字単位で開始点と終了点が異なる行で、
-        #   開始点より前・終了点より後に空白しかない時、行指向で処理する。
+        # Exceptional behavior of d: On lines where the start and end points are different character by character,
+        #   When there is only blank space before the start point or after the end point, process in a line-oriented manner.
         if local rex=$'(^|\n)([ \t]*)$'; [[ ${_ble_edit_str::beg} =~ $rex ]]; then
           local prefix=${BASH_REMATCH[2]}
           if rex=$'^[ \t]*(\n|$)'; [[ ${_ble_edit_str:end} =~ $rex ]]; then
@@ -1606,7 +1606,7 @@ function ble/keymap:vi/operator:d {
   return 0
 }
 function ble/keymap:vi/operator:c {
-  local context=$3 arg=$4 reg=$5 # beg は上書き対象
+  local context=$3 arg=$4 reg=$5 # beg is to be overwritten
   if [[ $context == line ]]; then
     ble/keymap:vi/register#set-edit "$reg" L "${_ble_edit_str:beg:end-beg}" || return 1
 
@@ -1622,10 +1622,10 @@ function ble/keymap:vi/operator:c {
   elif [[ $context == block ]]; then
     ble/keymap:vi/operator:d "$@" || return 1 # @var beg will be overwritten here
 
-    # operator:d によってずれた矩形領域を修正する。
-    # 一から計算し直すのは面倒なので sub_ranges を直接弄る。
-    # 実のところ block-insert-mode insert は sub_ranges[0] の smin と sub_x1
-    # しか参照しないので、sub_ranges[0] だけ修正すれば良い。
+    # Correct the rectangular area shifted by operator:d.
+    # Since it is troublesome to recalculate from scratch, we will manipulate sub_ranges directly.
+    # Actually block-insert-mode insert is smin of sub_ranges[0] and sub_x1
+    # Since only sub_ranges[0] is referenced, you only need to modify sub_ranges[0].
     local sub=${sub_ranges[0]}
     local smin=${sub%%:*} sub=${sub#*:}
     local smax=${sub%%:*} sub=${sub#*:}
@@ -1646,7 +1646,7 @@ function ble/keymap:vi/operator:y {
   local beg=$1 end=$2 context=$3 arg=$4 reg=$5
   local yank_type= yank_content=
   if [[ $context == line ]]; then
-    ble_keymap_vi_operator_index=$_ble_edit_ind # operator:y では現在位置を動かさない
+    ble_keymap_vi_operator_index=$_ble_edit_ind # operator:y does not move the current position
     yank_type=L
     yank_content=${_ble_edit_str:beg:end-beg}
   elif [[ $context == block ]]; then
@@ -1705,13 +1705,13 @@ function ble/keymap:vi/operator:rot13 {
 function ble/keymap:vi/expand-range-for-linewise-operator {
   local ret
 
-  # 行頭補正:
+  # Heading correction:
   ble-edit/content/find-logical-bol "$beg"; beg=$ret
 
-  # 行末補正:
-  #   行前進時は非空白行頭以前に end がある場合はその行は無視
-  #   行後退時は行頭に end (_ble_edit_ind) がある場合はその行は無視
-  #   同一行内の移動の場合は無条件にその行は含まれる。
+  # End of line correction:
+  #   When advancing a line, if there is an end before the beginning of a non-blank line, that line is ignored.
+  #   When backtracking a line, if end (_ble_edit_ind) is at the beginning of the line, that line is ignored.
+  #   If the movement is within the same line, that line is included unconditionally.
   ble-edit/content/find-logical-bol "$end"; local bol2=$ret
   ble-edit/content/find-non-space "$bol2"; local nol2=$ret
   if ((beg<bol2&&_ble_edit_ind<=bol2&&end<=nol2)); then
@@ -1830,7 +1830,7 @@ function ble/keymap:vi/operator:indent.impl/decrease-graphical-block-indent {
 ##   @param[in] width
 ##   @var[in] sub_ranges
 function ble/keymap:vi/operator:indent.impl/decrease-logical-block-indent {
-  # タブは幅 it で固定と見做して削除する
+  # The tab is assumed to have a fixed width it and is deleted.
   local width=$1
   local it=${bleopt_tab_width:-$_ble_term_it}
   local sub smin ret nsp
@@ -1900,15 +1900,15 @@ function ble/keymap:vi/operator:indent-right {
 # Fold operators gq gw
 
 ## @fn ble/keymap:vi/string#measure-width text
-##   指定した文字列の表示上の幅を計測します。
+##   Measures the displayed width of the specified string.
 ##
 ##   @param[in] text
 ##   @var[out] ret
 ##
-##   折り返し処理は行いません。
-##   タブや改行などの特別処理は行いません。
-##   C0 文字は 2 文字として取り扱います。
-##   C1 文字は 4 文字として取り扱います。
+##   No wrap-around processing will be performed.
+##   No special processing such as tabs or line breaks is performed.
+##   The C0 character is treated as two characters.
+##   The C1 character is treated as 4 characters.
 function ble/keymap:vi/string#measure-width {
   local text=$1 iN=${#1} i=0 s=0
   while ((i<iN)); do
@@ -1924,12 +1924,12 @@ function ble/keymap:vi/string#measure-width {
   ret=$s
 }
 ## @fn ble/keymap:vi/string#fold/.get-interval text x
-##   単語間のスペースの表示上の幅を計算します。
+##   Calculates the visual width of the spaces between words.
 ##
 ##   @param[in] text
-##     スペース・タブで構成される文字列を指定します。
+##     Specifies a string consisting of spaces and tabs.
 ##   @param[in] x
-##     画面上の初期位置を指定します。
+##     Specifies the initial position on the screen.
 ##   @var[out] ret
 ##
 function ble/keymap:vi/string#fold/.get-interval {
@@ -1948,25 +1948,25 @@ function ble/keymap:vi/string#fold/.get-interval {
 }
 ## @fn ble/keymap:vi/string#fold text [cols]
 ##   @param[in]     text
-##   @param[in,opt] cols [既定値 ${COLUMNS:-80}]
-##     折り返す幅を指定します。
-##     cols-1 列以内に表示文字が収まる様に折り返し処理されます。
-##     但し長い単語の途中で折り返しは起こりません。
+##   @param[in,opt] cols [default ${COLUMNS:-80}]
+##     Specify the wrapping width.
+##     The displayed characters are wrapped so that they fit within cols-1 columns.
+##     However, wrapping does not occur in the middle of long words.
 ##   @var[out] ret
 function ble/keymap:vi/string#fold {
   local text=$1
   local cols=${2:-${COLUMNS-80}}
   local sp=$' \t' nl=$'\n'
 
-  # 途中状態について
-  #   @var i       text 内の現在処理している位置
-  #   @var out     今までに確定した結果文字列
-  #   @var otmp    保留中の単語間スペース。次の単語が来て初めて確定する。
-  #   @var x       $out を処理した後の表示横位置
-  #   @var xtmp    $out$otmp を処理した後の表示横位置
-  #   @var isfirst 初回の正規表現一致かどうか
-  #   @var indent  インデント (改行直後に挿入する空白類)
-  #   @var xindent インデント挿入直後の表示横位置
+  # About the intermediate status
+  #   @var i The currently processed position in text
+  #   @var out Result string determined so far
+  #   @var otmp Pending interword space. It is only confirmed when the next word comes.
+  #   Display horizontal position after processing @var x $out
+  #   @var xtmp Display horizontal position after processing $out$otmp
+  #   @var isfirst Whether it is the first regular expression match
+  #   @var indent Indent (whitespace inserted immediately after line break)
+  #   @var xindent Display horizontal position immediately after inserting indentation
   local i=0 out= otmp= x=0 xtmp=0
   local isfirst=1 indent= xindent=0
 
@@ -1974,7 +1974,7 @@ function ble/keymap:vi/string#fold {
   while [[ ${text:i} =~ $rex ]]; do
     ((i+=${#BASH_REMATCH}))
     if [[ ${BASH_REMATCH[1]} ]]; then
-      # 単語
+      # word
       local word=${BASH_REMATCH[1]}
       ble/keymap:vi/string#measure-width "$word"
       if ((xtmp+ret<cols||xtmp<=xindent)); then
@@ -1988,13 +1988,13 @@ function ble/keymap:vi/string#fold {
     else
       local w=1
       if [[ ${BASH_REMATCH[2]} ]]; then
-        [[ $otmp ]] && continue # 改行直後の空白は無視
-        # 単語間のスペース
+        [[ $otmp ]] && continue # Ignore spaces immediately after a line break
+        # space between words
         otmp=${BASH_REMATCH[2]}
         ble/keymap:vi/string#fold/.get-interval "$otmp" "$x"; w=$ret
-        [[ $isfirst ]] && indent=$otmp xindent=$ret # インデント記録
+        [[ $isfirst ]] && indent=$otmp xindent=$ret # Indent record
       else
-        # 改行は空白に置換。既存の空白 otmp は消去。
+        # Line breaks are replaced with spaces. Erase existing blank otmp.
         otmp=' ' w=1
       fi
 
@@ -2025,7 +2025,7 @@ function ble/keymap:vi/operator:fold/.fold-paragraphwise {
     local len1=${#rematch1}
     local paragraph=${BASH_REMATCH:len1}
 
-    # fold (実はここだけ変えれば paragraphwise の様々な処理を実装できる)
+    # fold (Actually, you can implement various paragraphwise processes by changing just this part)
     ble/keymap:vi/string#fold "$paragraph" "$cols"
     paragraph=${ret%$'\n'}$'\n'
 
@@ -2045,9 +2045,9 @@ function ble/keymap:vi/operator:fold.impl {
   ble/keymap:vi/operator:fold/.fold-paragraphwise "$old" "$cols"; local new=$ret
   ble/widget/.replace-range "$beg" "$end" "$new"
 
-  # 変換後のカーソル位置を修正。
+  # Corrected cursor position after conversion.
   if [[ :$opts: == *:preserve_point:* ]]; then
-    # gw: もともとカーソルが合った文字に移動。
+    # gw: Move to the character that the cursor was originally on.
     if ((end<=oind)); then
       ble_keymap_vi_operator_index=$((beg+${#new}))
     elif ((beg<oind)); then
@@ -2055,7 +2055,7 @@ function ble/keymap:vi/operator:fold.impl {
       ble_keymap_vi_operator_index=$((beg+${#ret}))
     fi
   else
-    # gq: 最終行の非空白行頭 (gq) に移動。
+    # gq: Move to the nonblank beginning (gq) of the last line.
     if [[ $new ]]; then
       ble-edit/content/find-logical-bol "$((beg+${#new}-1))"
       ble-edit/content/find-non-space "$ret"
@@ -2105,12 +2105,12 @@ function ble/keymap:vi/operator:filter {
   _ble_keymap_vi_filter_args=("$beg" "$end" "${@:3}")
 
   if [[ $_ble_keymap_vi_repeat_invoke ]]; then
-    # nmap . によって繰り返しが要求された時
+    # When repetition is requested by nmap .
     local command=${_ble_keymap_vi_repeat[10]}
     ble/keymap:vi/operator:filter/.hook "$command"
     return "$?"
   else
-    # 通常の呼び出し時
+    # During normal call
     ble/keymap:vi/operator:filter/.cache-repeat
     _ble_edit_ind=$beg
     _ble_edit_mark=$end
@@ -2129,7 +2129,7 @@ function ble/keymap:vi/operator:filter/cancel.hook {
   _ble_edit_mark_active= # clear mark:vi_filter
 }
 function ble/keymap:vi/operator:filter/.hook {
-  local command=$1 # 入力されたコマンド
+  local command=$1 # Command entered
   if [[ ! $command ]]; then
     ble/widget/vi-command/bell
     return 1
@@ -2190,18 +2190,18 @@ function ble/keymap:vi/operator:map {
 ## @fn ble/widget/vi-command/inclusive-goto.impl index flag reg nobell
 ##
 ##   @param[in] src, dst
-##     移動前の位置と移動先の位置を指定します。
+##     Specify the position before movement and the position to move to.
 ##
 ##   @param[in] flag
-##     オペレータ名を指定します。
+##     Specify the operator name.
 ##
 ##   @param[in] reg
-##     レジスタ番号を指定します。
+##     Specify the register number.
 ##
 ##   @param[in] opts
-##     コロン区切りのオプションです。
-##     nobell    移動前と移動後の位置が同じときにベルを鳴らしません。
-##     inclusive 移動の既定の動作が inclusive である事を示します。
+##     Colon-separated options.
+##     nobell Does not ring the bell when the position before and after movement is the same.
+##     inclusive Indicates that the default behavior for movement is inclusive.
 ##
 function ble/widget/vi-command/exclusive-range.impl {
   local src=$1 dst=$2 flag=$3 reg=$4 opts=$5
@@ -2216,7 +2216,7 @@ function ble/widget/vi-command/exclusive-range.impl {
     elif [[ :$opflags: == *:vi_char:* ]]; then
       local ble_keymap_vi_opmode=vi_char
 
-      # 規則 o_v (omap v) の toggle inclusive/exclusive
+      # toggle inclusive/exclusive for rule o_v (omap v)
       if [[ :$opts: == *:inclusive:* ]]; then
         ((src<dst?dst--:(dst<src&&src--)))
       else
@@ -2258,14 +2258,14 @@ function ble/widget/vi-command/exclusive-goto.impl {
     if ble-edit/content/bolp "$index"; then
       local is_linewise=
       if ((_ble_edit_ind<index)); then
-        # :help exclusive-linewise の規則1 (src<ind の時のみ)
+        # :help exclusive-linewise rule 1 (only when src<ind)
         ((index--))
-        # :help exclusive-linewise の規則2
+        # :help exclusive-linewise rule 2
         rex=$'(^|\n)[ \t]*$'
         [[ ${_ble_edit_str::_ble_edit_ind} =~ $rex ]] &&
           is_linewise=1
       elif ((index<_ble_edit_ind)); then
-        # :help exclusive-linewise の規則2 (条件が異なる)
+        # :help exclusive-linewise rule 2 (different conditions)
         ble-edit/content/bolp &&
           is_linewise=1
       fi
@@ -2294,32 +2294,32 @@ function ble/widget/vi-command/inclusive-goto.impl {
 ## @fn ble/widget/vi-command/linewise-goto.impl index flag reg opts
 ##
 ##   @param[in] p, q
-##     開始位置と終了位置を指定します。
-##     flag が設定されていない場合は q に移動します。
+##     Specify the start and end positions.
+##     If flag is not set, move to q.
 ##
 ##   @param[in] index
-##     開始位置を _ble_edit_ind とし、
-##     移動先または終了位置を指定します。
+##     Set the starting position to _ble_edit_ind,
+## Specify the destination or end position.
 ##
-##     index=indx:linex の形をしているとき、
-##     基準の位置 indx から linex 行目を移動先とします。
-##     index=整数 の場合 index を含む行を移動先とします。
+##     When it has the form index=indx:linex,
+##     The movement destination is linex from the reference position indx.
+##     If index=integer, move to the row containing index.
 ##
 ##   @param[in] flag
 ##   @param[in] reg
 ##
 ##   @param[in] opts
-##     以下のフィールドを似にに含むコロン区切りのリスト
+##     A colon-separated list containing the following fields:
 ##
 ##     preserve_column
 ##     require_multiline
 ##     goto_bol
 ##
 ##     bolx=NUMBER
-##       既に計算済みの移動先 (index, q) の行の行頭がある場合はここに指定します。
+##       If there is a start of the line where the destination (index, q) is already calculated, specify it here.
 ##
 ##     nolx=NUMBER
-##       既に計算済みの移動先 (index, q) の行の非空白行頭位置がある場合はここに指定します。
+##       If there is a non-blank start position of the destination line (index, q) that has already been calculated, specify it here.
 ##
 function ble/widget/vi-command/linewise-range.impl {
   local p=$1 q=$2 flag=$3 reg=$4 opts=$5
@@ -2333,7 +2333,7 @@ function ble/widget/vi-command/linewise-range.impl {
   local bolx=; ble/string#match ":$opts:" ':bolx=([0-9]+):' && bolx=${BASH_REMATCH[1]}
   local nolx=; ble/string#match ":$opts:" ':nolx=([0-9]+):' && nolx=${BASH_REMATCH[1]}
 
-  # 移動時 (オペレータが設定されていない時)
+  # When moving (when no operator is set)
   if [[ ! $flag ]]; then
     if [[ ! $nolx ]]; then
       if [[ ! $bolx ]]; then
@@ -2357,9 +2357,9 @@ function ble/widget/vi-command/linewise-range.impl {
   ble-edit/content/find-logical-bol "$p"; bolp=$ret
   [[ $bolq ]] || { ble-edit/content/find-logical-bol "$qbase" "$qline"; bolq=$ret; }
 
-  # jk+- で1行も移動できない場合は操作をキャンセルする。
-  # Note: qline を用いる場合は必ずしも望みどおり
-  #   qline 行目が存在するとは限らないことに注意する。
+  # If you cannot move a single line with jk+-, cancel the operation.
+  # Note: When using qline, it is not always possible to get what you want.
+  #   Note that line qline does not necessarily exist.
   if [[ :$opts: == *:require_multiline:* ]]; then
     if ((bolq==bolp)); then
       ble/widget/vi-command/bell
@@ -2367,9 +2367,9 @@ function ble/widget/vi-command/linewise-range.impl {
     fi
   fi
 
-  # オペレータ呼び出し
+  # operator call
   if [[ :$opflags: == *:vi_char:* || :$opflags: == *:vi_block:* ]]; then
-    # 行き先の決定
+    # Deciding on a destination
     local beg=$p end
     if [[ :$opts: == *:preserve_column:* ]]; then
       local index
@@ -2395,9 +2395,9 @@ function ble/widget/vi-command/linewise-range.impl {
       return "$ext"
     fi
   else
-    # 行指向の処理 (既定)
+    # Row-oriented processing (default)
 
-    # 最初の行の行頭 beg と最後の行の行末 end
+    # Beg of the first line and end of the last line
     local beg end
     if ((bolp<=bolq)); then
       ble-edit/content/find-logical-eol "$bolq"; beg=$bolp end=$ret
@@ -2415,10 +2415,10 @@ function ble/widget/vi-command/linewise-range.impl {
       return "$ext"
     fi
 
-    # 範囲の先頭に移動
+    # Move to beginning of range
     local ind=$_ble_edit_ind
     if [[ $opname == [cd] ]]; then
-      # これらは常に first-non-space になる。
+      # These are always first-non-space.
       _ble_edit_ind=$beg
       ble/widget/vi-command/first-non-space
     elif [[ :$opts: == *:preserve_column:* ]]; then # j k
@@ -2436,11 +2436,11 @@ function ble/widget/vi-command/linewise-range.impl {
         ble/keymap:vi/needs-eol-fix "$index" && ((index--))
         _ble_edit_ind=$index
       fi
-    elif [[ :$opts: == *:goto_bol:* ]]; then # 行指向 yis
+    elif [[ :$opts: == *:goto_bol:* ]]; then # row-oriented yis
       _ble_edit_ind=$beg
     else # + - gg G L H
       if ((beg==bolq||ind<beg)) || [[ ${_ble_edit_str:beg:ind-beg} == *$'\n'* ]] ; then
-        # 先頭行の非空白行頭に移動する
+        # Move to the beginning of the first non-blank line
         if ((bolq<=bolp)) && [[ $nolq ]]; then
           local nolb=$nolq
         else
@@ -2482,11 +2482,11 @@ function ble/keymap:vi/async-read-char {
 # marks
 
 ## @arr _ble_keymap_vi_mark_local
-##   添字は mark の文字コードで指定する。
-##   各要素は point:bytes の形をしている。
+##   The subscript is specified by the character code of mark.
+##   Each element has the form point:bytes.
 ## @arr _ble_keymap_vi_mark_global
-##   添字は mark の文字コードで指定する。
-##   各要素は hindex:point:bytes の形をしている。
+##   The subscript is specified by the character code of mark.
+##   Each element has the form hindex:point:bytes.
 _ble_keymap_vi_mark_Offset=32
 _ble_keymap_vi_mark_hindex=
 _ble_keymap_vi_mark_local=()
@@ -2504,13 +2504,13 @@ ble/array#push _ble_textarea_local_VARNAMES \
                _ble_keymap_vi_mark_edit_dend \
                _ble_keymap_vi_mark_edit_dend0
 
-# mark 番号と用途の対応
+# Correspondence between mark number and usage
 #
 #
-#   1     内部使用。矩形挿入モードの開始点を記録するためのもの
-#   91 93 `[ と `]。編集・ヤンク範囲を保持する。
-#   96 39 `` と `'。最後のジャンプ位置を保持する。39 は実際には使用されない。
-#   60 62 `< と `>。最後のビジュアル範囲。
+#   1 Internal use. For recording the starting point of rectangle insert mode
+#   91 93 `[ and `]. Preserve edit/yank range.
+#   96 39 `` and `''. Hold last jump position. 39 is not actually used.
+#   60 62 `< and `>. Final visual range.
 #
 
 ble/array#push _ble_edit_dirty_observer ble/keymap:vi/mark/shift-by-dirty-range
@@ -2523,8 +2523,8 @@ function ble/keymap:vi/mark/history-onleave.hook {
   fi
 }
 
-# 履歴がロードされていない時は取り敢えず _ble_history_index=0 で登録をしておく。
-# 履歴がロードされた後の初めての利用のときに正しい履歴番号に修正する。
+# If the history is not loaded, register it with _ble_history_index=0.
+# Correct the history number when using it for the first time after the history has been loaded.
 function ble/keymap:vi/mark/update-mark-history {
   local h; ble/history/get-index -v h
   if [[ ! $_ble_keymap_vi_mark_hindex ]]; then
@@ -2557,9 +2557,9 @@ blehook history_change!=ble/keymap:vi/mark/history-change.hook
 ## @fn ble/keymap:vi/mark/history-change.hook 'clear'
 ## @fn ble/keymap:vi/mark/history-change.hook 'insert' beg len
 ##   @param[in] index...
-##     削除する項目の番号を指定します。昇順に並んでいる事と重複がない事を仮定します。
+##     Specifies the number of the item to delete. Assume that they are arranged in ascending order and that there are no duplicates.
 ##   @param[in] beg len
-##     挿入位置と挿入項目の個数を指定します。
+##     Specify the insertion position and number of items to be inserted.
 function ble/keymap:vi/mark/history-change.hook {
   local kind=$1; shift
   case $kind in
@@ -2662,9 +2662,9 @@ function ble/keymap:vi/mark/set-local-mark {
 }
 ## @fn ble/keymap:vi/mark/get-mark.impl index bytes
 ##   @param[in] index bytes
-##     記録された行頭の位置と列を指定します。
+##     Specifies the position and column of the beginning of the recorded line.
 ##   @var[out] ret
-##     マークが見つかったとき対応する位置を返します。
+##     Returns the corresponding position when the mark is found.
 function ble/keymap:vi/mark/get-mark.impl {
   local index=$1 bytes=$2
   local len=${#_ble_edit_str}
@@ -2677,9 +2677,9 @@ function ble/keymap:vi/mark/get-mark.impl {
 }
 ## @fn ble/keymap:vi/mark/get-local-mark
 ##   @param[in] c
-##     mark の番号 (文字コード) を指定します。
+##     Specify the mark number (character code).
 ##   @var[out] ret
-##     マークが見つかったとき対応する位置を返します。
+##     Returns the corresponding position when the mark is found.
 function ble/keymap:vi/mark/get-local-mark {
   local c=$1
   ble/keymap:vi/mark/update-mark-history
@@ -2739,7 +2739,7 @@ function ble/widget/vi-command/set-mark.hook {
       ble/keymap:vi/adjust-command-mode
       return 0
     elif ((97<=c&&c<123||c==91||c==93||c==60||c==62||c==96||c==39)); then # a-z [ ] < > ` '
-      ((c==39)) && c=96 # m' は m` に読み替える
+      ((c==39)) && c=96 # m' is read as m`
       ble/keymap:vi/mark/set-local-mark "$c" "$_ble_edit_ind"
       ble/keymap:vi/adjust-command-mode
       return 0
@@ -2810,7 +2810,7 @@ function ble/widget/vi-command/goto-mark.hook {
       ble/widget/vi-command/goto-global-mark.impl "$c" "$opts"
       return "$?"
     elif ((_ble_keymap_vi_mark_Offset<=c)); then
-      ((c==39)) && c=96 # `' は `` に読み替える
+      ((c==39)) && c=96 # `' is replaced with ``
       ble/widget/vi-command/goto-local-mark.impl "$c" "$opts"
       return "$?"
     fi
@@ -2875,34 +2875,34 @@ function ble/widget/vi-command:marks {
 ## @arr _ble_keymap_vi_repeat
 ## @arr _ble_keymap_vi_repeat_insert
 ##
-##   _ble_keymap_vi_repeat が前回の操作を記録する
-##   _ble_keymap_vi_repeat_insert は挿入モードにいる時に、
-##   その挿入モードに突入するきっかけとなった操作を保持する。
-##   これは <C-[> または <C-c> で挿入モードを完了する際に、
-##   _ble_keymap_vi_repeat に書き込まれるものである。
+##   _ble_keymap_vi_repeat records previous operation
+##   _ble_keymap_vi_repeat_insert when in insert mode,
+##   Holds the operation that caused the insertion mode to be entered.
+##   This means that when completing insert mode with <C-[> or <C-c>,
+##   This is written to _ble_keymap_vi_repeat.
 ##
 ##   ${_ble_keymap_vi_repeat[0]} = KEYMAP
-##     呼び出し時の kmap を保持します。
+##     Keep the kmap at the time of the call.
 ##   ${_ble_keymap_vi_repeat[1]} = KEYS
-##     呼び出しに用いられたキーの列を保持します。
+##     Holds the sequence of keys used in the call.
 ##   ${_ble_keymap_vi_repeat[2]} = WIDGET
-##     呼び出された編集コマンドを保持します。
+##     Holds the edited command that was called.
 ##   ${_ble_keymap_vi_repeat[@]:3:3} = ARG FLAG REG
-##     呼び出し時の修飾状態を保持します。
+##     Preserves the qualification state at the time of the call.
 ##   ${_ble_keymap_vi_repeat[6]} = _ble_keymap_vi_xmap_prev_edit
-##     vi_xmap のとき範囲の大きさと種類を記録します。
+##     Records the range size and type when using vi_xmap.
 ##   ${_ble_keymap_vi_repeat[@]:10}
-##     各 WIDGET が自由に使える領域
+##     Area that each WIDGET can freely use
 ##
 ## @arr _ble_keymap_vi_repeat_irepeat
 ##
-##   _ble_keymap_vi_repeat の操作によって挿入モードに入るとき、
-##   そこで行われる挿入操作の列を記録する配列である。
-##   形式は _ble_keymap_vi_irepeat と同じ。
+##   When entering insert mode by operating _ble_keymap_vi_repeat,
+##   This is an array that records the sequence of insert operations performed there.
+##   The format is the same as _ble_keymap_vi_irepeat.
 ##
 ## @var _ble_keymap_vi_repeat_invoke
-##   ble/keymap:vi/repeat/invoke を通して呼び出された widget かどうかを保持するローカル変数です。
-##   この変数が非空白のとき ble/keymap:vi/repeat/invoke 内部での呼び出しであることを表します。
+## A local variable that holds whether the widget was called via ble/keymap:vi/repeat/invoke.
+##   When this variable is non-blank, it indicates a call inside ble/keymap:vi/repeat/invoke.
 ##
 _ble_keymap_vi_repeat=()
 _ble_keymap_vi_repeat_insert=()
@@ -2912,9 +2912,9 @@ function ble/keymap:vi/repeat/record-special {
   [[ $_ble_keymap_vi_mark_suppress_edit ]] && return 0
 
   if [[ $_ble_keymap_vi_repeat_invoke ]]; then
-    # repeat に引数が指定されたときは以降それを使う
+    # If an argument is specified for repeat, use it from now on
     [[ $repeat_arg ]] && _ble_keymap_vi_repeat[3]=$repeat_arg
-    # レジスタが記録されていないときは、以降新しく指定されたレジスタを使う
+    # If the register is not recorded, the newly specified register will be used from now on.
     [[ ! ${_ble_keymap_vi_repeat[5]} ]] && _ble_keymap_vi_repeat[5]=$repeat_reg
     return 0
   fi
@@ -2939,16 +2939,16 @@ function ble/keymap:vi/repeat/record {
   ble/keymap:vi/repeat/record-normal
 }
 ## @fn ble/keymap:vi/repeat/record-insert
-##   挿入モードを抜ける時に、挿入モードに入るきっかけになった操作と、
-##   挿入モードで行われた挿入操作の列を記録します。
+##   When exiting insert mode, the operation that triggered entering insert mode,
+##   Records columns for insert operations performed in insert mode.
 function ble/keymap:vi/repeat/record-insert {
   ble/keymap:vi/repeat/record-special && return 0
   if [[ ${_ble_keymap_vi_repeat_insert-} ]]; then
-    # 挿入モード突入操作が未だ有効ならば、挿入操作の有無に拘らず記録
+    # If the insertion mode entry operation is still valid, it will be recorded regardless of whether there is an insertion operation.
     _ble_keymap_vi_repeat=("${_ble_keymap_vi_repeat_insert[@]}")
     _ble_keymap_vi_repeat_irepeat=("${_ble_keymap_vi_irepeat[@]}")
   elif ((${#_ble_keymap_vi_irepeat[@]})); then
-    # 挿入モード突入操作が初期化されていたら、挿入操作がある時のみに記録
+    # If the insertion mode entry operation has been initialized, it will be recorded only when there is an insertion operation.
     local IFS=$_ble_term_IFS
     _ble_keymap_vi_repeat=(vi_nmap "${KEYS[*]-}" ble/widget/vi_nmap/insert-mode 1 '' '')
     _ble_keymap_vi_repeat_irepeat=("${_ble_keymap_vi_irepeat[@]}")
@@ -2956,8 +2956,8 @@ function ble/keymap:vi/repeat/record-insert {
   ble/keymap:vi/repeat/clear-insert
 }
 ## @fn ble/keymap:vi/repeat/clear-insert
-##   挿入モードにおいて white list にないコマンドが実行された時に、
-##   挿入モードに入るきっかけになった操作を初期化します。
+##   When a command not in the white list is executed in insert mode,
+##   Initializes the operation that caused insert mode to be entered.
 function ble/keymap:vi/repeat/clear-insert {
   _ble_keymap_vi_repeat_insert=()
 }
@@ -2969,7 +2969,7 @@ function ble/keymap:vi/repeat/invoke {
   local -a KEYS; ble/string#split-words KEYS "${_ble_keymap_vi_repeat[1]}"
   local WIDGET=${_ble_keymap_vi_repeat[2]}
 
-  # keymap の状態復元
+  # keymap state restoration
   if [[ $KEYMAP != vi_[onxs]map ]]; then
     ble/widget/vi-command/bell
     return 1
@@ -2979,21 +2979,21 @@ function ble/keymap:vi/repeat/invoke {
     local _ble_keymap_vi_xmap_prev_edit=${_ble_keymap_vi_repeat[6]}
     ble/widget/vi_xmap/.restore-visual-state
     ble/decode/keymap/push "$KEYMAP"
-    # Note: vim では . によって領域の大きさは更新されない。
-    #   従ってここでは敢えて _ble_keymap_vi_xmap_prev_edit を unset しない
+    # Note: In vim, . does not update the area size.
+    #   Therefore, we deliberately do not unset _ble_keymap_vi_xmap_prev_edit here.
   fi
 
-  # ※本体の _ble_keymap_vi_repeat は成功した時にのみ repeat/record で書き換える
+  # *The main _ble_keymap_vi_repeat is rewritten with repeat/record only when it is successful.
   _ble_edit_arg=
   _ble_keymap_vi_oparg=${_ble_keymap_vi_repeat[3]}
   _ble_keymap_vi_opfunc=${_ble_keymap_vi_repeat[4]}
   [[ $repeat_arg ]] && _ble_keymap_vi_oparg=$repeat_arg
 
-  # vim ではレジスタは記録されたものが優先されるようだ
+  # In vim, recorded registers seem to have priority.
   local REG=${_ble_keymap_vi_repeat[5]}
   [[ $REG ]] && _ble_keymap_vi_reg=$REG
 
-  local _ble_keymap_vi_single_command{,_overwrite}= # single-command-mode は持続させる。
+  local _ble_keymap_vi_single_command{,_overwrite}= # Single-command-mode persists.
   local _ble_keymap_vi_repeat_invoke=1
   local LASTWIDGET=$_ble_decode_widget_last
   _ble_decode_widget_last=$WIDGET
@@ -3004,7 +3004,7 @@ function ble/keymap:vi/repeat/invoke {
     local -a _ble_keymap_vi_irepeat
     _ble_keymap_vi_irepeat=("${_ble_keymap_vi_repeat_irepeat[@]}")
 
-    ble/array#push _ble_keymap_vi_irepeat '0:ble/widget/dummy' # Note: normal-mode が自分自身を pop しようとするので。
+    ble/array#push _ble_keymap_vi_irepeat '0:ble/widget/dummy' # Note: as normal-mode tries to pop itself.
     ble/widget/vi_imap/normal-mode
   fi
   ble/util/unlocal _ble_keymap_vi_single_command{,_overwrite}
@@ -3023,7 +3023,7 @@ function ble/widget/vi_nmap/repeat {
 ## @widget vi-command/backward-char [type]
 ##
 ##   @param[in] type
-##     type=wrap のとき複数行に亘る移動を許します。
+##     When type=wrap allows moving across multiple lines.
 ##
 function ble/widget/vi-command/forward-char {
   local ARG FLAG REG; ble/keymap:vi/get-arg 1
@@ -3105,18 +3105,18 @@ function ble/widget/vi_nmap/forward-char-toggle-case {
 ## @fn ble/widget/vi-command/.history-relative-line offset
 ##
 ##   @param[in] offset
-##     移動する相対行数を指定する。負の値は前に移動することを表し、
-##     正の値は後に移動することを表す。
+##     Specifies the relative number of lines to move. Negative values represent moving forward;
+##     A positive value indicates moving later.
 ##
 ##   @exit
-##     全く移動しなかった場合は 1 を返します。
-##     それ以外の場合は 0 を返します。
+##     Returns 1 if no movement occurred.
+##     otherwise returns 0.
 ##
 function ble/widget/vi-command/.history-relative-line {
   local offset=$1
   ((offset)) || return 0
 
-  # 履歴が初期化されていないとき最終行にいる。
+  # You are at the last line when the history has not been initialized.
   if [[ ! $_ble_history_prefix && ! $_ble_history_load_done ]]; then
     ((offset<0)) || return 1
     ble/history/initialize # to use ble/history/get-index
@@ -3161,11 +3161,11 @@ function ble/widget/vi-command/.history-relative-line {
 }
 
 ## @fn ble/keymap:vi/get-index-of-relative-line p offset
-##   列を保持した行移動の先の位置を計算します。
+##   Calculates the destination position for row movement preserving columns.
 ##   @param[in,opt] p
-##     基準となる位置を指定します。空文字列を指定した時は現在位置が使われます。
+##     Specify the reference position. If an empty string is specified, the current position will be used.
 ##   @param[in] offset
-##     移動する行数を指定します。
+##     Specify the number of rows to move.
 ##   @param[out] index
 function ble/keymap:vi/get-index-of-relative-line {
   local ind=${1:-$_ble_edit_ind} offset=$2
@@ -3179,7 +3179,7 @@ function ble/keymap:vi/get-index-of-relative-line {
   ble-edit/content/find-logical-bol "$ind" 0; local bol1=$ret
   ble-edit/content/find-logical-bol "$ind" "$offset"; local bol2=$ret
   if ble/edit/use-textmap; then
-    # 列の表示相対位置 (x,y) を保持
+    # Preserve relative display position (x,y) of columns
     local b1x b1y; ble/textmap#getxy.cur --prefix=b1 "$bol1"
     local b2x b2y; ble/textmap#getxy.cur --prefix=b2 "$bol2"
 
@@ -3192,7 +3192,7 @@ function ble/keymap:vi/get-index-of-relative-line {
 
     ble/textmap#get-index-at "$x" "$y" # local variable "index" is set here
   else
-    # 論理列を保持
+    # Preserve logical columns
     ble-edit/content/find-logical-eol "$bol2"; local eol2=$ret
     ((index=bol2+ind-bol1,index>eol2&&(index=eol2)))
   fi
@@ -3202,24 +3202,24 @@ function ble/keymap:vi/get-index-of-relative-line {
 ## @widget vi-command/forward-line  # nmap j
 ## @widget vi-command/backward-line # nmap k
 ##
-##   j, k による移動の動作について。論理行を移動するとする。
-##   配置情報があるとき、列は行頭からの相対表示位置 (dx,dy) を保持する。
-##   配置情報がないとき、論理列を保持する。
+##   About the operation of movement by j and k. Suppose you want to move a logical line.
+##   When placement information is available, the column holds the relative display position (dx,dy) from the beginning of the line.
+##   Retain logical columns when there is no placement information.
 ##
-##   より前の履歴項目に移った時は列は行末に移る。
-##   より後の履歴項目に移った時は列は先頭に移る。
+##   When moving to an earlier history item, the column moves to the end of the line.
+##   When moving to a later history item, the column moves to the beginning.
 ##
-##   ToDo: 移動開始時の相対表示位置の記録は現在行っていない。
+##   ToDo: Currently, the relative display position at the start of movement is not recorded.
 ##
 ##   @param[in] offset flag
 ##
 ##   @param[in] opts
-##     以下の値をコロンで区切って繋げた物を指定する。
+##     Specify the following values separated by colons.
 ##
 ##     history
-##       現在の履歴項目内で要求された行数だけ移動できないとき、
-##       履歴項目内の論理行を移動する。
-##       但し flag がある場合は履歴項目の移動は行わない。
+##       When it is not possible to move the requested number of lines within the current history item,
+##       Move logical lines within history items.
+##       However, if flag is present, the history item will not be moved.
 ##
 function ble/widget/vi-command/relative-line.impl {
   local offset=$1 flag=$2 reg=$3 opts=$4
@@ -3229,7 +3229,7 @@ function ble/widget/vi-command/relative-line.impl {
     return "$?"
   fi
 
-  # 現在履歴項目内で移動できる行数の判定
+  # Determining the number of lines that can currently be moved within a history item
   local count=$((offset<0?-offset:offset)) ret
   if ((offset<0)); then
     ble/string#count-char "${_ble_edit_str::_ble_edit_ind}" $'\n'
@@ -3239,7 +3239,7 @@ function ble/widget/vi-command/relative-line.impl {
   local nmove=$((count<ret?count:ret))
   ((count-=nmove))
 
-  # 現在の履歴項目内での探索
+  # Search within the current history item
   if ((count==0)); then
     local index; ble/keymap:vi/get-index-of-relative-line "$_ble_edit_ind" "$offset"
     ble/keymap:vi/needs-eol-fix "$index" && ((index--))
@@ -3248,7 +3248,7 @@ function ble/widget/vi-command/relative-line.impl {
     return 0
   fi
 
-  # 履歴項目を行数を数えつつ移動
+  # Move history items by counting the number of lines
   if [[ $_ble_decode_keymap == vi_nmap && :$opts: == *:history:* ]]; then
     if ble/widget/vi-command/.history-relative-line "$((offset>=0?count:-count))" || ((nmove)); then
       ble/keymap:vi/adjust-command-mode
@@ -3273,11 +3273,11 @@ function ble/widget/vi-command/backward-line {
 ## @widget vi-command/graphical-backward-line # nmap gk
 ##
 ##   @param[in] offset
-##     移動する相対行数。負の値は上の行へ行くことを表す。正の値は下の行へ行くことを表す。
+##     Relative number of rows to move. Negative values ​​indicate going to the top row. A positive value indicates going to the bottom row.
 ##   @param[in] flag
-##     オペレータを指定する。
+##     Specify the operator.
 ##   @param[in] opts
-##     以下のオプションをコロンで繋げたものを指定する。
+##     Specify the following options connected by colons.
 ##
 ##     history
 ##
@@ -3321,7 +3321,7 @@ function ble/widget/vi-command/graphical-relative-line.impl {
     fi
   fi
 
-  # 失敗: オペレータは実行されないが移動はする。
+  # Failed: Operator is not executed but moved.
   ((move)) && ble/widget/vi-command/exclusive-goto.impl "$index"
   ble/widget/vi-command/bell
   return 1
@@ -3344,7 +3344,7 @@ function ble/widget/vi-command/relative-first-non-space.impl {
   ble-edit/content/find-logical-bol "$ind" "$arg"; local bolx=$ret
   ble-edit/content/find-non-space "$bolx"; local nolx=$ret
 
-  # 2017-09-12 何故か分からないが vim はこういう振る舞いに見える。
+  # 2017-09-12 I don't know why, but vim seems to behave like this.
   ((_ble_keymap_vi_single_command==2&&_ble_keymap_vi_single_command--))
 
   if [[ $flag ]]; then
@@ -3376,7 +3376,7 @@ function ble/widget/vi-command/relative-first-non-space.impl {
     return 0
   fi
 
-  # 履歴項目の移動
+  # Moving history items
   if [[ $_ble_decode_keymap == vi_nmap && :$opts: == *:history:* ]] && ble/widget/vi-command/.history-relative-line "$((arg>=0?count:-count))"; then
     ble/widget/vi-command/first-non-space
   elif ((nmove)); then
@@ -3421,7 +3421,7 @@ function ble/widget/vi-command/forward-eol {
   ble/keymap:vi/needs-eol-fix "$index" && ((index--))
   ble/widget/vi-command/inclusive-goto.impl "$index" "$FLAG" "$REG" nobell
   [[ $_ble_decode_keymap == vi_[xs]map ]] &&
-    ble/keymap:vi/xmap/add-eol-extension # 末尾拡張
+    ble/keymap:vi/xmap/add-eol-extension # trailing extension
 }
 # nmap g0 g<home>
 function ble/widget/vi-command/beginning-of-graphical-line {
@@ -3488,7 +3488,7 @@ function ble/widget/vi-command/last-non-space {
   local ret
   ble-edit/content/find-logical-eol "$_ble_edit_ind" "$((ARG-1))"; local index=$ret
   if ((ARG>1)) && [[ ${_ble_edit_str:_ble_edit_ind:index-_ble_edit_ind} != *$'\n'* ]]; then
-    # 行移動を起こすはずだったのに一行も進めなかった場合は失敗
+    # Failure if line movement was supposed to occur but no line was advanced
     ble/widget/vi-command/bell
     return 1
   fi
@@ -3551,12 +3551,12 @@ function ble/widget/vi_nmap/scroll.impl {
       _ble_textarea_scroll_new=$max_scroll
     fi
 
-    # ax ay 表示範囲
+    # ax ay display range
     local ay=$((_ble_textarea_scroll_new+_ble_textmap_begy))
     local by=$((_ble_textarea_scroll_new+height-1))
     ((_ble_textarea_scroll_new&&ay++))
 
-    # カーソル範囲
+    # cursor range
     ((_ble_textarea_scroll_new!=0&&ay<by&&ay++,
       _ble_textarea_scroll_new!=max_scroll&&ay<by&&by--))
     local x y
@@ -3596,7 +3596,7 @@ function ble/widget/vi_nmap/pagedown {
 
   ble/widget/.update-textmap
 
-  # 最終行以外にいる事を確認
+  # Confirm that you are on a line other than the last line
   local x y
   ble/textmap#getxy.cur "$_ble_edit_ind"
   if ((y==_ble_textmap_endy)); then
@@ -3604,7 +3604,7 @@ function ble/widget/vi_nmap/pagedown {
     return 1
   fi
 
-  # 行き先を決定
+  # Decide on your destination
   local vheight=$((height-_ble_textmap_begy-1))
   local ybase=$((_ble_textarea_scroll_new+height-1))
   local y1=$((ybase+(ARG-1)*(vheight-2)))
@@ -3614,7 +3614,7 @@ function ble/widget/vi_nmap/pagedown {
     ble-edit/content/find-non-space "$index"; index=$ret
   _ble_edit_ind=$index
 
-  # スクロール (現在位置が上から2行目になる様に)
+  # Scroll (so that the current position is the second line from the top)
   local max_scroll=$((_ble_textmap_endy+1-height))
   ble/textmap#getxy.cur "$_ble_edit_ind"
   local scroll=$((y<=_ble_textmap_begy+1?0:(y-_ble_textmap_begy-1)))
@@ -3630,13 +3630,13 @@ function ble/widget/vi_nmap/pageup {
 
   ble/widget/.update-textmap
 
-  # 少なくとも1行目が表示されていない事を確認
+  # Make sure that at least the first line is not displayed
   if ((!_ble_textarea_scroll_new)); then
     ble/widget/vi-command/bell
     return 1
   fi
 
-  # 行き先を決定
+  # Decide on your destination
   local vheight=$((height-_ble_textmap_begy-1))
   local ybase=$((_ble_textarea_scroll_new+_ble_textmap_begy+1))
   local y1=$((ybase-(ARG-1)*(vheight-2)))
@@ -3647,7 +3647,7 @@ function ble/widget/vi_nmap/pageup {
     ble-edit/content/find-non-space "$index"; index=$ret
   _ble_edit_ind=$index
 
-  # スクロール (現在位置が下から2行目になる様に)
+  # Scroll (so that the current position is the second line from the bottom)
   local x y
   ble/textmap#getxy.cur "$_ble_edit_ind"
   local scroll=$((y-height+2))
@@ -3679,19 +3679,19 @@ function ble/widget/vi_nmap/scroll-to-center.impl {
     fi
 
     if [[ :$opts: == *:nol:* ]]; then
-      # 非空白行頭に移動する
+      # move to beginning of non-blank line
       ble-edit/content/find-non-space "$bol2"
       _ble_edit_ind=$ret
     elif ((bol1!=bol2)); then
-      # 行内の同じ相対位置に移動する
+      # move to the same relative position within a row
 
-      # dx dy = 行頭からの相対位置
+      # dx dy = relative position from the beginning of the line
       local b1x b1y p1x p1y dx dy
       ble/textmap#getxy.cur --prefix=b1 "$bol1"
       ble/textmap#getxy.cur --prefix=p1 "$_ble_edit_ind"
       ((dx=p1x,dy=p1y-b1y))
 
-      # index = 行き先の行 bol2 の同じ相対位置のインデックス
+      # index = index of the same relative position in the destination row bol2
       local b2x b2y p2x p2y index
       ble/textmap#getxy.cur --prefix=b2 "$bol2"
       ((p2x=b2x,p2y=b2y+dy))
@@ -3700,7 +3700,7 @@ function ble/widget/vi_nmap/scroll-to-center.impl {
       if ble-edit/content/find-logical-bol "$index"; ((ret==bol2)); then
         _ble_edit_ind=$index
       else
-        # 別の行になっている時は行末に移動
+        # If on a different line, move to the end of the line
         ble-edit/content/find-logical-eol "$bol2"
         _ble_edit_ind=$ret
       fi
@@ -3708,7 +3708,7 @@ function ble/widget/vi_nmap/scroll-to-center.impl {
     ble/keymap:vi/needs-eol-fix && ((_ble_edit_ind--))
   fi
 
-  # スクロール量の計算
+  # Calculating scroll amount
   if ((_ble_textmap_endy+1>height)); then
     local max_scroll=$((_ble_textmap_endy+1-height))
 
@@ -3778,20 +3778,20 @@ function ble/widget/vi_nmap/scroll-or-pagedown-and-redraw {
 ## @fn ble/widget/vi_nmap/paste.impl/block arg [type]
 ##
 ##   @param[in] arg
-##     挿入する各行の繰り返し回数を指定します。
+##     Specifies the number of repetitions for each row to be inserted.
 ##
 ##   @param[in] type
-##     graphical を指定すると配置情報を用いて挿入します。
-##     省略したときは、配置情報があるときにそれを使用します。
-##     それ以外を指定すると論理列に基いて挿入を行います。
+##     If you specify graphical, it will be inserted using the placement information.
+##     If omitted, placement information will be used if available.
+##     If you specify anything else, inserts will be performed based on logical columns.
 ##
 ##   @var[in] _ble_edit_kill_ring
-##     改行区切りの文字列リストです。
+##     A list of strings separated by line breaks.
 ##
 ##   @var[in] _ble_edit_kill_type == B:*
-##     B: に続き空白区切りの数字のリストを保持します。
-##     数字は _ble_edit_kill_ring に含まれる行の数と同じだけ指定します。
-##     数字は行の途中に挿入する際に後ろに追加する空白の数を表します。
+##     B: Contains a list of space-separated numbers following.
+##     Specify as many numbers as there are rows in _ble_edit_kill_ring.
+##     The number represents the number of spaces to add after the line.
 ##
 function ble/widget/vi_nmap/paste.impl/block {
   local arg=${1:-1} type=$2
@@ -3832,7 +3832,7 @@ function ble/widget/vi_nmap/paste.impl/block {
       fi
     fi
 
-    # 挿入文字列
+    # insert string
     local text=${atext[i]}
     local fill=$((afill[i]))
     if ((arg>1)); then
@@ -3842,7 +3842,7 @@ function ble/widget/vi_nmap/paste.impl/block {
       text=${ret::${#ret}-fill}
     fi
 
-    # 挿入位置と padding
+    # Insertion position and padding
     local index iend=
     if [[ $is_newline ]]; then
       index=${#_ble_edit_str}
@@ -3853,14 +3853,14 @@ function ble/widget/vi_nmap/paste.impl/block {
       ble-edit/content/find-logical-eol "$bol"; local eol=$ret
       ble/textmap#get-index-at "$x" "$((by+y))"; ((index>eol&&(index=eol)))
 
-      # left padding (行末がより左にある、または、全角文字があるとき)
+      # left padding (when the end of the line is further to the left or there are full-width characters)
       local ax ay ac; ble/textmap#getxy.out --prefix=a "$index"
       ((ay-=by,ac=ay*cols+ax))
       if ((ac<c)); then
         ble/string#repeat ' ' "$((c-ac))"
         text=$ret$text
 
-        # タブを空白に変換
+        # Convert tabs to blanks
         if ((index<eol)) && [[ ${_ble_edit_str:index:1} == $'\t' ]]; then
           local rx ry rc; ble/textmap#getxy.out --prefix=r "$((index+1))"
           ((rc=(ry-by)*cols+rx))
@@ -3870,7 +3870,7 @@ function ble/widget/vi_nmap/paste.impl/block {
         fi
       fi
 
-      # right padding (行末がより右にあるとき)
+      # right padding (when the end of the line is further to the right)
       if ((index<eol&&fill)); then
         ble/string#repeat ' ' "$fill"
         text=$text$ret
@@ -3897,7 +3897,7 @@ function ble/widget/vi_nmap/paste.impl/block {
     ble/array#push ins_text "$text"
   done
 
-  # 逆順に挿入
+  # insert in reverse order
   ble/keymap:vi/mark/start-edit-area
   local i=${#ins_beg[@]}
   while ((i--)); do
@@ -4025,17 +4025,17 @@ function ble/widget/vi-command/forward-word.impl {
   local arg=$1 flag=$2 reg=$3 rex_word=$4
   local ifs=$_ble_term_IFS
   if [[ $flag == c && ${_ble_edit_str:_ble_edit_ind:1} != [$ifs] ]]; then
-    # Note: cw cW は特別な動作
+    # Note: cw cW has special behavior.
     #   http://vim-jp.org/vimdoc-ja/change.html#cw
     ble/widget/vi-command/forward-word-end.impl "$arg" "$flag" "$reg" "$rex_word" allow_here
     return "$?"
   fi
   local b=$'[ \t]' n=$'\n'
-  local rex="^((($rex_word)$n?|$b+$n?|$n)($b+$n)*$b*){0,$arg}" # 単語先頭または空行に止まる
+  local rex="^((($rex_word)$n?|$b+$n?|$n)($b+$n)*$b*){0,$arg}" # Stops at the beginning of a word or a blank line
   [[ ${_ble_edit_str:_ble_edit_ind} =~ $rex ]]
   local index=$((_ble_edit_ind+${#BASH_REMATCH}))
   if [[ $flag ]]; then
-    # :help word-motions の特別規則 (通過した最後の単語が行末にあるとき)
+    # Special rules for :help word-motions (when the last word passed is at the end of a line)
     local rematch1=${BASH_REMATCH[1]}
     if local rex="$n$b*\$"; [[ $rematch1 =~ $rex ]]; then
       local suffix_len=${#BASH_REMATCH}
@@ -4048,7 +4048,7 @@ function ble/widget/vi-command/forward-word.impl {
 function ble/widget/vi-command/forward-word-end.impl {
   local arg=$1 flag=$2 reg=$3 rex_word=$4 opts=$5
   local IFS=$_ble_term_IFS
-  local rex="^([$IFS]*($rex_word)?){0,$arg}" # 単語末端に止まる。空行には止まらない
+  local rex="^([$IFS]*($rex_word)?){0,$arg}" # Stops at the end of the word. Don't stop at empty lines
   local offset=1; [[ :$opts: == *:allow_here:* ]] && offset=0
   [[ ${_ble_edit_str:_ble_edit_ind+offset} =~ $rex ]]
   local index=$((_ble_edit_ind+offset+${#BASH_REMATCH}-1))
@@ -4059,7 +4059,7 @@ function ble/widget/vi-command/forward-word-end.impl {
 function ble/widget/vi-command/backward-word.impl {
   local arg=$1 flag=$2 reg=$3 rex_word=$4
   local b=$'[ \t]' n=$'\n'
-  local rex="((($rex_word)$n?|$b+$n?|$n)($b+$n)*$b*){0,$arg}\$" # 単語先頭または空行に止まる
+  local rex="((($rex_word)$n?|$b+$n?|$n)($b+$n)*$b*){0,$arg}\$" # Stops at the beginning of a word or a blank line
   [[ ${_ble_edit_str::_ble_edit_ind} =~ $rex ]]
   local index=$((_ble_edit_ind-${#BASH_REMATCH}))
   ble/widget/vi-command/exclusive-goto.impl "$index" "$flag" "$reg"
@@ -4068,10 +4068,10 @@ function ble/widget/vi-command/backward-word-end.impl {
   local arg=$1 flag=$2 reg=$3 rex_word=$4
   local i=$'[ \t\n]' b=$'[ \t]' n=$'\n' w="($rex_word)"
   local rex1="(^|$w$n?|$n)($b+$n)*$b*"
-  local rex="($rex1)($rex1){$((arg-1))}($rex_word|$i)\$" # 単語末端または空行に止まる
+  local rex="($rex1)($rex1){$((arg-1))}($rex_word|$i)\$" # Stops at the end of a word or a blank line
   [[ ${_ble_edit_str::_ble_edit_ind+1} =~ $rex ]]
   local index=$((_ble_edit_ind+1-${#BASH_REMATCH}))
-  local rematch3=${BASH_REMATCH[3]} # 最初の ($rex_word)
+  local rematch3=${BASH_REMATCH[3]} # first ($rex_word)
   [[ $rematch3 ]] && ((index+=${#rematch3}-1))
   ble/widget/vi-command/inclusive-goto.impl "$index" "$flag" "$reg"
 }
@@ -4128,15 +4128,15 @@ function ble/widget/vi-command/nth-column {
   ble-edit/content/find-logical-bol; local bol=$ret
   ble-edit/content/find-logical-eol; local eol=$ret
   if ble/edit/use-textmap; then
-    local bx by; ble/textmap#getxy.cur --prefix=b "$bol" # Note: 先頭行はプロンプトにより bx!=0
+    local bx by; ble/textmap#getxy.cur --prefix=b "$bol" # Note: The first line is bx!=0 at the prompt
     local ex ey; ble/textmap#getxy.cur --prefix=e "$eol"
     local dstx=$((bx+ARG-1)) dsty=$by cols=${COLUMNS:-80}
     ((dsty+=dstx/cols,dstx%=cols))
     ((dsty>ey&&(dsty=ey,dstx=ex)))
     ble/textmap#get-index-at "$dstx" "$dsty" # local variable "index" is set here
 
-    # Note: 何故かノーマルモードで d や c を実行するときには行末に行かないのに、
-    # ビジュアルモードでは行末に行くことができるようだ。
+    # Note: For some reason, when I run d or c in normal mode, it doesn't go to the end of the line, but
+    # Visual mode seems to allow you to go to the end of the line.
     [[ $_ble_decode_keymap != vi_[xs]map ]] &&
       ble-edit/content/nonbol-eolp "$index" && ((index--))
   else
@@ -4259,8 +4259,8 @@ function ble/widget/vi-command/history-goto {
 }
 
 # nmap G
-#   Note: vim では G はこの振る舞いだが、blesh では実際には
-#     vi-command/history-end が束縛されるのでこれは既定では使われない。
+#   Note: In vim G has this behavior, but in blesh it actually
+#     This is not used by default since vi-command/history-end is bound.
 function ble/widget/vi-command/last-line {
   local ARG FLAG REG; ble/keymap:vi/get-arg 0
   [[ $FLAG ]] || ble/keymap:vi/mark/set-jump # ``
@@ -4272,9 +4272,9 @@ function ble/widget/vi-command/last-line {
 }
 
 # nmap C-home / gg
-#   Note: nth-line (H) との違いは jump でない事のみである。
-#   Note: vim では gg もこの振る舞いだが、blesh では gg は
-#     既定では vi-command/history-beginning に束縛される。
+#   Note: The only difference from nth-line (H) is that it is not a jump.
+#   Note: In vim, gg also has this behavior, but in blesh, gg is
+#     By default it is bound to vi-command/history-beginning.
 function ble/widget/vi-command/first-nol {
   local ARG FLAG REG; ble/keymap:vi/get-arg 1
   ble/widget/vi-command/linewise-goto.impl "0:$((ARG-1))" "$FLAG" "$REG"
@@ -4298,7 +4298,7 @@ function ble/widget/vi-command/last-eol {
 
 ## @fn ble/widget/vi_nmap/replace-char.impl code [overwrite_mode]
 ##   @param[in] overwrite_mode
-##     置換する文字の挿入方法を指定します。
+##     Specify how to insert the replacement character.
 function ble/widget/vi_nmap/replace-char.impl {
   local key=$1 overwrite_mode=${2:-R}
   _ble_edit_overwrite_mode=
@@ -4424,27 +4424,27 @@ function ble/widget/vi_nmap/insert-mode-at-backward-line {
 
 
 ## @var _ble_keymap_vi_char_search
-##   前回の ble/widget/vi-command/search-char.impl/core の検索を記録します。
+##   Records the previous search for ble/widget/vi-command/search-char.impl/core.
 _ble_keymap_vi_char_search=
 
 ## @fn ble/widget/vi-command/search-char.impl/core opts key|char
 ##
 ##   @param[in] opts
-##     以下のフラグ文字から構成される文字列です。
+##     A string consisting of the following flag characters:
 ##
-##     b 後方検索であることを表します。
+##     b Indicates backward search.
 ##
-##     p 見つかった文字の1つ手前に移動することを表します。
+##     p Indicates to move one character before the found character.
 ##
-##     r 繰り返し検索であることを表します。
-##       このとき第1引数は文字 char と解釈されます。
-##       これ以外のとき第1引数はキーコード key と解釈されます。
+##     r Indicates a repeated search.
+##       In this case, the first argument is interpreted as the character char.
+##       In other cases, the first argument is interpreted as the key code key.
 ##
 ##   @param[in] key
 ##   @param[in] char
-##     key は検索対象のキーコードを指定します。
-##     char は検索対象の文字を指定します。
-##     どちらで解釈されるかは後述する opts のフラグ r に依存します。
+##     key specifies the key code to search for.
+##     char specifies the character to search for.
+##     Which way it is interpreted depends on the opts flag r, which will be explained later.
 ##
 ##
 function ble/widget/vi-command/search-char.impl/core {
@@ -4638,7 +4638,7 @@ _ble_keymap_vi_text_object=
 ## @fn ble/keymap:vi/text-object/sentence.impl  arg flag reg type
 ## @fn ble/keymap:vi/text-object/paragraph.impl arg flag reg type
 ##
-##   @exit テキストオブジェクトの処理が完了したときに 0 を返します。
+## @exit Returns 0 when processing of the text object is complete.
 ##
 
 
@@ -4648,9 +4648,9 @@ _ble_keymap_vi_text_object=
 ##   @var[in] rex_word nl space ifs
 ##   @var[in,out] beg end
 ##   @var[out] flags
-##     A 先頭に空白が含まれる事を表す。
-##     Z 末尾に空白が含まれる事を表す。
-##     I 単語前半の取り込みが試みられた事を表す。
+##     A indicates that there is a blank space at the beginning.
+##     Z indicates that there is a space at the end.
+##     I Indicates that an attempt was made to import the first half of the word.
 function ble/keymap:vi/text-object/word.extend-forward {
   local rex
 
@@ -4675,7 +4675,7 @@ function ble/keymap:vi/text-object/word.extend-forward {
   local i rematch=
   for ((i=0;i<arg;i++)); do
     if ((i==0)) && [[ $flags == *I* ]]; then
-      # 単語前方を取り込む
+      # capture word front
       rex='('$rex_word')$|['$space']*['$ifs']$'
       [[ ${_ble_edit_str::beg+1} =~ $rex ]] &&
         ((beg-=${#BASH_REMATCH}-1,end=beg))
@@ -4687,13 +4687,13 @@ function ble/keymap:vi/text-object/word.extend-forward {
     rematch=$BASH_REMATCH
     ((end+=${#rematch}))
 
-    # Note: aw に対する正規表現では二重改行を読むが後退する。
+    # Note: The regular expression for aw reads double newlines but backs up.
     [[ $type == a* && $rematch == *$'\n\n' ]] && ((end--))
 
-    # Note: Vim では何故か最初の一致だけ改行を除去。
-    #   最後の一致の改行は exclusive にする事で、
-    #   呼び出し元に除去させている様な気がする。
-    # Note: aw の時は "非空白から改行" に一致する事はない。
+    # Note: For some reason, Vim only removes the newline on the first match.
+    #   By making the line break of the last match exclusive,
+    #   It seems like the caller is removing it.
+    # Note: aw never matches "non-blank to newline".
     if ((i==0)) && [[ $flags == *I* ]] || ((i==arg-1)); then
       [[ $type == i* && $rematch == *"$nl" ]] && ((end--))
     fi
@@ -4702,12 +4702,12 @@ function ble/keymap:vi/text-object/word.extend-forward {
   [[ ${_ble_edit_str:end-1:1} == *["$ifs"] ]] && flags=${flags}Z
 
   if [[ $type == a* && $flags != *[AZ]* ]]; then
-    # aw で前後に空白が含まれない時、前方の空白を取り込む
-    # Note: vim の実装 (search.c (current_word)) では
-    #   行頭 exclusive でも前方空白を取り込むが、
-    #   aw において行頭 exclusive になる事は普通はないので謎。
-    #   virtual_active() の時行の途中で oneleft() が失敗する事はあるが、
-    #   この様な状況を意図してこの条件が加えられたとは思えない。
+    # When aw does not include spaces before or after, capture leading spaces
+    # Note: In the vim implementation (search.c (current_word))
+    #   Exclusive at the beginning of the line also captures leading blanks, but
+    #   It's a mystery because it is not normal for aw to be exclusive at the beginning of a line.
+    #   oneleft() may fail in the middle of virtual_active(), but
+    #   I don't think this condition was added with this situation in mind.
     if rex='['$space']+$'; [[ ${_ble_edit_str::beg} =~ $rex ]]; then
       local p=$((beg-${#BASH_REMATCH}))
       ble-edit/content/bolp "$p" || beg=$p
@@ -4737,7 +4737,7 @@ function ble/keymap:vi/text-object/word.extend-backward {
     [[ ${_ble_edit_str::beg} =~ $rex_unit ]] || return 1
     ((beg-=${#BASH_REMATCH}))
 
-    # Note: vim の振る舞いに倣って
+    # Note: Following vim's behavior
     local match=${BASH_REMATCH%"$nl"}
     if ((beg==0&&${#match}>=2)); then
       if [[ $type == i* ]]; then
@@ -4780,7 +4780,7 @@ function ble/keymap:vi/text-object/word.impl {
 
   local beg=$index end=$index flags=
   if ! ble/keymap:vi/text-object/word.extend-forward; then
-    # 一致失敗
+    # Match failure
     index=${#_ble_edit_str}
     ble-edit/content/nonbol-eolp "$index" && ((index--))
     _ble_edit_ind=$index
@@ -4850,7 +4850,7 @@ function ble/keymap:vi/text-object/quote.impl {
     ble-edit/content/find-logical-bol; local bol=$ret
     ble/string#count-char "${_ble_edit_str:bol:_ble_edit_ind-bol}" "$quote"
     if ((ret%2==1)); then
-      # 現在終了引用符
+      # current closing quote
       ((end=_ble_edit_ind+1))
       ble/keymap:vi/text-object:quote/.prev && beg=$ret
     else
@@ -4888,7 +4888,7 @@ function ble/keymap:vi/text-object:quote/.expand-xmap-range {
 ## @fn ble/keymap:vi/text-object:quote/.xmap
 ##   @var[in] quote
 function ble/keymap:vi/text-object:quote/.xmap {
-  # 複数行に亘る場合は失敗
+  # Fails if it spans multiple lines
   local min=$_ble_edit_ind max=$_ble_edit_mark
   ((min>max)) && local min=$max max=$min
   [[ ${_ble_edit_str:min:max+1-min} == *$'\n'* ]] && return 1
@@ -4920,7 +4920,7 @@ function ble/keymap:vi/text-object:quote/.xmap {
   elif ((_ble_edit_ind>_ble_edit_mark)); then
     local updates_mark=
     if [[ ${_ble_edit_str:_ble_edit_ind:1} == "$quote" ]]; then
-      # 現在位置に " があるとき。
+      # When there is " at the current position.
       ble/keymap:vi/text-object:quote/.next "$((_ble_edit_ind+1))" || return 1; local beg=$ret
       if ble/keymap:vi/text-object:quote/.next "$((beg+1))"; then
         local end=$ret
@@ -4928,7 +4928,7 @@ function ble/keymap:vi/text-object:quote/.xmap {
         local end=$beg beg=$_ble_edit_ind
       fi
     else
-      # 現在位置以降の最初の 右" (その行の偶数番目の ") と対応する 左"
+      # The first right after the current position (the even-numbered " on that line) and the corresponding left"
       ble-edit/content/find-logical-bol; local bol=$ret
       ble/string#count-char "${_ble_edit_str:bol:_ble_edit_ind-bol}" "$quote"
       if ((ret%2==0)); then
@@ -5109,7 +5109,7 @@ function ble/keymap:vi/text-object:block/.xmap {
     local beg end p=$_ble_edit_ind
     ble/keymap:vi/text-object:block/.search-block "$p" "$p" "$lparen" "$rparen" reject-empty-here || return 1
 
-    # i, a に応じて適切に範囲を決定する
+    # Decide the range appropriately depending on i, a
     if [[ $type == i* ]]; then
       # Note: When ((beg + 1 == end)) with "the next pair (...)", the mark and
       # the index is reversed in Vim 9.0.  This might be a bug of Vim because
@@ -5255,10 +5255,10 @@ function ble/keymap:vi/text-object:sentence/.beg {
   local pivot=$_ble_edit_ind rex=
   if ble-edit/content/bolp && ble-edit/content/eolp; then
     if rex=$'^\n+[^\n]'; [[ ${_ble_edit_str:pivot} =~ $rex ]]; then
-      # 前方に非空白が見つかればその手前の行を開始点とする
+      # If a non-blank line is found in front, the line before it is used as the starting point.
       beg=$((pivot+${#BASH_REMATCH}-2))
     else
-      # 前の非空行末を基点に取り直す
+      # Start from the end of the previous non-blank line
       if rex=$'\n+$'; [[ ${_ble_edit_str::pivot} =~ $rex ]]; then
         ((pivot-=${#BASH_REMATCH}))
       fi
@@ -5269,8 +5269,8 @@ function ble/keymap:vi/text-object:sentence/.beg {
     if [[ ${_ble_edit_str::pivot+1} =~ $rex ]]; then
       beg=${#BASH_REMATCH}
       if ((pivot<beg)); then
-        # pivot < beg は beg == pivot + 1 (終端まで一致) を意味する。
-        # この時点で pivot は必ず非空行または先頭行にいるので /\n\n/ に一致することはない。
+        # pivot < beg means beg == pivot + 1 (match to the end).
+        # At this point, pivot is always on a nonempty line or the first line, so it will never match /\n\n/.
         local rematch34=${BASH_REMATCH[3]}${BASH_REMATCH[4]}
         if [[ $rematch34 ]]; then
           # /(^\n\s+|\n\n\s+|[.!?]\s+)$/
@@ -5300,14 +5300,14 @@ function ble/keymap:vi/text-object:sentence/.next {
   else
     is_interval=1
     if local rex=$'^\n+'; [[ ${_ble_edit_str:end} =~ $rex ]]; then
-      # 連続する LF を読み切る
+      # Read all consecutive LFs
       ((end+=${#BASH_REMATCH}))
     elif rex="(([.!?][])\"']*)[ $ht$lf]|$lf$lf).*\$"; [[ ${_ble_edit_str:end} =~ $rex ]]; then
-      # 文を次の文末記号まで
+      # sentence to next end of sentence
       local rematch2=${BASH_REMATCH[2]}
       end=$((${#_ble_edit_str}-${#BASH_REMATCH}+${#rematch2}))
     else
-      # 最後の文
+      # last sentence
       local index=${#_ble_edit_str}
       ((end<index)) && [[ ${_ble_edit_str:index-1:1} == $'\n' ]] && ((index--))
       ((end=index))
@@ -5329,7 +5329,7 @@ function ble/keymap:vi/text-object/sentence.impl {
   done
   ((beg<end)) && [[ ${_ble_edit_str:end-1:1} == $'\n' ]] && ((end--))
 
-  # at は後方 (forward) に空白を確保できなければ前方 (backward) に空白を確保する。
+  # If at cannot allocate space forward, it allocates space backwards.
   if [[ $type != i* && ! $is_interval ]]; then
     local ifs=$_ble_term_IFS
     if ((end)) && [[ ${_ble_edit_str:end-1:1} != ["$ifs"] ]]; then
@@ -5347,8 +5347,8 @@ function ble/keymap:vi/text-object/sentence.impl {
     _ble_edit_mark=$beg
     ble/widget/vi-command/exclusive-goto.impl "$end"
   elif ble-edit/content/bolp "$beg" && [[ ${_ble_edit_str:end:1} == $'\n' ]]; then
-    # 行頭から LF の手前までのときに linewise になる。
-    # _ble_edit_str の末端までのときは linewise ではないことに注意する。
+    # It becomes linewise from the beginning of the line to before the LF.
+    # Note that it is not linewise until the end of _ble_edit_str.
     ble/widget/vi-command/linewise-range.impl "$beg" "$end" "$flag" "$reg" goto_bol
   else
     ble/widget/vi-command/exclusive-range.impl "$beg" "$end" "$flag" "$reg"
@@ -5363,14 +5363,14 @@ function ble/keymap:vi/text-object/paragraph.impl {
   ble-edit/content/find-logical-bol; local bol=$ret
   ble-edit/content/find-non-space "$bol"; local nol=$ret
   if rex=$'[ \t]*(\n|$)' ble-edit/content/eolp "$nol"; then
-    # 空行のときは連続する一番初めの空行に移動する
+    # If the line is empty, move to the first consecutive empty line
     empty_start=1
     rex=$'(^|\n)([ \t]*\n)*$'
     [[ ${_ble_edit_str::bol} =~ $rex ]]
     local rematch1=${BASH_REMATCH[1]} # Note: for bash-3.1 ${#arr[n]} bug
     ((beg=bol-(${#BASH_REMATCH}-${#rematch1})))
   else
-    # 非空行のときは最初の非空行の先頭まで移動する。
+    # If it is a non-blank line, move to the beginning of the first non-blank line.
     if rex=$'^(.*\n)?[ \t]*\n'; [[ ${_ble_edit_str::bol} =~ $rex ]]; then
       ((beg=${#BASH_REMATCH}))
     else
@@ -5392,13 +5392,13 @@ function ble/keymap:vi/text-object/paragraph.impl {
     if [[ ${_ble_edit_str:end} =~ $rex ]]; then
       ((end+=${#BASH_REMATCH}))
     else
-      # paragraph の場合は次が見つからない場合はエラー
+      # For paragraph, error if next not found
       ble/widget/vi-command/bell
       return 1
     fi
   done
 
-  # at で後続の空行がなければ backward の空行を取り入れる
+  # If there is no trailing blank line in at, take the blank line in backward.
   if [[ $type != i* && ! $empty_start ]]; then
     if rex=$'(^|\n)[ \t]*\n$'; ! [[ ${_ble_edit_str::end} =~ $rex ]]; then
       if rex=$'(^|\n)([ \t]*\n)*$'; [[ ${_ble_edit_str::beg} =~ $rex ]]; then
@@ -5418,7 +5418,7 @@ function ble/keymap:vi/text-object/paragraph.impl {
 
 ## @fn ble/keymap:vi/text-object.impl
 ##
-##   @exit テキストオブジェクトの処理が完了したときに 0 を返します。
+## @exit Returns 0 when processing of the text object is complete.
 ##
 function ble/keymap:vi/text-object.impl {
   local arg=$1 flag=$2 reg=$3 type=$4
@@ -5490,7 +5490,7 @@ function ble/widget/vi-command/text-object-inner {
 #
 # map: :cmd
 
-# 既定の cmap 履歴
+# Default cmap history
 _ble_keymap_vi_commandline_history=()
 _ble_keymap_vi_commandline_history_edit=()
 _ble_keymap_vi_commandline_history_dirt=()
@@ -5550,7 +5550,7 @@ function ble/widget/vi-command:q! {
 }
 function ble/widget/vi-command:q {
   ble/widget/exit
-  ble/keymap:vi/adjust-command-mode # ジョブがあるときは終了しないので。
+  ble/keymap:vi/adjust-command-mode # Because it will not end when there is a job.
   return 1
 }
 function ble/widget/vi-command:wq {
@@ -5577,9 +5577,9 @@ _ble_keymap_vi_search_history_dirt=()
 _ble_keymap_vi_search_history_index=0
 
 ## @bleopt keymap_vi_search_match_current
-##   非空の文字列が設定されている時 /, ?, n, N で
-##   現在のカーソルの下にある単語に一致します。
-##   既定値は空文字列で vim の振る舞いに倣います。
+##   /, ?, n, N when a non-empty string is set
+##   Matches the word under the current cursor.
+##   The default value is an empty string, mimicking the behavior of vim.
 bleopt/declare -v keymap_vi_search_match_current ''
 
 function ble/highlight/layer:region/mark:vi_search/get-selection {
@@ -5596,60 +5596,60 @@ function ble/keymap:vi/search/clear-matched {
 ## @fn ble/keymap:vi/search/invoke-search needle
 ##
 ##   @param[in] needle
-##     検索パターンを表す正規表現を指定する。
+##     Specify a regular expression that represents the search pattern.
 ##
 ##   @var[out] beg end
-##     一致範囲を返す。
+##     Returns the match range.
 ##
 ##   @exit
-##     一致が見つかった場合に正常終了 0。それ以外の時は 0 以外の値を返す。
+##     Successful completion 0 if a match is found. Otherwise, it returns a value other than 0.
 ##
 ##   @var[in] opt_optional_next
-##     現在位置より後または前の一致を検索する。
-##     vi_omap で呼び出した時、現在位置で一致した時に設定される。
-##     keymap_vi_search_match_current が非空の時はここには来ない。
+##     Find a match after or before the current location.
+##     When called with vi_omap, it is set when there is a match at the current position.
+##     It does not come here when keymap_vi_search_match_current is non-empty.
 ##
 ##   @var[in] opt_locate
-##     現在位置に一致可能な検索を行う。
-##     履歴を遡って検索して一致する履歴項目が見つかった時、
-##     その履歴項目内で最初に見つかったものを特定する為に使われる。
+##     Perform a search that can match the current location.
+##     When a matching history item is found by searching backwards through the history,
+## Used to identify the first occurrence of that history item.
 ##
 ##   @var[in] opt_backward
-##     検索方向を指定する。
+##     Specify the search direction.
 ##
 function ble/keymap:vi/search/invoke-search {
   local needle=$1
   local dir=+; ((opt_backward)) && dir=B
   local ind=$_ble_edit_ind
 
-  # 検索開始位置
+  # Search start position
   if ((opt_optional_next)); then
     if ((!opt_backward)); then
       ((_ble_edit_ind<${#_ble_edit_str}&&_ble_edit_ind++))
     fi
   elif ((opt_locate)) || ! ble/keymap:vi/search/matched; then
-    # 何にも一致していない状態から
+    # From the state of not matching anything
     if ((opt_locate)) || [[ $bleopt_keymap_vi_search_match_current ]]; then
-      # 現在位置に一致可能
-      #   前方検索: @hello → @hello (そのまま)
-      #   後方検索: hell@o → hello@ (ずらす)
+      # Can match current location
+      #   Forward search: @hello → @hello (as is)
+      #   Backward search: hell@o → hello@ (shift)
       if ((opt_backward)); then
         ble-edit/content/eolp || ((_ble_edit_ind++))
       fi
     else
-      # 現在位置には一致させない
-      #   前方検索: @hello → h@ello (ずらす)
-      #   後方検索: hell@o → hell@o (そのまま)
+      # Don't match current position
+      #   Forward search: @hello → h@ello (shift)
+      #   Backward search: hell@o → hell@o (as is)
       if ((!opt_backward)); then
         ble-edit/content/eolp || ((_ble_edit_ind++))
       fi
     fi
   else
-    # _ble_edit_ind .. _ble_edit_mark[+1] に一致しているとき
+    # _ble_edit_ind .. When matching _ble_edit_mark[+1]
     if ((!opt_backward)); then
       if [[ $_ble_decode_keymap == vi_[xs]map ]]; then
-        # vi_xmap, vi_smap では _ble_edit_mark は別の用途に使われていて
-        # 終端点の情報が失われているので再度一致を試みる。
+        # In vi_xmap and vi_smap, _ble_edit_mark is used for another purpose.
+        # Since the terminal point information has been lost, try matching again.
         if ble-edit/isearch/search "$@" && ((beg==_ble_edit_ind)); then
           _ble_edit_ind=$end
         else
@@ -5660,7 +5660,7 @@ function ble/keymap:vi/search/invoke-search {
         ble-edit/content/eolp || ((_ble_edit_ind++))
       fi
     else
-      # 2回目以降の一致では opts=- で検索する。
+      # For second and subsequent matches, search with opts=-.
       dir=-
     fi
   fi
@@ -5684,13 +5684,13 @@ function ble/widget/vi-command/search.core {
   if ble/keymap:vi/search/invoke-search "$needle"; then
     if ((beg<end)); then
       ble-edit/content/bolp "$end" || ((end--))
-      _ble_edit_ind=$beg # eol 補正は search.impl 側で最後に行う
+      _ble_edit_ind=$beg # eol correction is done last on search.impl side
       [[ $_ble_decode_keymap != vi_[xs]map ]] && _ble_edit_mark=$end
       _ble_keymap_vi_search_activate=vi_search
       return 0
     else
-      # vim では空一致は即座に失敗のようだ。
-      # 続きを検索するということはしない。
+      # In vim, an empty match seems to fail immediately.
+      # There is no need to search for more.
       opt_history=
       is_empty_match=1
     fi
@@ -5751,9 +5751,9 @@ function ble/widget/vi-command/search.impl {
   local ARG FLAG REG; ble/keymap:vi/get-arg 1
 
   local opts=$1 needle=$2
-  [[ :$opts: != *:repeat:* ]]; local opt_repeat=$? # 再検索 n N
-  [[ :$opts: != *:history:* ]]; local opt_history=$? # 履歴検索が有効か
-  [[ :$opts: != *:-:* ]]; local opt_backward=$? # 逆方向
+  [[ :$opts: != *:repeat:* ]]; local opt_repeat=$? # Search again n N
+  [[ :$opts: != *:history:* ]]; local opt_history=$? # Is history search enabled?
+  [[ :$opts: != *:-:* ]]; local opt_backward=$? # Reverse direction
   local opt_locate=0
   local opt_optional_next=0
   if ((opt_repeat)); then
@@ -5790,7 +5790,7 @@ function ble/widget/vi-command/search.impl {
     local old_hindex; ble/history/get-index -v old_hindex
   fi
 
-  local start= # 初めの履歴番号。search.core 内で最初に履歴を読み込んだあとで設定される。
+  local start= # First history number. Set after the first history read in search.core.
   local ntask=$ARG
   while ((ntask)); do
     ble/widget/vi-command/search.core || break
@@ -5799,16 +5799,16 @@ function ble/widget/vi-command/search.impl {
 
   if [[ $FLAG ]]; then
     if ((ntask)); then
-      # 検索対象が見つからなかったとき
+      # When the search target was not found
       _ble_keymap_vi_search_activate=
       _ble_edit_ind=$original_ind
       ble/keymap:vi/adjust-command-mode
       return 1
     else
-      # 見つかったとき
+      # when found
       if ((_ble_edit_ind==original_index)); then
-        # 範囲が空のときは次の一致場所まで。
-        # 次の一致場所がないとき (自分自身のとき) は空領域になる。
+        # If the range is empty, continue to the next match.
+        # If there is no next matching location (if it is itself), it becomes an empty area.
         opt_optional_next=1 ble/widget/vi-command/search.core
       fi
       local index=$_ble_edit_ind
@@ -5819,13 +5819,13 @@ function ble/widget/vi-command/search.impl {
     fi
   else
     if ((ntask<ARG)); then
-      # 同じ履歴項目内でのジャンプ
+      # Jump within the same history item
       if ((opt_history)); then
         local new_hindex; ble/history/get-index -v new_hindex
         ((new_hindex==old_hindex))
       fi && ble/keymap:vi/mark/set-local-mark 96 "$original_index" # ``
 
-      # 行末補正
+      # line end correction
       if ble/keymap:vi/needs-eol-fix; then
         if ((!opt_backward&&_ble_edit_ind<_ble_edit_mark)); then
           ((_ble_edit_ind++))
@@ -5876,10 +5876,10 @@ function ble/widget/vi-command/search-word.impl {
       word=$BASH_REMATCH$word
   fi
 
-  # Note: Bash 正規表現は <regex.h> を用いるので、
-  #   必ずしも非 POSIX ERE \<\> に対応しているとは限らない。
-  #   また [[:alnum:]_] と符合しているかも分からない。
-  #   従って適用できるか確認してから境界に一致することを要求する。
+  # Note: Bash regular expressions use <regex.h>, so
+  #   Not necessarily compatible with non-POSIX ERE \<\>.
+  #   Also, I don't know if it matches [[:alnum:]_].
+  #   Therefore, check if it is applicable and then request that it match the boundary.
   local needle=$word
   rex='\<'$needle; [[ $word =~ $rex ]] && needle=$rex
   rex=$needle'\>'; [[ $word =~ $rex ]] && needle=$rex
@@ -5964,7 +5964,7 @@ function ble/keymap:vi/set-up-command-map {
   ble-bind -f 'g q' 'vi-command/operator fold'
   ble-bind -f 'g w' 'vi-command/operator fold-preserve-point'
   ble-bind -f 'g @' 'vi-command/operator map'
-  # ble-bind -f '='   'vi-command/operator =' # インデント (equalprg, ep)
+  # ble-bind -f '=' 'vi-command/operator =' # indent (equalprg, ep)
   # ble-bind -f 'z f' 'vi-command/operator f'
 
   ble-bind -f paste_begin vi-command/bracketed-paste
@@ -6061,7 +6061,7 @@ function ble/keymap:vi/set-up-command-map {
 
 function ble/widget/vi_omap/operator-rot13-or-search-backward {
   if [[ $_ble_keymap_vi_opfunc == rot13 ]]; then
-    # g?? の時だけは rot13-encode lines
+    # Only when g?? rot13-encode lines
     ble/widget/vi-command/operator rot13
   else
     ble/widget/vi-command/search-backward
@@ -6111,20 +6111,20 @@ function ble-decode/keymap:vi_omap/define {
   ble-bind -f a   vi-command/text-object-outer
   ble-bind -f i   vi-command/text-object-inner
 
-  # 範囲の種類の変更 (vim o_v o_V)
+  # Changing range type (vim o_v o_V)
   ble-bind -f v      vi_omap/switch-to-charwise
   ble-bind -f V      vi_omap/switch-to-linewise
   ble-bind -f C-v    vi_omap/switch-to-blockwise
   ble-bind -f C-q    vi_omap/switch-to-blockwise
 
-  # 2文字オペレータの短縮形
+  # Two-letter operator abbreviation
   ble-bind -f '~' 'vi-command/operator toggle_case'
   ble-bind -f 'u' 'vi-command/operator u'
   ble-bind -f 'U' 'vi-command/operator U'
   ble-bind -f '?' 'vi_omap/operator-rot13-or-search-backward'
   ble-bind -f 'q' 'vi-command/operator fold'
-  # Note: w は前方単語。例: {N}gww は format {N} words
-  # Note: @ は omap では定義されない。例: {N}g@@ は bell
+  # Note: w is a forward word. Example: {N}gww is format {N} words
+  # Note: @ is not defined in omap. Example: {N}g@@ is bell
 }
 
 #------------------------------------------------------------------------------
@@ -6137,7 +6137,7 @@ function ble/widget/vi-command/exit-on-empty-line {
     return "$?"
   else
     ble/widget/exit
-    ble/keymap:vi/adjust-command-mode # ジョブがあるときは終了しないので。
+    ble/keymap:vi/adjust-command-mode # Because it will not end when there is a job.
     return 1
   fi
 }
@@ -6182,8 +6182,8 @@ function ble/widget/vi-command/cancel {
 
 # nmap u, U, C-r
 #
-#   `[`] は設定する。vim と違って実際に変更のあった範囲を抽出する。
-#   . は設定しない。
+#   `[`] is set. Unlike vim, it extracts the range that actually changed.
+#   . is not set.
 #
 bleopt/declare -v keymap_vi_imap_undo ''
 _ble_keymap_vi_undo_suppress=
@@ -6237,12 +6237,12 @@ function ble/widget/vi_nmap/increment.impl {
   local delta=$1
   ((delta==0)) && return 0
 
-  # 数字の範囲の確定
+  # Determining the range of numbers
   local line=${_ble_edit_str:_ble_edit_ind}
   line=${line%%$'\n'*}
   local rex='^([^0-9]*)[0-9]+'
   if ! [[ $line =~ $rex ]]; then
-    # 行末にいる時(空行を意味する)にはベルは鳴らさない。
+    # The bell does not ring when you are at the end of the line (meaning an empty line).
     [[ $line ]] && ble/widget/.bell 'number not found'
     ble/keymap:vi/adjust-command-mode
     return 0
@@ -6253,7 +6253,7 @@ function ble/widget/vi_nmap/increment.impl {
   rex='-?[0-9]*$'; [[ ${_ble_edit_str::beg} =~ $rex ]]
   ((beg-=${#BASH_REMATCH}))
 
-  # 数の抽出
+  # Extracting numbers
   local number=${_ble_edit_str:beg:end-beg}
   local abs=${number#-}
   if [[ $abs == 0?* ]]; then
@@ -6264,7 +6264,7 @@ function ble/widget/vi_nmap/increment.impl {
     fi
   fi
 
-  # 数の増加・減少
+  # Increase/decrease in number
   ((number+=delta))
   if [[ $abs == 0?* ]]; then
     # Zero padding
@@ -6338,7 +6338,7 @@ function ble-decode/keymap:vi_nmap/define {
   ble-bind -f delete vi_nmap/kill-forward-char
 
   ble-bind -f 'r'    vi_nmap/replace-char
-  ble-bind -f 'g r'  vi_nmap/virtual-replace-char # vim で実際に試すとこの機能はない
+  ble-bind -f 'g r'  vi_nmap/virtual-replace-char # When I try it with vim, this function does not exist.
 
   ble-bind -f J      vi_nmap/connect-line-with-space
   ble-bind -f 'g J'  vi_nmap/connect-line
@@ -6404,7 +6404,7 @@ function ble-decode/keymap:vi_nmap/define {
   ble-bind -f 'C-d'      'vi-command/exit-on-empty-line' # overwrites vi_nmap/forward-scroll
   ble-bind -f 'ac_enter' 'auto-complete-enter'
 
-  # Note #D1256: Bash vi-command 互換性の為
+  # Note #D1256: For Bash vi-command compatibility
   ble-bind -f M-left   'vi-command/backward-vword'
   ble-bind -f M-right  'vi-command/forward-vword'
   ble-bind -f C-delete 'vi-rlfunc/kill-word'
@@ -6418,7 +6418,7 @@ function ble-decode/keymap:vi_nmap/define {
   # ble-bind -f '_'   'vi-rlfunc/yank-arg'
 }
 
-# lib/core-decode.vi_nmap-rlfunc.txt 用
+# For lib/core-decode.vi_nmap-rlfunc.txt
 
 function ble/widget/vi-rlfunc/.is-uppercase {
   local n=${#KEYS[@]}
@@ -6602,7 +6602,7 @@ function ble/widget/vi-rlfunc/quoted-insert {
 function ble/widget/vi-rlfunc/eof-maybe {
   if [[ ! $_ble_edit_str ]]; then
     ble/widget/exit
-    ble/keymap:vi/adjust-command-mode # ジョブがあるときは終了しないので。
+    ble/keymap:vi/adjust-command-mode # Because it will not end when there is a job.
     return 1
   elif ble-edit/is-single-complete-line; then
     ble/widget/vi_nmap/accept-line
@@ -6696,11 +6696,11 @@ function ble/widget/vi_nmap/@motion {
 #------------------------------------------------------------------------------
 # Visual mode
 
-# 選択の種類は _ble_edit_mark_active に設定される文字列で区別する。
+# The selection type is distinguished by the character string set to _ble_edit_mark_active.
 #
-#   _ble_edit_mark_active は vi_char, vi_line, vi_block のどれかである
-#   更に末尾拡張 (行末までの選択範囲の拡張) が設定されているときには
-#   vi_char+, vi_line+, vi_block+ などの様に + が末尾に付く。
+#   _ble_edit_mark_active is one of vi_char, vi_line, vi_block
+#   Additionally, if tail extension (extending the selection to the end of the line) is set,
+#   Add a + at the end, such as vi_char+, vi_line+, vi_block+, etc.
 
 function ble/keymap:vi/xmap/has-eol-extension {
   [[ $_ble_edit_mark_active == *+ ]]
@@ -6719,7 +6719,7 @@ function ble/keymap:vi/xmap/switch-type {
 }
 
 #--------------------------------------
-# xmap/矩形範囲の抽出
+# xmap/extract rectangular range
 
 ## @fn local p0 q0 lx ly rx ry; ble/keymap:vi/get-graphical-rectangle [index1 [index2]]
 ## @fn local p0 q0 lx ly rx ry; ble/keymap:vi/get-logical-rectangle   [index1 [index2]]
@@ -6782,53 +6782,53 @@ function ble/keymap:vi/get-rectangle-height {
 
 ## @fn ble/keymap:vi/extract-graphical-block-by-geometry bol1 bol2 x1:y1 x2:y2 opts
 ## @fn ble/keymap:vi/extract-logical-block-by-geometry bol1 bol2 c1 c2 opts
-##   指定した引数の範囲を元に矩形範囲を抽出します。
+##   Extracts a rectangular range based on the specified argument range.
 ## @fn ble/keymap:vi/extract-graphical-block [index1 [index2 [opts]]]
 ## @fn ble/keymap:vi/extract-logical-block [index1 [index2 [opts]]]
 ## @fn ble/keymap:vi/extract-block [index1 [index2 [opts]]]
-##   現在位置 (_ble_edit_ind) とマーク (_ble_edit_mark) を元に矩形範囲を抽出します。
+##   Extracts a rectangular range based on the current position (_ble_edit_ind) and mark (_ble_edit_mark).
 ##
 ##   @param[in] bol1 bol2
-##     2つの行の行頭を指定します。
+##     Specify the beginning of two lines.
 ##   @param[in] x1:y1 x2:y2
-##     2つの列を行頭からの相対位置で指定します。
+##     Specify the two columns relative to the beginning of the line.
 ##   @param[in] c1 c2
-##     2つの列を論理列で指定します。
+##     Specify the two columns as logical columns.
 ##
 ##   @param[in,opt] index1 [$_ble_edit_mark]
 ##   @param[in,opt] index2 [$_ble_edit_ind]
-##     矩形の端点の文字インデックスを指定します。
+##     Specifies the character index of the endpoint of the rectangle.
 ##
 ##   @param[in,opt] opts
-##     コロン区切りのフラグ指定です。
+##     Colon-separated flag specifications.
 ##
 ##     first_line
-##       矩形を構成する最初の行についてだけ情報を取得します。
-##       その他の行については空の情報 (':::::') を sub_ranges に格納します。
+##       Get information only about the first row that makes up the rectangle.
+##       For other rows, empty information (':::::') is stored in sub_ranges.
 ##
 ##     skip_middle
-##       矩形を構成する最初と最後の行についてだけ情報を取得します。
-##       その他の行については空の情報 (':::::') を sub_ranges に格納します。
+##       Get information only about the first and last rows that make up the rectangle.
+##       For other rows, empty information (':::::') is stored in sub_ranges.
 ##
 ##   @var[in] _ble_edit_mark_active
-##     末尾拡張を行うばあいにこの引数の末端に + を指定します。
+##     When performing trailing expansion, specify + at the end of this argument.
 ##
 ##   @arr[out] sub_ranges
-##     矩形を構成する各行の情報を格納します。
-##     各要素は以下の形式を持ちます。
+##     Stores information for each row that makes up the rectangle.
+##     Each element has the following format:
 ##
 ##     smin:smax:slpad:srpad:sfill:stext
 ##
 ##     smin smax
-##       選択範囲を強調するとき・切り取るときの範囲を指定します。
+##       Specify the range to emphasize/cut the selection.
 ##     slpad srpad
-##       選択範囲を切り取ったときに左右に補填する空白の数を指定します。
+##       Specifies the number of blank spaces to fill on the left and right when cutting the selection.
 ##     sfill
-##       矩形の挿入時に右端に補填するべき空白の数を指定します。
+##       Specifies the number of spaces to be padded on the right edge when inserting a rectangle.
 ##     stext
-##       選択範囲から読み取られる文字列を指定します。
-##       全角文字などが範囲の境界を跨ぐとき、
-##       その文字は (範囲に被る幅と同数の) 空白に置き換えられます。
+##       Specifies the string to be read from the selection.
+##       When full-width characters, etc. cross the range boundary,
+##       The character is replaced with spaces (as many spaces as the range spans).
 ##   @var[out] sub_x1 sub_x2
 ##
 function ble/keymap:vi/extract-graphical-block-by-geometry {
@@ -6872,12 +6872,12 @@ function ble/keymap:vi/extract-graphical-block-by-geometry {
       local sfill=0 slpad=0 srpad=0
       local stext=${_ble_edit_str:smin:smax-smin}
       if ((smin<smax)); then
-        # 1. 左の境界 c1 を大きな文字が跨いでいるときは空白に変換する。
+        # 1. If a large character straddles the left border c1, convert it to a blank space.
         ((c1l=(y1l-boly)*cols+x1l))
         if ((c1l<c1)); then
           ((slpad=c1-c1l))
 
-          # assert: smin < smax <= eol なので行末ではない
+          # assert: smin < smax <= eol, so it's not the end of the line
           ble/util/assert '! ble-edit/content/eolp "$smin"'
 
           ((c1r=(y1r-boly)*cols+x1r))
@@ -6886,7 +6886,7 @@ function ble/keymap:vi/extract-graphical-block-by-geometry {
           stext=$ret${stext:1}
         fi
 
-        # 2. 右の境界 c2 を大きな文字が跨いでいるときは空白に変換する
+        # 2. If a large character straddles the right border c2, convert it to a blank space.
         ((c2l=(y2l-boly)*cols+x2l))
         if ((c2l<c2)); then
           if ((smax==eol)); then
@@ -6901,16 +6901,16 @@ function ble/keymap:vi/extract-graphical-block-by-geometry {
             ((srpad=c2r-c2))
           fi
         elif ((c2l>c2)); then
-          # ここに来るのは ble/keymap:vi/xmap/has-eol-extension のときのみの筈
+          # It should come here only when ble/keymap:vi/xmap/has-eol-extension is used.
           ((sfill=c2-c2l,
             sfill<min_sfill&&(min_sfill=sfill)))
         fi
       else
         if ((smin==eol)); then
-          # 行末
+          # end of line
           ((sfill=c2-c1))
         elif ((c2>c1)); then
-          # 範囲の両端が単一の文字の左端または内部にある
+          # Both ends of the range are to the left of or within a single character
           ble/string#repeat ' ' "$((c2-c1))"
           stext=$ret${stext:1}
           ((smax++))
@@ -6995,7 +6995,7 @@ function ble/keymap:vi/extract-block {
 }
 
 #--------------------------------------
-# xmap/選択範囲の着色の設定
+# xmap/selection coloring settings
 
 ## @fn ble/highlight/layer:region/mark:vi_char/get-selection
 ## @fn ble/highlight/layer:region/mark:vi_line/get-selection
@@ -7054,7 +7054,7 @@ function ble/highlight/layer:region/mark:vi_block+/get-face { ble/highlight/laye
 
 
 #--------------------------------------
-# xmap/前回の選択サイズ
+# xmap/previous selection size
 
 _ble_keymap_vi_xmap_prev_edit=vi_char:1:1
 ble/array#push _ble_textarea_local_VARNAMES \
@@ -7154,7 +7154,7 @@ function ble/widget/vi_xmap/.restore-visual-state {
 }
 
 #--------------------------------------
-# xmap/前回の選択範囲
+# xmap/previous selection
 
 # mark `< `>
 _ble_keymap_vi_xmap_prev_visual=
@@ -7211,7 +7211,7 @@ function ble/widget/vi-command/previous-visual-area {
 }
 
 #--------------------------------------
-# xmap/モード遷移
+# xmap/mode transition
 
 function ble/widget/vi-command/visual-mode.impl {
   local keymap=$1 visual_type=$2
@@ -7224,7 +7224,7 @@ function ble/widget/vi-command/visual-mode.impl {
   _ble_edit_overwrite_mode=
   _ble_edit_mark=$_ble_edit_ind
   _ble_edit_mark_active=$visual_type
-  _ble_keymap_vi_xmap_insert_data= # ※矩形挿入の途中で更に xmap に入ったときはキャンセル
+  _ble_keymap_vi_xmap_insert_data= # *Cancel if further xmap is entered during rectangle insertion.
 
   ((ARG)) && ble/widget/vi_xmap/.restore-visual-state "$ARG"
 
@@ -7254,8 +7254,8 @@ function ble/widget/vi_nmap/blockwise-select-mode {
 function ble/widget/vi_xmap/exit {
   # Note: xmap operator:c
   #   -> vi_xmap/block-insert-mode.impl
-  #   → vi_xmap/cancel 経由で呼び出されるとき、
-  #   既に vi_nmap に戻っていることがあるので、vi_xmap, vi_smap のときだけ処理する。
+  #   → When called via vi_xmap/cancel,
+  #   Since it may have already returned to vi_nmap, process only vi_xmap and vi_smap.
   if [[ $_ble_decode_keymap == vi_[xs]map ]]; then
     ble/keymap:vi/xmap/set-previous-visual-area
     _ble_edit_mark_active=
@@ -7266,7 +7266,7 @@ function ble/widget/vi_xmap/exit {
   return 0
 }
 function ble/widget/vi_xmap/cancel {
-  # もし single-command-mode にいたとしても消去して normal へ移動する
+  # Even if you are in single-command-mode, delete it and move to normal.
 
   _ble_keymap_vi_single_command=
   _ble_keymap_vi_single_command_overwrite=
@@ -7332,7 +7332,7 @@ function ble/widget/vi_xmap/switch-to-visual-blockwise {
 }
 
 ## @bleopt keymap_vi_keymodel
-##   選択モードにおける移動コマンドの振る舞いを制御します。
+##   Controls the behavior of movement commands in selection mode.
 bleopt/declare -v keymap_vi_keymodel ''
 function ble/widget/vi_smap/@nomarked {
   [[ ,$bleopt_keymap_vi_keymodel, == *,stopsel,* ]] &&
@@ -7341,11 +7341,11 @@ function ble/widget/vi_smap/@nomarked {
 }
 
 #--------------------------------------
-# xmap/各種コマンド
+# xmap/various commands
 
 function ble/widget/vi_smap/self-insert {
-  # Note: repeat (nmap .) についてはこの実装で良い。
-  #   KEYS=(...) vi_smap/self-insert として記録されるので。
+  # Note: This implementation is fine for repeat (nmap .).
+  #   KEYS=(...) as it is recorded as vi_smap/self-insert.
   ble/widget/vi-command/operator c
   ble/widget/self-insert
 }
@@ -7375,7 +7375,7 @@ function ble/widget/vi_xmap/exchange-boundaries {
       local lpos2=${data2[0]} rpos2=$((data2[4]?data2[1]:data2[1]-1))
     fi
 
-    # lpos2:rpos2 が _ble_edit_ind に対応していないとき swap する
+    # lpos2: swap when rpos2 does not support _ble_edit_ind
     if ! ((lpos2<=_ble_edit_ind&&_ble_edit_ind<=rpos2)); then
       local lpos1=$lpos2 lpos2=$lpos1
       local rpos1=$rpos2 rpos2=$rpos1
@@ -7480,7 +7480,7 @@ function ble/widget/vi_xmap/linewise-operator.impl {
   local op=$1 opts=$2
   local ARG FLAG REG; ble/keymap:vi/get-arg 1
   if [[ $FLAG ]]; then
-    ble/widget/.bell 'wrong keymap: xmap ではオペレータは設定されないはず'
+    ble/widget/.bell 'wrong keymap: operators should not be set in xmap'
     return 1
   fi
 
@@ -7545,20 +7545,20 @@ function ble/widget/vi_xmap/connect-line {
 }
 
 #--------------------------------------
-# xmap/矩形挿入モード
+# xmap/rectangle insertion mode
 
 ## @var _ble_keymap_vi_xmap_insert_data
-##   矩形挿入モードの情報を保持します。
-##   iline:x1:width:content の形式です。
+##   Holds information about rectangle insertion mode.
+##   The format is iline:x1:width:content.
 ##
 ##   iline
-##     編集を行う行の番号を保持します。
+##     Holds the number of the line being edited.
 ##   x1
-##     挿入開始位置を表示列で保持します。
+##     Holds the insertion start position in the display column.
 ##   width
-##     編集行の元々の幅を保持します。
+##     Retains the original width of the edit line.
 ##   nline
-##     行数を保持します。
+##     Holds the number of rows.
 ##
 _ble_keymap_vi_xmap_insert_data=
 _ble_keymap_vi_xmap_insert_dbeg=-1
@@ -7627,12 +7627,12 @@ function ble/widget/vi_xmap/block-insert-mode.onleave {
 
   ble/string#split data : "$data"
 
-  # カーソル行が記録行と同じか
+  # Is the cursor line the same as the recording line?
   local ret
   ble-edit/content/find-logical-bol; local bol=$ret
-  ble/string#count-char "${_ble_edit_str::bol}" $'\n'; ((ret==data[0])) || return  1 # 行番号
+  ble/string#count-char "${_ble_edit_str::bol}" $'\n'; ((ret==data[0])) || return 1 # Line number
   ble/keymap:vi/mark/get-local-mark 1 || return 1; local mark=$ret # `[
-  ble-edit/content/find-logical-bol "$mark"; ((bol==ret)) || return 1 # 記録行 `[ と同じか
+  ble-edit/content/find-logical-bol "$mark"; ((bol==ret)) || return 1 # Is it the same as record line `[?
 
   local has_textmap=
   if ble/edit/use-textmap; then
@@ -7640,7 +7640,7 @@ function ble/widget/vi_xmap/block-insert-mode.onleave {
     has_textmap=1
   fi
 
-  # 表示幅の変量
+  # Display width variable
   local new_width delta
   ble-edit/content/find-logical-eol; local eol=$ret
   if [[ $has_textmap ]]; then
@@ -7652,9 +7652,9 @@ function ble/widget/vi_xmap/block-insert-mode.onleave {
     ((new_width=eol-bol))
   fi
   ((delta=new_width-data[2]))
-  ((delta>0)) || return 1 # 縮んだ場合は処理しない
+  ((delta>0)) || return 1 #Do not process if it shrinks
 
-  # 切り出し列の決定
+  # Determining the cutout column
   local x1=${data[1]}
   [[ $x1 == '$' ]] && ((x1=data[2]))
   ((x1>new_width&&(x1=new_width)))
@@ -7670,7 +7670,7 @@ function ble/widget/vi_xmap/block-insert-mode.onleave {
   fi
   local x2=$((x1+delta))
 
-  # 切り出し
+  # Cut out
   local ins= p1 p2
   if [[ $has_textmap ]]; then
     local index lx ly rx ry
@@ -7682,7 +7682,7 @@ function ble/widget/vi_xmap/block-insert-mode.onleave {
   fi
   ins=${_ble_edit_str:p1:p2-p1}
 
-  # 挿入の決定
+  # Insert decision
   local -a ins_beg=() ins_text=()
   local iline=1 nline=${data[3]} strlen=${#_ble_edit_str}
   for ((iline=1;iline<nline;iline++)); do
@@ -7716,7 +7716,7 @@ function ble/widget/vi_xmap/block-insert-mode.onleave {
     ble/array#push ins_text "$lpad$ins"
   done
 
-  # 挿入実行
+  # Insert execution
   local i=${#ins_beg[@]}
   ble/keymap:vi/mark/start-edit-area
   ble/keymap:vi/mark/commit-edit-area "$p1" "$p2"
@@ -7725,10 +7725,10 @@ function ble/widget/vi_xmap/block-insert-mode.onleave {
     ble/widget/.replace-range "$index" "$index" "$text"
   done
   ble/keymap:vi/mark/end-edit-area
-  # Note: この編集は record-insert 経由で記録されるので
-  # ここで明示的に ble/keymap:vi/repeat/record を呼び出す必要はない。
+  # Note: This edit is recorded via record-insert, so
+  # There is no need to explicitly call ble/keymap:vi/repeat/record here.
 
-  # 領域の最初に
+  # at the beginning of the area
   local index
   if ble/keymap:vi/mark/get-local-mark 60 && index=$ret; then
     ble/widget/vi-command/goto-mark.impl "$index"
@@ -7736,7 +7736,7 @@ function ble/widget/vi_xmap/block-insert-mode.onleave {
     ble-edit/content/find-logical-bol; index=$ret
   fi
 
-  # ノーマルモードに戻る時に一文字カーソルが戻るので一文字進めておく。
+  # When you return to normal mode, the cursor will move back one character, so move it forward one character.
   ble-edit/content/eolp || ((index++))
   _ble_edit_ind=$index
   return 0
@@ -7778,8 +7778,8 @@ function ble/widget/vi_xmap/append-mode {
     local beg=$_ble_edit_mark end=$_ble_edit_ind
     ((beg<=end)) || local beg=$end end=$beg
     if [[ $mark_type == vi_line ]]; then
-      # 行指向のときは最終行の先頭か _ble_edit_ind の内、
-      # 後にある文字の後に移動する。
+      # When line-oriented, start of the last line or in _ble_edit_ind,
+      # Move after the next character.
       if ((_ble_edit_mark>_ble_edit_ind)); then
         local ret
         ble-edit/content/find-logical-bol "$end"; end=$ret
@@ -7796,7 +7796,7 @@ function ble/widget/vi_xmap/append-mode {
 }
 
 #--------------------------------------
-# xmap/貼り付け
+# xmap/paste
 
 # xmap: p, P
 function ble/widget/vi_xmap/paste.impl {
@@ -7813,7 +7813,7 @@ function ble/widget/vi_xmap/paste.impl {
   local adjustment=
   if [[ $mark_type == vi_block ]]; then
     if [[ $kill_type == L ]]; then
-      # P: V → C-v のときは C-v の最終行直後に挿入
+      # P: When V → C-v, insert immediately after the last line of C-v
       if ((is_after)); then
         local ret; ble/keymap:vi/get-rectangle-height; local nline=$ret
         adjustment=lastline:$nline
@@ -7822,7 +7822,7 @@ function ble/widget/vi_xmap/paste.impl {
       # C-v → C-v
       is_after=0
     else
-      # 単純 v → C-v はブロック挿入に切り替え
+      # Simple v → C-v switches to block insert
       is_after=0
       if [[ $kill_ring != *$'\n'* ]]; then
         ((${#kill_ring}>=2)) && adjustment=index:$((${#kill_ring}*ARG-1))
@@ -7833,20 +7833,20 @@ function ble/widget/vi_xmap/paste.impl {
     fi
   elif [[ $mark_type == vi_line ]]; then
     if [[ $kill_type == L ]]; then
-      # V → V のとき
+      # When V → V
       is_after=0
     elif [[ $kill_type == B:* ]]; then
-      # C-v → V のとき、行貼り付け。
-      # kill_type=B:* のとき kill_ring の末端の改行は空行を意味するので、
-      # 空行が消えないように $'\n' を付加する必要がある。
+      # C-v → V pastes lines.
+      # When kill_type=B:*, the newline at the end of kill_ring means a blank line, so
+      # You need to add $'\n' to prevent blank lines from disappearing.
       is_after=0 kill_type=L kill_ring=$kill_ring$'\n'
     else
-      # v → V のとき、行貼り付けになる。
+      # When v → V, lines are pasted.
       is_after=0 kill_type=L
       [[ $kill_ring == *$'\n' ]] && kill_ring=$kill_ring$'\n'
     fi
   else
-    # v, V, C-v → v のとき
+    # When v, V, C-v → v
     is_after=0
     [[ $kill_type == L ]] && adjustment=newline
   fi
@@ -7891,14 +7891,14 @@ function ble/widget/vi_xmap/paste-before {
 ## @fn ble/widget/vi_xmap/increment.impl opts
 ##
 ##   @param[in] opts
-##     以下の項目をコロンで区切って指定したものです。
+##     Specify the following items separated by colons.
 ##
-##     - increase [既定]
-##       数字を増加させます。
+##     - increase [default]
+##       Increase numbers.
 ##     - decrease
-##       数字を減少させるます。
+##       Decrease numbers.
 ##     - progressive
-##       k 個目の数字について増加・減少量を k 倍します。
+##       Multiply the increase/decrease amount for the kth number by k times.
 ##
 function ble/widget/vi_xmap/increment.impl {
   local opts=$1
@@ -7938,7 +7938,7 @@ function ble/widget/vi_xmap/increment.impl {
     local -a lines
     ble/string#split-lines lines "${_ble_edit_str:beg:end-beg}"
 
-    # sub_ranges 生成
+    # sub_ranges generation
     local line index=$beg
     local -a sub_ranges
     for line in "${lines[@]}"; do
@@ -7954,14 +7954,14 @@ function ble/widget/vi_xmap/increment.impl {
     local stext=${sub#*:*:*:*:*:}
     [[ $stext =~ $rex_number ]] || continue
 
-    # 元々の数
+    # original number
     local rematch1=${BASH_REMATCH[1]}
     local rematch2=${BASH_REMATCH[2]}
     local offset=${#rematch1} length=${#rematch2}
     local number=$((10#0$rematch2))
     [[ $rematch1 == *- ]] && ((number=-number,offset--,length++))
 
-    # 新しい数
+    # new number
     ((number+=delta,delta+=progress))
     if [[ $rematch2 == 0?* ]]; then
       # Zero padding
@@ -8184,7 +8184,7 @@ function ble/widget/vi_imap/overwrite-mode {
 # imap C-w
 
 ## @fn ble/widget/vi_imap/.locate-backward-vword
-##   直前の単語 (vword) の開始点を特定します。
+##   Identify the start of the previous word (vword).
 ##   @var[out] ret
 function ble/widget/vi_imap/.locate-backward-word {
   local space=$' \t' nl=$'\n'
@@ -8283,7 +8283,7 @@ function ble/widget/vi-command/bracketed-paste.proc {
     local isbol index=$_ble_edit_ind
     ble-edit/content/bolp && isbol=1
     ble/decode/widget/call-interactively 'ble/widget/vi_nmap/append-mode' 97
-    [[ $isbol ]] && ((_ble_edit_ind=index)) # 行頭にいたときは戻る
+    [[ $isbol ]] && ((_ble_edit_ind=index)) # Go back when you are at the beginning of the line
 
     ble/widget/vi_imap/bracketed-paste.proc "$@"
     ble/keymap:vi/imap/invoke-widget \
@@ -8440,8 +8440,8 @@ function ble-decode/keymap:vi_imap/define {
 }
 
 ## @fn ble-decode/keymap:vi_imap/define-meta-bindings
-##   M- で始まるキーバインディングを定義します。
-##   ユーザから呼び出すための関数です。
+##   Define key bindings starting with M-.
+##   This is a function that can be called by the user.
 function ble-decode/keymap:vi_imap/define-meta-bindings {
   local ble_bind_keymap=vi_imap
 
@@ -8545,7 +8545,7 @@ _ble_keymap_vi_cmap_accept_hook=
 _ble_keymap_vi_cmap_cancel_hook=
 _ble_keymap_vi_cmap_before_widget=
 
-# 既定の cmap 履歴
+# Default cmap history
 _ble_keymap_vi_cmap_history=()
 _ble_keymap_vi_cmap_history_edit=()
 _ble_keymap_vi_cmap_history_dirt=()

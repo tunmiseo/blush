@@ -17,7 +17,7 @@ Koristite „exit” za napuštanje ljuske.
 „exit” használatával lehet elhagyni a parancsértelmezőt.
 Gunakan "exit" untuk meninggalkan shell.
 Usare "exit" per uscire dalla shell.
-シェルから脱出するには "exit" を使用してください。
+Use "exit" to leave the shell.
 Naudokite „exit“, jei norite išeiti iš ap.
 Gebruik "exit" om de shell te verlaten.
 Użyj "exit", aby opuścić tę powłokę.
@@ -29,4 +29,4 @@ Använd "exit" fär att lämna skalet.
 Kabuğu bırakmak için "exit" kullanın.
 Використовуйте "exit", щоб вийти з оболонки.
 Dùng "exit" để rời hệ vỏ.
-使用 "exit" 退出 shell 。
+Use "exit" to leave the shell.

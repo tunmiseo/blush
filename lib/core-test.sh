@@ -116,7 +116,7 @@ function ble/test/end-section {
   local ncrash=$((ntest-nfail-npass))
   local nskip=$((count-ntest))
   if ((ntest)); then
-    local percentage=$((npass*1000/ntest)) # Note: 切り捨て
+    local percentage=$((npass*1000/ntest)) # Note: Truncation
     ble/util/sprintf percentage '%6s' "$((percentage/10)).$((percentage%10))%" # "XXX.X%"
   else
     local percentage=---.-%
@@ -183,7 +183,7 @@ function ble/test/.read-arguments {
   [[ $qexit   ]] && _ble_test_item_expect[2]=$xexit
   [[ $qret    ]] && _ble_test_item_expect[3]=$xret
 
-  # 何もチェックが指定されなかった時は終了ステータスをチェックする
+  # If no check is specified, check the exit status
   ((${#_ble_test_item_expect[@]})) || _ble_test_item_expect[2]=0
 
   IFS= builtin eval '_ble_test_code="${buff[*]}"'

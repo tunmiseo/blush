@@ -99,12 +99,12 @@ function ble/keymap:vi_test/section:cw {
   ble/keymap:vi_test/check B3a '@:@123   456    789' 'c w'   '@:@   456    789'
   ble/keymap:vi_test/check B3b '@:@123   456    789' '1 c w' '@:@   456    789'
   ble/keymap:vi_test/check B3c '@:@123   456    789' '2 c w' '@:@    789'
-  ble/keymap:vi_test/check B4a '@:ab@c///漢字' 'c w'   '@:ab@///漢字'
-  ble/keymap:vi_test/check B4b '@:ab@c///漢字' '1 c w' '@:ab@///漢字'
-  ble/keymap:vi_test/check B4c '@:ab@c///漢字' '2 c w' '@:ab@漢字'
-  ble/keymap:vi_test/check B5a '@:@abc///漢字' 'c w'   '@:@///漢字'
-  ble/keymap:vi_test/check B5b '@:@abc///漢字' '1 c w' '@:@///漢字'
-  ble/keymap:vi_test/check B5c '@:@abc///漢字' '2 c w' '@:@漢字'
+  ble/keymap:vi_test/check B4a '@:ab@c///kanji' 'c w'   '@:ab@///kanji'
+  ble/keymap:vi_test/check B4b '@:ab@c///kanji' '1 c w' '@:ab@///kanji'
+  ble/keymap:vi_test/check B4c '@:ab@c///kanji' '2 c w' '@:ab@kanji'
+  ble/keymap:vi_test/check B5a '@:@abc///kanji' 'c w'   '@:@///kanji'
+  ble/keymap:vi_test/check B5b '@:@abc///kanji' '1 c w' '@:@///kanji'
+  ble/keymap:vi_test/check B5c '@:@abc///kanji' '2 c w' '@:@kanji'
 
   # with empty lines
   ble/keymap:vi_test/check C1 $'@:123 456 @  \n\n789' 'c w' $'@:123 456 @\n\n789'
@@ -193,13 +193,13 @@ function ble/keymap:vi_test/section:macro {
 function ble/keymap:vi_test/section:surround {
   ble/test/start-section "ble/keymap.vi/surround" 7
 
-  # ys の時は末端の空白を除く
+  # When ys, remove trailing blanks
   ble/keymap:vi_test/check A1a '@:abcd @fghi jklm nopq' 'y s e a'     '@:abcd @<fghi> jklm nopq'
   ble/keymap:vi_test/check A1b '@:abcd @fghi jklm nopq' 'y s w a'     '@:abcd @<fghi> jklm nopq'
   ble/keymap:vi_test/check A1c '@:abcd @fghi jklm nopq' 'y s a w a'   '@:abcd @<fghi> jklm nopq'
   ble/keymap:vi_test/check A1d '@:abcd @     jklm nopq' 'y s 3 l a'   '@:abcd @<>     jklm nopq'
 
-  # vS の時は末端の空白は除かない
+  # When using vS, trailing spaces are not removed.
   ble/keymap:vi_test/check A2a '@:abcd @fghi jklm nopq' 'v 3 l S a'   '@:abcd @<fghi> jklm nopq'
   ble/keymap:vi_test/check A2b '@:abcd @fghi jklm nopq' 'v 4 l S a'   '@:abcd @<fghi >jklm nopq'
   ble/keymap:vi_test/check A2c '@:abcd @fghi jklm nopq' 'h v 5 l S a' '@:abcd@< fghi >jklm nopq'
@@ -211,22 +211,22 @@ function ble/keymap:vi_test/section:surround {
 function ble/keymap:vi_test/section:txtobj_quote_xmap {
   ble/test/start-section "ble/keymap.vi/txtobj_quote_xmap" 45
 
-  # A. xmap txtobj i"/a"、開始点と終了点が同じとき
+  # A. xmap txtobj i"/a", when the start and end points are the same
 
-  # A1. 様々な位置で実行した時
+  # A1. When executed at various positions
   ble/keymap:vi_test/check A1a '@:ab@cd " fghi " jklm " nopq " rstu " vwxyz' 'v i " S a' '@:abcd "@< fghi >" jklm " nopq " rstu " vwxyz'
   ble/keymap:vi_test/check A1b '@:abcd @" fghi " jklm " nopq " rstu " vwxyz' 'v i " S a' '@:abcd "@< fghi >" jklm " nopq " rstu " vwxyz'
   ble/keymap:vi_test/check A1c '@:abcd " fghi@ " jklm " nopq " rstu " vwxyz' 'v i " S a' '@:abcd "@< fghi >" jklm " nopq " rstu " vwxyz'
   ble/keymap:vi_test/check A1d '@:abcd " fghi @" jklm " nopq " rstu " vwxyz' 'v i " S a' '@:abcd "@< fghi >" jklm " nopq " rstu " vwxyz'
-  # A2. 引数が指定された時、a" が指定された時
+  # A2. When an argument is specified, a" is specified
   ble/keymap:vi_test/check A2a '@:ab@cd " fghi " jklm " nopq " rstu " vwxyz' 'v 2 i " S a' '@:abcd @<" fghi "> jklm " nopq " rstu " vwxyz'
   ble/keymap:vi_test/check A2b '@:ab@cd " fghi " jklm " nopq " rstu " vwxyz' 'v a " S a'   '@:abcd @<" fghi " >jklm " nopq " rstu " vwxyz'
   ble/keymap:vi_test/check A2c '@:ab@cd " fghi " jklm " nopq " rstu " vwxyz' 'v 2 a " S a' '@:abcd @<" fghi " >jklm " nopq " rstu " vwxyz'
-  # A3. "" の中が空の時
+  # A3. When "" is empty
   ble/keymap:vi_test/check A3a '@:ab@cd "" jklm " nopq " rstu " vwxyz' 'v i " S a'   '@:abcd @<""> jklm " nopq " rstu " vwxyz'
   ble/keymap:vi_test/check A3b '@:ab@cd "" jklm " nopq " rstu " vwxyz' 'v 2 i " S a' '@:abcd @<""> jklm " nopq " rstu " vwxyz'
 
-  # B. xmap txtobj i"/a"、mark より現在位置の方が後のとき
+  # B. xmap txtobj i"/a", when the current position is later than mark
   # B1. i"
   ble/keymap:vi_test/check B1a '@:abcd@ " fghi " jklm " nopq " rstu " vwxyz' 'v l i " S a' '@:abcd@< " fghi " jklm >" nopq " rstu " vwxyz'
   ble/keymap:vi_test/check B1b '@:abcd " fghi " jklm " nopq@ " rstu " vwxyz' 'v l i " S a' '@:abcd " fghi " jklm " nopq@< " rstu >" vwxyz'
@@ -249,7 +249,7 @@ function ble/keymap:vi_test/section:txtobj_quote_xmap {
   ble/keymap:vi_test/check B3e '@:abcd " fghi " @jklm " nopq " rstu " vwxyz' 'v l a " S a' '@:abcd " fghi " jklm @<" nopq " >rstu " vwxyz'
   ble/keymap:vi_test/check B3f '@:abcd " fghi "@ jklm " nopq " rstu " vwxyz' 'v l a " S a' '@:abcd " fghi "@< jklm " nopq " >rstu " vwxyz'
 
-  # C. xmap txtobj i"/a"、mark より現在位置の方が前のとき
+  # C. xmap txtobj i"/a", when the current position is earlier than mark
   ble/keymap:vi_test/check C1a '@:abc@d " fghi " jklm " nopq " rstu " vwxyz' 'v h i " S a' '@:ab@<cd> " fghi " jklm " nopq " rstu " vwxyz'
   ble/keymap:vi_test/check C1b '@:abcd " @fghi " jklm " nopq " rstu " vwxyz' 'v h i " S a' '@:abcd "@< fghi >" jklm " nopq " rstu " vwxyz'
   ble/keymap:vi_test/check C1c '@:abcd " fghi@ " jklm " nopq " rstu " vwxyz' 'v h i " S a' '@:abcd "@< fghi >" jklm " nopq " rstu " vwxyz'
@@ -331,16 +331,16 @@ function ble/keymap:vi_test/section:txtobj_block_omap {
 function ble/keymap:vi_test/section:txtobj_block_xmap {
   ble/test/start-section "ble/keymap.vi/txtobj_block_xmap" 145
 
-  # xmap txtobj i"/a"、開始点と終了点が同じとき
+  # xmap txtobj i"/a", when the start and end points are the same
 
-  # 様々な位置で実行した時
+  # when executed in various positions
   ble/keymap:vi_test/check A1a '@:echo @( foo ) bar ( baz ) hello ( vim ) world' 'v i b S a' '@:echo (@< foo >) bar ( baz ) hello ( vim ) world'
   ble/keymap:vi_test/check A1b '@:echo ( @foo ) bar ( baz ) hello ( vim ) world' 'v i b S a' '@:echo (@< foo >) bar ( baz ) hello ( vim ) world'
   ble/keymap:vi_test/check A1c '@:echo ( foo @) bar ( baz ) hello ( vim ) world' 'v i b S a' '@:echo (@< foo >) bar ( baz ) hello ( vim ) world'
   ble/keymap:vi_test/check A1d '@:echo ( foo ) @bar ( baz ) hello ( vim ) world' 'v i b S a' '@:echo ( foo ) bar (@< baz >) hello ( vim ) world'
   ble/keymap:vi_test/check A1e '@:echo ( foo ) bar ( baz ) hello ( vim ) @world' 'v i b S a' '@:echo ( foo ) bar ( baz ) hello ( vim ) @<w>orld'
 
-  # 入れ子になっている時
+  # When nested
   ble/keymap:vi_test/check B1a '@:echo ( @( foo ) bar ( baz ) hello ) ( vim ) world' 'v   i b S a' '@:echo ( (@< foo >) bar ( baz ) hello ) ( vim ) world'
   ble/keymap:vi_test/check B1b '@:echo ( @( foo ) bar ( baz ) hello ) ( vim ) world' 'v 1 i b S a' '@:echo ( (@< foo >) bar ( baz ) hello ) ( vim ) world'
   ble/keymap:vi_test/check B1c '@:echo ( @( foo ) bar ( baz ) hello ) ( vim ) world' 'v 2 i b S a' '@:echo (@< ( foo ) bar ( baz ) hello >) ( vim ) world'
@@ -357,28 +357,28 @@ function ble/keymap:vi_test/section:txtobj_block_xmap {
   ble/keymap:vi_test/check B4b '@:echo ( ( foo ) @bar ( baz ) hello ) ( vim ) world' 'v 1 i b S a' '@:echo (@< ( foo ) bar ( baz ) hello >) ( vim ) world'
   ble/keymap:vi_test/check B4c '@:echo ( ( foo ) @bar ( baz ) hello ) ( vim ) world' 'v 2 i b S a' '@:echo ( ( foo ) @<b>ar ( baz ) hello ) ( vim ) world'
 
-  # 閉じていない時1
+  # When not closed1
   ble/keymap:vi_test/check C1a '@:echo ( ( @foo ) bar ( baz ) hello' 'v i b S a' '@:echo ( (@< foo >) bar ( baz ) hello'
   ble/keymap:vi_test/check C1b '@:echo ( ( foo ) @bar ( baz ) hello' 'v i b S a' '@:echo ( ( foo ) @<b>ar ( baz ) hello'
 
-  # 閉じていない時2
+  # When not closed 2
   ble/keymap:vi_test/check D1a '@:echo ( @foo bar' 'v i b S a' '@:echo ( @<f>oo bar'
 
-  # 閉じていない時3
+  # When not closed 3
   ble/keymap:vi_test/check E1a '@:echo (vim) test ( quick ) world ( @foo bar' 'v i b S a' '@:echo (vim) test ( quick ) world ( @<f>oo bar'
   ble/keymap:vi_test/check E1b '@:echo (vim) test ( quick ) @world ( foo bar' 'v i b S a' '@:echo (vim) test ( quick ) @<w>orld ( foo bar'
   ble/keymap:vi_test/check E1c '@:echo (vim) test ( @quick ) world ( foo bar' 'v i b S a' '@:echo (vim) test (@< quick >) world ( foo bar'
   ble/keymap:vi_test/check E1d '@:echo (vim) @test ( quick ) world ( foo bar' 'v i b S a' '@:echo (vim) test (@< quick >) world ( foo bar'
   ble/keymap:vi_test/check E1e '@:echo (@vim) test ( quick ) world ( foo bar' 'v i b S a' '@:echo (@<vim>) test ( quick ) world ( foo bar'
 
-  # 始まりがない時
+  # When there is no beginning
   ble/keymap:vi_test/check F1a '@:echo @vim) test ( quick ) world ( foo )' 'v i b S a' '@:echo @<v>im) test ( quick ) world ( foo )'
   ble/keymap:vi_test/check F1b '@:echo vim@) test ( quick ) world ( foo )' 'v i b S a' '@:echo vim) test (@< quick >) world ( foo )'
   ble/keymap:vi_test/check F1c '@:echo vim) @test ( quick ) world ( foo )' 'v i b S a' '@:echo vim) test (@< quick >) world ( foo )'
   ble/keymap:vi_test/check F1d '@:echo vim) test @( quick ) world ( foo )' 'v i b S a' '@:echo vim) test (@< quick >) world ( foo )'
   ble/keymap:vi_test/check F1e '@:echo vim) test ( quick ) @world ( foo )' 'v i b S a' '@:echo vim) test ( quick ) world (@< foo >)'
 
-  # echo () ... の時。ib と ab の両方テストする
+  # When echo () .... Test both ib and ab
   ble/keymap:vi_test/check G1a '@:echo @foo () (bar)' 'v i b S a' '@:echo foo @<()> (bar)'
   ble/keymap:vi_test/check G1b '@:echo foo @() (bar)' 'v i b S a' '@:echo foo @<(>) (bar)'
   ble/keymap:vi_test/check G1c '@:echo foo (@) (bar)' 'v i b S a' '@:echo foo (@<)> (bar)'
@@ -388,7 +388,7 @@ function ble/keymap:vi_test/section:txtobj_block_xmap {
   ble/keymap:vi_test/check G3a '@:echo @foo () (bar)' 'v i b h S a' '@:echo foo@< ()> (bar)'
   ble/keymap:vi_test/check G3b '@:echo @foo () (bar)' 'v a b l S a' '@:echo foo @<() >(bar)'
 
-  # 改行が含まれている場合の処理
+  # Processing when line breaks are included
   ble/keymap:vi_test/check H1a $'@:echo (\nhello @world\n)'   'v i b S a' $'@:echo (\n@<hello world\n>)'
   ble/keymap:vi_test/check H2a $'@:echo (\nhello @world\n\n)' 'v i b S a' $'@:echo (\n@<hello world\n\n>)'
 
@@ -600,7 +600,7 @@ function ble/keymap:vi_test/section:txtobj_word {
 
   ble/test/start-section "ble/keymap.vi/txtobj_word_xmap" 34
 
-  # B. xmap iw/aw (mark == ind の時)
+  # B. xmap iw/aw (when mark == ind)
   ble/keymap:vi_test/check B1/viw.1  '@:echo he@llo world "hello" "world"' 'v i w S a' '@:echo @<hello> world "hello" "world"'
   ble/keymap:vi_test/check B1/vaw.1  '@:echo he@llo world "hello" "world"' 'v a w S a' '@:echo @<hello >world "hello" "world"'
   ble/keymap:vi_test/check B2/viw.2  '@:echo hello@ world "hello" "world"' 'v i w S a' '@:echo hello@< >world "hello" "world"'
@@ -622,7 +622,7 @@ function ble/keymap:vi_test/section:txtobj_word {
   ble/keymap:vi_test/check B5/v2iw.5 '@:echo hello world "hello@" "world"' 'v 2 i w S a' '@:echo hello world "hello@<" >"world"'
   ble/keymap:vi_test/check B5/v2aw.5 '@:echo hello world "hello@" "world"' 'v 2 a w S a' '@:echo hello world "hello@<" ">world"'
 
-  # B. xmap iw/aw (ind < mark の時)
+  # B. xmap iw/aw (when ind < mark)
   ble/keymap:vi_test/check B2/v1hiw '@:echo  hello  wo@rld' 'v 1 h i w S a' '@:echo  hello  @<wor>ld'
   ble/keymap:vi_test/check B2/v2hiw '@:echo  hello  wo@rld' 'v 2 h i w S a' '@:echo  hello@<  wor>ld'
   ble/keymap:vi_test/check B2/v3hiw '@:echo  hello  wo@rld' 'v 3 h i w S a' '@:echo  hello@<  wor>ld'
@@ -644,15 +644,15 @@ function ble/keymap:vi_test/section:txtobj_word {
 function ble/keymap:vi_test/section:op.2018-02-22 {
   ble/test/start-section "ble/keymap.vi/op.2018-02-22" 4
 
-  # 行指向のコピー&貼り付け #D0674
+  # Line-oriented copy and paste #D0674
   ble/keymap:vi_test/check A0 $'@:12@345\n67890\n' 'y y p' $'@:12345\n@12345\n67890\n'
 
-  # Y 及び yy ではカーソル位置は変化しない。 #D0673
+  # For Y and yy, the cursor position does not change. #D0673
   ble/keymap:vi_test/check B1 $'@:12@345\n67890\n' 'Y' $'@:12@345\n67890\n'
   ble/keymap:vi_test/check B2 $'@:12@345\n67890\n' 'y y' $'@:12@345\n67890\n'
 
-  # blockwise operator d の書き直し #D0673
-  ble/keymap:vi_test/check C $'@:\n12@34567\n1あ2345\n12い345\n123う45\n1234え5\n' 'C-v 4 j l d' $'@:\n12@567\n1 345\n12345\n12 45\n12え5\n'
+  # Rewrite of blockwise operator d #D0673
+  ble/keymap:vi_test/check C $'@:\n12@34567\n1a2345\n12i345\n123u45\n1234e5\n' 'C-v 4 j l d' $'@:\n12@567\n1 345\n12345\n12 45\n12e5\n'
 
   ble/test/end-section
 }

@@ -95,7 +95,7 @@ function bleopt/.read-arguments {
       else
         local ret; bleopt/expand-variable-pattern "$var"
 
-        # obsolete な物は除外
+        # Exclude obsolete items
         var=()
         local v i=0
         for v in "${ret[@]}"; do
@@ -103,9 +103,9 @@ function bleopt/.read-arguments {
           var[i++]=$v
         done
 
-        # 表示目的で obsolete しかない時は obsolete でも表示。代入時も obsolete
-        # な名称を明示した場合、もしくは一致するものが obsolete な物のみの場合
-        # は obsolete に対しても作用する。
+        # If only obsolete is available for display purposes, it is also displayed as obsolete. Also obsolete when assigned
+        # If you specify a name that is obsolete, or if the only matches are obsolete ones.
+        # also works on obsolete.
         if ((${#var[@]} == 0 && ${#ret[*]})); then
           if [[ $op == [+-]= ]]; then
             # Since the operators += and -= need to read the original value,
@@ -117,7 +117,7 @@ function bleopt/.read-arguments {
           var=("${ret[@]}")
         fi
 
-        # 適した物が見つからない場合は失敗
+        # Failure if suitable item is not found
         if ((${#var[@]}==0)); then
           ble/util/print "bleopt: option \`$name' not found" >&2
           flags=E$flags
@@ -150,16 +150,16 @@ function bleopt/default {
 
 ## @fn bleopt args...
 ##   @param[in] args
-##     args は以下の内の何れかの形式を持つ。
+##     args has one of the following formats:
 ##
 ##     var=value
-##       既存の設定変数に値を設定する。
-##       設定変数が存在しないときはエラー。
+##       Set a value to an existing configuration variable.
+##       Error if configuration variable does not exist.
 ##     var:=value
-##       設定変数に値を設定する。
-##       設定変数が存在しないときは新しく作成する。
+##       Set values to configuration variables.
+##       If the configuration variable does not exist, create a new one.
 ##     var
-##       変数の設定内容を表示する
+##       Display variable settings
 ##
 function bleopt {
   builtin eval -- "$_ble_bash_POSIXLY_CORRECT_local_adjust"
@@ -205,7 +205,7 @@ function bleopt {
   [[ $flags == *u* ]] &&
     ble/array#filter pvars bleopt/changed.predicate
 
-  # --reset: pvars を全て既定値の設定に読み替える
+  # --reset: Replace all pvars with default settings
   if [[ $flags == *r* ]]; then
     local var
     for var in "${pvars[@]}"; do
@@ -256,7 +256,7 @@ function bleopt {
   fi
 
   if ((${#pvars[@]})); then
-    # 着色
+    # Coloring
     local sgr0= sgr1= sgr2= sgr3= sgr4=
     if [[ $flags == *c* || $flags != *n* && -t 1 ]]; then
       local ret
@@ -328,7 +328,7 @@ function bleopt/reinitialize {
   ble/is-function bleopt/obsolete:"$name" && return 0
   ble/is-function bleopt/check:"$name" || return 0
 
-  # 一旦値を既定値に戻して改めてチェックを行う。
+  # Reset the value to the default value and check again.
   local value=${!varname}
   builtin eval -- "$varname=\$$defname"
   bleopt/check:"$name" &&
@@ -355,7 +355,7 @@ function bleopt/check:input_encoding {
     return 1
   fi
 
-  # Note: ble/encoding:$value/clear は optional な設定である。
+  # Note: ble/encoding:$value/clear is an optional setting.
 
   if [[ $bleopt_input_encoding != "$value" ]]; then
     local bleopt_input_encoding=$value
@@ -365,15 +365,15 @@ function bleopt/check:input_encoding {
 }
 
 ## @bleopt internal_stackdump_enabled
-##   エラーが起こった時に関数呼出の構造を標準エラー出力に出力するかどうかを制御する。
-##   算術式評価によって非零の値になる場合にエラーを出力する。
-##   それ以外の場合にはエラーを出力しない。
+##   Controls whether the function call structure is printed to standard error when an error occurs.
+##   Outputs an error if an arithmetic expression evaluates to a non-zero value.
+## No error is output in other cases.
 bleopt/declare -v internal_stackdump_enabled 0
 
 ## @bleopt openat_base
-##   bash-4.1 未満で exec {var}>foo が使えない時に ble.sh で内部的に fd を割り当てる。
-##   この時の fd の base を指定する。bleopt_openat_base, bleopt_openat_base+1, ...
-##   という具合に順番に使用される。既定値は 30 である。
+##   Allocate fd internally in ble.sh when exec {var}>foo cannot be used in versions lower than bash-4.1.
+##   Specify the base of fd at this time. bleopt_openat_base, bleopt_openat_base+1, ...
+##   are used in order. Default value is 30.
 bleopt/declare -n openat_base 30
 
 ## @bleopt pager
@@ -392,25 +392,25 @@ function ble/util/setexit { return "$1"; }
 ## @var _ble_util_upvar_setup
 ## @var _ble_util_upvar
 ##
-##   これらの変数は関数を定義する時に [-v varname] の引数を認識させ、
-##   関数の結果を格納する変数名を外部から指定できるようにするのに用いる。
-##   使用する際は関数を以下の様に記述する。既定の格納先変数は ret となる。
+##   These variables make the [-v varname] argument recognized when defining a function,
+##   Used to allow external specification of the variable name that stores the result of a function.
+##   When using it, write the function as follows. The default storage variable is ret.
 ##
 ##     function MyFunction {
 ##       eval "$_ble_util_upvar_setup"
 ##
-##       ret=... # 処理を行い、変数 ret に結果を格納するコード
-##               # (途中で return などすると正しく動かない事に注意)
+##       ret=... # Code that performs the processing and stores the result in the variable ret
+##               # (Please note that if you return in the middle, it will not work correctly)
 ##
 ##       eval "$_ble_util_upvar"
 ##     }
 ##
-##   既定の格納先変数を別の名前 (以下の例では arg) にする場合は次の様にする。
+##   If you want to change the default storage variable to a different name (arg in the example below), do the following:
 ##
 ##     function MyFunction {
 ##       eval "${_ble_util_upvar_setup//ret/arg}"
 ##
-##       arg=... # 処理を行い、変数 arg に結果を格納するコード
+##       arg=... # Code that performs the processing and stores the result in variable arg
 ##
 ##       eval "${_ble_util_upvar//ret/arg}"
 ##     }
@@ -456,8 +456,8 @@ function ble/util/restore-vars {
       if ble/array#is-sparse "$__ble_name"; then
         ble/idict#copy "$__ble_name" "$__ble_prefix$__ble_name"
       else
-        # Note: bash-4.2 以下では set -u で空配列に対する "${arr[@]}" が失敗す
-        # るので ${arr[@]+"${arr[@]}"} とする。
+        # Note: Under bash-4.2, "${arr[@]}" on an empty array fails with set -u.
+        # Therefore, set ${arr[@]+"${arr[@]}"}.
         builtin eval "$__ble_name=(\${$__ble_prefix$__ble_name[@]+\"\${$__ble_prefix$__ble_name[@]}\"})"
       fi
     else
@@ -471,7 +471,7 @@ function ble/util/restore-vars {
 #
 
 ## @fn ble/variable#get-attr varname
-##   指定した変数の属性を取得します。
+##   Gets the attributes of the specified variable.
 ##   @var[out] attr
 if ((_ble_bash>=40400)); then
   function ble/variable#get-attr {
@@ -529,15 +529,15 @@ function ble/array#reserve-prototype {
 
 ## @fn ble/is-array arr
 ##
-##   Note: これに関しては様々な実現方法が考えられるが大体余りうまく動かない。
+##   Note: There are various ways to implement this, but most of them don't work very well.
 ##
-##   * ! declare +a arr だと現在の関数のローカル変数の判定になってしまう。
-##   * bash-4.2 以降では ! declare -g +a arr を使えるが、
-##     これだと呼び出し元の関数で定義されている配列が見えない。
-##     というか現在のスコープの配列も見えない。
-##   * 今の所は compgen -A arrayvar を用いているが、
-##     この方法だと bash-4.3 以降では連想配列も配列と判定され、
-##     bash-4.2 以下では連想配列は配列とはならない。
+##   * ! declare +a arr will determine the local variables of the current function.
+##   * Since bash-4.2 you can use ! declare -g +a arr, but
+##     In this case, the array defined in the calling function cannot be seen.
+##     Or rather, I can't even see the array in the current scope.
+##   * Currently I am using compgen -A arrayvar,
+##     With this method, associative arrays are recognized as arrays in bash-4.3 and later,
+##     Associative arrays are not arrays under bash-4.2.
 if ((_ble_bash>=40400)); then
   function ble/is-array { [[ ${!1@a} == *a* ]]; }
   function ble/is-assoc { [[ ${!1@a} == *A* ]]; }
@@ -567,8 +567,8 @@ function ble/array#is-sparse {
 }
 
 ## @fn ble/array#set arr value...
-##   配列に値を設定します。
-##   Bash 4.4 で arr2=("${arr1[@]}") が遅い問題を回避する為の関数です。
+##   Set values in an array.
+##   This is a function to avoid the problem that arr2=("${arr1[@]}") is slow in Bash 4.4.
 function ble/array#set { builtin eval "$1=(\"\${@:2}\")"; }
 
 ## @fn ble/array#push arr value...
@@ -579,8 +579,8 @@ if ((_ble_bash>=40000)); then
 elif ((_ble_bash>=30100)); then
   function ble/array#push {
     # Note (workaround Bash 3.1/3.2 bug): #D1198
-    #   何故か a=("${@:2}") は IFS に特別な物が設定されていると
-    #   "${*:2}" と同じ振る舞いになってしまう。
+    #   For some reason, a=("${@:2}") seems to have something special set up in IFS.
+    #   The behavior is the same as "${*:2}".
     IFS=$_ble_term_IFS builtin eval "$1+=(\"\${@:2}\")"
   }
 else
@@ -610,8 +610,8 @@ function ble/array#unshift {
 }
 ## @fn ble/array#shift arr count
 function ble/array#shift {
-  # Note: Bash 4.3 以下では ${arr[@]:${2:-1}} が offset='${2'
-  # length='-1' に解釈されるので、先に算術式展開させる。
+  # Note: In Bash 4.3 and below, ${arr[@]:${2:-1}} is offset='${2'
+  # Since length='-1' is interpreted, the arithmetic expression is expanded first.
   builtin eval -- "$1=(\"\${$1[@]:$((${2:-1}))}\")"
 }
 ## @fn ble/array#reverse arr
@@ -836,8 +836,8 @@ function ble/array#fill-range {
 }
 
 ## @fn ble/idict#replace arr needle [replacement]
-##   needle に一致する要素を全て replacement に置換します。
-##   replacement が指定されていない時は該当要素を unset します。
+##   Replaces all elements matching needle with replacement.
+##   If replacement is not specified, the corresponding element will be unset.
 ##   @var[in] arr
 ##   @var[in] needle
 ##   @var[in,opt] replacement
@@ -897,7 +897,7 @@ function ble/string#common-prefix {
     return 0
   fi
 
-  # l <= 解 < u, (${a:u}: 一致しない, ${a:l} 一致する)
+  # l <= solution < u, (${a:u}: does not match, ${a:l} matches)
   local l=0 u=${#a} m
   while ((l+1<u)); do
     ((m=(l+u)/2))
@@ -923,7 +923,7 @@ function ble/string#common-suffix {
     return 0
   fi
 
-  # l < 解 <= u, (${a:l}: 一致しない, ${a:u} 一致する)
+  # l < solution <= u, (${a:l}: does not match, ${a:u} matches)
   local l=0 u=${#a} m
   while ((l+1<u)); do
     ((m=(l+u+1)/2))
@@ -938,17 +938,17 @@ function ble/string#common-suffix {
 }
 
 ## @fn ble/string#split arr sep str...
-##   文字列を分割します。
-##   空白類を分割に用いた場合は、空要素は削除されます。
+##   Split a string.
+##   If whitespace is used for splitting, empty elements will be removed.
 ##
-##   @param[out] arr 分割した文字列を格納する配列名を指定します。
-##   @param[in]  sep 分割に使用する文字を指定します。
-##   @param[in]  str 分割する文字列を指定します。
+##   @param[out] arr Specify the array name that stores the divided strings.
+##   @param[in] sep Specifies the character to use for splitting.
+##   @param[in] str Specifies the string to split.
 ##
 function ble/string#split {
   local IFS=$2
   if [[ -o noglob ]]; then
-    # Note: 末尾の sep が無視されない様に、末尾に手で sep を 1 個追加している。
+    # Note: One sep is manually added to the end so that the last sep is not ignored.
     builtin eval "$1=(\$3\$2)"
   else
     set -f
@@ -967,10 +967,10 @@ function ble/string#split-words {
   fi
 }
 ## @fn ble/string#split-lines arr text
-##   文字列を行に分割します。空行も省略されません。
+##   Splits a string into lines. Blank lines are not omitted.
 ##
-##   @param[out] arr  分割した文字列を格納する配列名を指定します。
-##   @param[in]  text 分割する文字列を指定します。
+##   @param[out] arr Specify the array name that stores the divided strings.
+##   @param[in] text Specifies the string to split.
 ##   @var[out] ret
 ##
 if ((_ble_bash>=40000)); then
@@ -985,7 +985,7 @@ fi
 ## @fn ble/string#count-char text chars
 ##   @param[in] text
 ##   @param[in] chars
-##     検索対象の文字の集合を指定します。
+##     Specifies the set of characters to search for.
 ##   @var[out] ret
 function ble/string#count-char {
   local text=$1 char=$2
@@ -1004,12 +1004,12 @@ function ble/string#count-string {
 ##   @param[in] text
 ##   @param[in] needle
 ##   @param[in] n
-##     この引数を指定したとき n 番目の一致を検索します。
+##     This argument searches for the nth match.
 ##   @var[out] ret
-##     一致した場合に見つかった位置を返します。
-##     見つからなかった場合に -1 を返します。
+##     Returns the location found if there is a match.
+##     Returns -1 if not found.
 ##   @exit
-##     一致した場合に成功し、見つからなかった場合に失敗します。
+##     Succeeds if there is a match, fails if not found.
 function ble/string#index-of {
   local haystack=$1 needle=$2 count=${3:-1}
   ble/string#repeat '*"$needle"' "$count"; local pattern=$ret
@@ -1022,7 +1022,7 @@ function ble/string#index-of {
 ##   @param[in] text
 ##   @param[in] needle
 ##   @param[in] n
-##     この引数を指定したとき n 番目の一致を検索します。
+##     This argument searches for the nth match.
 ##   @var[out] ret
 function ble/string#last-index-of {
   local haystack=$1 needle=$2 count=${3:-1}
@@ -1232,16 +1232,16 @@ function ble/string#escape-for-bash-escape-string {
 ## @fn ble/string#escape-for-bash-specialchars text flags
 ##   @param[in] text
 ##   @param[in] flags
-##     c 単語中でチルダ展開を誘導する文字をエスケープします。
-##     b ブレース展開の文字もエスケープします。
-##     H 語頭の #, ~ のエスケープをしません。
-##     T 語頭のチルダのエスケープをしません。
-##     G グロブ文字をエスケープしません。
+##     c Escape characters that induce tilde expansion in words.
+##     b Also escapes brace expansion characters.
+##     H Do not escape #, ~ at the beginning of a word.
+##     T Don't escape the tilde at the beginning of a word.
+## G Do not escape glob characters.
 ##   @var[out] ret
 function ble/string#escape-for-bash-specialchars {
   local chars='\ "'\''`$|&;<>()!^'
-  # Note: = と : は文法的にはエスケープは不要だが
-  #   補完の際の COMP_WORDBREAKS を避ける為に必要である。
+  # Note: Although = and : do not require escaping grammatically,
+  #   Necessary to avoid COMP_WORDBREAKS during completion.
   [[ $2 != *G* ]] && chars=$chars'*?['
   [[ $2 == *c* ]] && chars=$chars'=:'
   [[ $2 == *b* ]] && chars=$chars'{,}'
@@ -1255,7 +1255,7 @@ function ble/string#escape-for-bash-specialchars {
     a=$'\t' b=$'\\\t'  ret=${ret//"$a"/"$b"}
   fi
 
-  # 上の処理で extglob の ( も quote されてしまうので G の時には戻す。
+  # In the above process, extglob's ( is also quoted, so it is returned when it is G.
   if [[ $2 == *G* ]] && shopt -q extglob; then
     local a b
     a='!\(' b='!(' ret=${ret//"$a"/"$b"}
@@ -1267,18 +1267,18 @@ function ble/string#escape-for-bash-specialchars {
 }
 
 ## @fn ble/string#escape-for-display str [opts]
-##   str に含まれる制御文字を ^A などのキャレット表記に置き換えます。
+##   Replaces control characters in str with caret notation, such as ^A.
 ##
 ##   @param[in] str
 ##   @param[in] opts
 ##     revert
-##       キャレット表記を反転表示します。
+##       Highlight the caret notation.
 ##     sgr1=*
-##       キャレット表記に用いる SGR シーケンスを指定します。
-##       キャレット表記の開始に挿入されます。
+##       Specifies the SGR sequence to use for caret notation.
+##       Inserts at the start of caret notation.
 ##     sgr0=*
-##       キャレット表記以外の部分に用いる地の SGR シーケンスを指定します。
-##       キャレット表記の終端に挿入されます。
+##       Specifies the ground SGR sequence to be used for parts other than caret notation.
+##       Inserts at the end of the caret notation.
 ##
 function ble/string#escape-for-display {
   local head= tail=$1 opts=$2
@@ -1442,11 +1442,11 @@ function ble/string#create-unicode-progress-bar/.block {
     ble/string#repeat ' ' "$ret"
   elif ((block>=8)); then
     ble/util/c2s "$((0x2588))"
-    ((${#ret}==1)) || ret='*' # LC_CTYPE が非対応の文字の時
+    ((${#ret}==1)) || ret='*' # When LC_CTYPE is an unsupported character
   else
     ble/util/c2s "$((0x2590-block))"
     if ((${#ret}!=1)); then
-      # LC_CTYPE が非対応の文字の時
+      # When LC_CTYPE is an unsupported character
       ble/util/c2w "$((0x2588))"
       ble/string#repeat ' ' "$((ret-1))"
       ret=$block$ret
@@ -1456,7 +1456,7 @@ function ble/string#create-unicode-progress-bar/.block {
 
 ## @fn ble/string#create-unicode-progress-bar value max width opts
 ##   @param[in] opts
-##     unlimited ... 上限が不明である事を示します。
+##     unlimited ... Indicates that the upper limit is unknown.
 ##   @var[out] ret
 function ble/string#create-unicode-progress-bar {
   local value=$1 max=$2 width=$3 opts=:$4:
@@ -1473,7 +1473,7 @@ function ble/string#create-unicode-progress-bar {
   local out=
   if ((progress_integral)); then
     if [[ $opt_unlimited ]]; then
-      # unlimited の時は左は空白
+      # When unlimited, the left side is blank.
       ble/string#create-unicode-progress-bar/.block 0
     else
       ble/string#create-unicode-progress-bar/.block 8
@@ -1484,7 +1484,7 @@ function ble/string#create-unicode-progress-bar {
 
   if ((progress_fraction)); then
     if [[ $opt_unlimited ]]; then
-      # unlimited の時は2升を使って位置を表す
+      # When unlimited, 2 sho is used to represent the position.
       ble/string#create-unicode-progress-bar/.block "$progress_fraction"
       out=$out$'\e[7m'$ret$'\e[27m'
     fi
@@ -1507,8 +1507,8 @@ function ble/string#create-unicode-progress-bar {
 
   ret=$out
 }
-# Note: Bash-4.1 以下では "LC_CTYPE=C 組み込みコマンド" の形式だと
-#   locale がその場で適用されないバグがある。
+# Note: For Bash-4.1 and below, the format "LC_CTYPE=C built-in command"
+#   There is a bug where locale is not applied on the spot.
 function ble/util/strlen.impl {
   local LC_ALL= LC_CTYPE=C
   ret=${#1}
@@ -1858,18 +1858,18 @@ function ble/gdict#cp { ble/dict/.copy gdict "$1" "$2"; }
 
 ## @fn ble/util/readfile var filename
 ## @fn ble/util/mapfile arr < filename
-##   ファイルの内容を変数または配列に読み取ります。
+##   Read the contents of a file into a variable or array.
 ##
 ##   @param[in] var
-##     読み取った内容の格納先の変数名を指定します。
+##     Specify the variable name to store the read contents.
 ##   @param[in] arr
-##     読み取った内容を行毎に格納する配列の名前を指定します。
+##     Specify the name of the array that stores the read contents row by row.
 ##   @param[in] filename
-##     読み取るファイルの場所を指定します。
+##     Specifies the location of the file to read.
 ##
-## Note: bash-5.2 以上で $(< file) を使う可能性も考えたが、末尾改行が
-##   消えてしまう事、末尾改行を未定義にしてまで使う程の速度差もない事、
-##   などから採用は見送る事にした。
+## Note: I considered the possibility of using $(< file) in bash-5.2 or higher, but the trailing newline
+##   The fact that it disappears, and that there is no speed difference that makes it possible to use the trailing newline undefined,
+##   For these reasons, we decided to postpone hiring him.
 if ((_ble_bash>=40000)); then
   function ble/util/readfile { # 155ms for man bash
     local -a _ble_local_buffer=()
@@ -1904,15 +1904,15 @@ function ble/util/copyfile {
 }
 
 ## @fn ble/util/writearray [OPTIONS] arr
-##   配列の内容を読み出し可能な形式で出力します。
+##   Outputs the contents of an array in a readable format.
 ##
 ## OPTIONS
-##   --       以降の引数は通常引数
-##   -d delim 配列要素を区切るのに使う文字を設定します。
-##            既定値は改行 "\n" です。
-##   --nlfix  改行区切りで出力します。要素に改行が含まれる時は $'' を用
-##            いて内容をエスケープします。改行が含まれる要素番号の一覧
-##            を一番最後の要素に追加します。
+##   -- Subsequent arguments are normal arguments
+##   -d delim Sets the character used to separate array elements.
+##            The default value is newline "\n".
+##   --nlfix Output with line breaks separated. Use $'' when the element contains line breaks.
+##            and escape the contents. List of element numbers that include line breaks
+##            Add to the last element.
 ##
 function ble/util/writearray/.read-arguments {
   _ble_local_array=
@@ -2140,8 +2140,8 @@ function ble/util/writearray {
     __ble_awk=ble/bin/nawk __ble_awktype=nawk
   fi
 
-  # Note: printf も遅いが awk による parse の方が遅いので nlfix でない限りは直
-  # 接 printf を使う。但し、bash-5.2 以降では printf が格段に遅くなるので避ける。
+  # Note: printf is also slow, but parse by awk is slower, so unless you use nlfix, you can't use it directly.
+  # Use printf directly. However, printf is significantly slower in bash-5.2 and later, so avoid it.
   if ((!_ble_local_nlfix)) && ! [[ _ble_bash -ge 50200 && $__ble_awktype == [mn]awk ]]; then
     if [[ $_ble_local_delim ]]; then
       if [[ $_ble_local_delim == *["%\'"]* ]]; then
@@ -2157,14 +2157,14 @@ function ble/util/writearray {
     return "$?"
   fi
 
-  # Note: mawk は定義していない関数を使おうとすると、それが実際に決し
-  # て実行されないとしてもコンパイルに失敗して動かない。
+  # Note: mawk will attempt to use an undefined function without actually
+  # Even if it does not run, the compilation will fail and it will not work.
   local __ble_function_gensub_dummy=
   [[ $__ble_awktype == gawk ]] ||
     __ble_function_gensub_dummy='function gensub(rex, rep, n, str) { exit 3; }'
 
-  # Note: gawk の内部では $'\302' 等から現在のコードにないバイトを生成できない
-  # ので外部から与える。
+  # Note: gawk internally cannot generate bytes that are not in the current code from $'\302' etc.
+  # Therefore, it is given from outside.
   if [[ ! $_ble_util_writearray_rawbytes ]]; then
     local IFS=$_ble_term_IFS __ble_tmp; __ble_tmp=('\'{2,3}{0..7}{0..7})
     builtin eval "local _ble_util_writearray_rawbytes=\$'${__ble_tmp[*]}'"
@@ -2174,7 +2174,7 @@ function ble/util/writearray {
   local __ble_rex_dq='^"([^\\"]|\\.)*"'
   local __ble_rex_es='^\$'\''([^\\'\'']|\\.)*'\'''
   local __ble_rex_sq='^'\''([^'\'']|'\'\\\\\'\'')*'\'''
-  local __ble_rex_normal=$'^[^'$_ble_term_blank'$`"'\''()|&;<>\\]' # Note: []{}?*#!~^, @(), +() は quote されていなくても OK とする
+  local __ble_rex_normal=$'^[^'$_ble_term_blank'$`"'\''()|&;<>\\]' # Note: []{}?*#!~^, @(), +() are OK even if they are not quoted.
   declare -p "$_ble_local_array" | "$__ble_awk" -v _ble_bash="$_ble_bash" '
     '"$__ble_function_gensub_dummy"'
     BEGIN {
@@ -2242,7 +2242,7 @@ function ble/util/writearray {
         return s;
     }
 
-#%  # 制御文字が要素に含まれていない場合は全て [1]="..." の形式になっている筈。
+#% # If the control character is not included in the element, it should all be in the format [1]="...".
     function analyze_elements_dq(decl, _, arr, i, n) {
       if (decl ~ /^\[[0-9]+\]="([^'$'\1\2''"\n\\]|\\.)*"( \[[0-9]+\]="([^\1\2"\\]|\\.)*")*$/) {
         if (IS_GAWK) {
@@ -2274,7 +2274,7 @@ function ble/util/writearray {
             printf("%s%c", arr[i], 0);
         }
 
-#%      # [N]="" の形式の時は要素内改行はないと想定
+#% # When using the [N]="" format, it is assumed that there is no line break within the element.
         if (FLAG_NLFIX) printf("\n");
 
         return 1;
@@ -2292,7 +2292,7 @@ function ble/util/writearray {
       }
     }
 
-#%  # 任意の場合は多少遅くなるがこちらの関数で処理する。
+#% # In any case, this function will process it, although it will be a little slower.
     function analyze_elements_general(decl, _, arr, i, n, str, elem, m) {
       if (FLAG_NLFIX)
         nlfix_begin();
@@ -2336,10 +2336,10 @@ function ble/util/writearray {
     }
 
     function process_declaration(decl) {
-#%    # declare 除去
+#% # declare remove
       sub(/^declare +(-[-aAilucnrtxfFgGI]+ +)?(-- +)?/, "", decl);
 
-#%    # 全体 quote の除去
+#% # Remove entire quote
       if (decl ~ /^([_a-zA-Z][_a-zA-Z0-9]*)='\''\(.*\)'\''$/) {
         # Note: nawk in Solaris 2.11 does not allow regex to start with /=.
         sub(/(=)'\''\(/, "=(", decl);
@@ -2347,14 +2347,14 @@ function ble/util/writearray {
         gsub(/'\'\\\\\'\''/, "'\''", decl);
       }
 
-#%    # bash-3.0 の declare -p は改行について誤った出力をする。
+#% # bash-3.0's declare -p gives incorrect output about newlines.
       if (_ble_bash < 30100) gsub(/\\\n/, "\n", decl);
 
-#%    # #D1238 bash-4.3 以前の declare -p は ^A, ^? を
-#%    #   ^A^A, ^A^? と出力してしまうので補正する。
-#%    # #D1325 更に Bash-3.0 では "x${_ble_term_DEL}y" とすると
-#%    #   _ble_term_DEL の中身が消えてしまうので
-#%    #   "x""${_ble_term_DEL}""y" とする必要がある。
+#% # #D1238 Before bash-4.3, declare -p changed ^A, ^?
+#% # ^A^A, ^A^? is output, so correct it.
+#% # #D1325 Furthermore, in Bash-3.0, "x${_ble_term_DEL}y"
+#% # The contents of _ble_term_DEL will be deleted.
+#% # Must be "x""${_ble_term_DEL}""y".
       if (_ble_bash < 40400) {
         gsub(/\001\001/, "\001", decl);
         gsub(/\001\177/, "\177", decl);
@@ -2363,10 +2363,10 @@ function ble/util/writearray {
       sub(/^([_a-zA-Z][_a-zA-Z0-9]*)=\(['"$_ble_term_blank"']*/, "", decl);
       sub(/['"$_ble_term_blank"']*\)['"$_ble_term_blank"']*$/, "", decl);
 
-#%    # 空配列
+#% # empty array
       if (decl == "") return 1;
 
-#%    # [N]="value" だけの時の高速実装。mawk だと却って遅くなる様だ
+#% # Fast implementation when only [N]="value". mawk seems to be slower.
       if (AWKTYPE != "mawk" && analyze_elements_dq(decl)) return 1;
 
       return analyze_elements_general(decl);
@@ -2407,17 +2407,17 @@ function ble/util/readarray {
 }
 
 ## @fn ble/util/assign var command
-##   var=$(command) の高速な代替です。command はサブシェルではなく現在のシェル
-##   で実行されます。Bash 5.3 の var=${ command; } にほぼ等価です。
+##   A fast alternative to var=$(command). command is the current shell, not a subshell
+##   will be executed. Roughly equivalent to var=${ command; } in Bash 5.3.
 ##
 ##   @param[in] var
-##     代入先の変数名を指定します。
+##     Specify the variable name to which to assign.
 ##   @param[in] command...
-##     実行するコマンドを指定します。
+##     Specifies the command to run.
 ##
-## @remarks util.bgproc.sh では « ble/util/assign bgpid '(set -m; command &
-##   bgpid=$!; ble/util/print "$bgpid")' » でプロセスグループが作られる事を想定
-##   している。例えば bgpid=$(...) はプロセスグループが作られないので使えない。
+## @remarks In util.bgproc.sh « ble/util/assign bgpid '(set -m; command &
+##   Assuming that a process group is created with bgpid=$!; ble/util/print "$bgpid")' »
+##   I am doing it. For example, bgpid=$(...) cannot be used because a process group is not created.
 ##
 ## @remarks There is small behavioral differences between the implementation by
 ##   the function substitution and the manual implementation using temporary
@@ -2458,7 +2458,7 @@ if ((_ble_bash>=50300)); then
     builtin eval -- "$1=\${ builtin eval -- \"\$2\"; }"
   }
 elif ((_ble_bash>=40000)); then
-  # mapfile の方が read より高速
+  # mapfile is faster than read
   function ble/util/assign {
     local _ble_local_tmpfile; ble/util/assign/mktmp
     builtin eval -- "$2" >| "$_ble_local_tmpfile"
@@ -2481,15 +2481,15 @@ else
   }
 fi
 ## @fn ble/util/assign-array arr command args...
-##   mapfile -t arr < <(command ...) の高速な代替です。
-##   command はサブシェルではなく現在のシェルで実行されます。
+##   Fast alternative to mapfile -t arr < <(command ...).
+##   command is executed in the current shell, not in a subshell.
 ##
 ##   @param[in] arr
-##     代入先の配列名を指定します。
+##     Specify the array name to which to assign.
 ##   @param[in] command
-##     実行するコマンドを指定します。
+##     Specifies the command to run.
 ##   @param[in] args...
-##     command から参照する引数 ($3 $4 ...) を指定します。
+##     Specify the arguments ($3 $4 ...) to reference from command.
 ##
 if ((_ble_bash>=40000)); then
   function ble/util/assign-array {
@@ -2572,10 +2572,10 @@ fi
 #
 
 ## @fn ble/is-function function
-##   関数 function が存在するかどうかを検査します。
+##   Tests whether function function exists.
 ##
 ##   @param[in] function
-##     存在を検査する関数の名前を指定します。
+##     Specifies the name of the function to check for existence.
 ##
 if ((_ble_bash>=30200)); then
   function ble/is-function {
@@ -2591,18 +2591,18 @@ else
   }
 fi
 
-# ble/bin/awk の初期化に ble/util/assign と ble/is-function を使うので
+# Since we use ble/util/assign and ble/is-function to initialize ble/bin/awk,
 ble/bin/awk/.instantiate
 
 ## @fn ble/function#getdef function
 ##   @var[out] def
 ##
-## Note: declare -pf "$name" が -o posix に依存しない関数定義の取得方
-##   法であるかに思えたが、declare -pf "$name" を使うと -t 属性が付い
-##   ていた時に末尾に declare -ft name という余分な属性付加のコマンド
-##   が入ってしまう。或いはこの属性も一緒に保存できた方が良いのかもし
-##   れないが、取り敢えず今は属性が入らない様に declare -pf name は使
-##   わない。
+## Note: How to get function definitions where declare -pf "$name" does not depend on -o posix
+##   It seemed to be legal, but when I use declare -pf "$name", the -t attribute is added.
+##   When I was using the command, I added an extra attribute to the end of the command: declare -ft name.
+##   will be included. Or maybe it would be better to save this attribute as well.
+##   However, for now, use declare -pf name so that no attributes are included.
+##   No.
 if ((_ble_bash>=30200)); then
   function ble/function#getdef {
     local name=$1
@@ -2624,8 +2624,8 @@ else
 fi
 
 ## @fn ble/function#evaldef def
-##   関数を定義します。基本的に eval に等価ですが評価時に shopt -s extglob 及び
-##   shopt -u expand_aliases を保証します。
+##   Define the function. Basically equivalent to eval, but when evaluating, use shopt -s extglob and
+##   shopt -u expand_aliases ensures.
 function ble/function#evaldef {
   ble/base/evaldef "$1"
 }
@@ -2668,16 +2668,16 @@ function ble/function#.copy-primitive {
 }
 
 ## @fn ble/function/is-global-trace-context
-##   この関数の呼び出し元の文脈で確実に global の DEBUG が見えているかどうかを
-##   判定します。
+##   Make sure that the global DEBUG is visible in the context of the caller of this function.
+##   I will judge.
 function ble/function/is-global-trace-context {
-  # Note: 例え set -T が設定されていたとしても、それが global で設定された物な
-  #   のか呼び出しの何処かの深さで設定された物なのか分からない。なので、set -T
-  #   が設定されていたからと言って無条件に global が見えているとは限らない。
-  # Note: ble に属する関数は勝手に set -T を一時的に有効にしたりする事は基本的
-  #   にないので許可する。但し、内部で一時的に restore-bash-options している時
-  #   はあるが、その内部で ble-attach 乃至は ble/function/is-global-trace-context等
-  #   を実行する事はないと仮定する。
+  # Note: Even if set -T is set, it is not the same as the one set by global.
+  #   I don't know if it's something set somewhere deep in the call. So set -T
+  #   Just because ``global'' is set does not mean that ``global'' is unconditionally visible.
+  # Note: Functions belonging to ble do not automatically enable set -T temporarily.
+  #   Since there is no such thing, I will allow it. However, when temporarily restoring-bash-options internally
+  #   There is, but inside it, ble-attach or ble/function/is-global-trace-context etc.
+  #   Assume that there is no need to execute .
   local func depth=1 ndepth=${#FUNCNAME[*]}
   for func in "${FUNCNAME[@]:1}"; do
     local src=${BASH_SOURCE[depth]}
@@ -2690,14 +2690,14 @@ function ble/function/is-global-trace-context {
 }
 
 ## @fn ble/function#try function args...
-##   関数 function が存在している時に限り関数を呼び出します。
+##   Calls the function only if function exists.
 ##
 ##   @param[in] function
-##     存在を検査して実行する関数の名前を指定します。
+##     Specifies the name of the function to check for existence and execute.
 ##   @param[in] args
-##     関数に渡す引数を指定します。
-##   @exit 関数が呼び出された場合はその終了ステータスを返します。
-##     関数が存在しなかった場合は 127 を返します。
+##     Specify the arguments to pass to the function.
+##   @exit Returns the exit status of the function if it was called.
+##     Returns 127 if the function does not exist.
 ##
 function ble/function#try {
   local lastexit=$?
@@ -2721,37 +2721,37 @@ function ble/function#get-source-and-lineno {
 }
 
 ## @fn ble/function#advice [-f] type function proc
-##   既存の関数の振る舞いを変更します。
+##   Change the behavior of an existing function.
 ##
 ##   @option -f
-##     関数が存在している時にのみ処理を行います。関数が存在しない場合はエラーメッ
-##     セージを表示せずに失敗します。
+##     Process only when the function exists. An error message is displayed if the function does not exist.
+##     fails without displaying any message.
 ##
 ##   @param[in] type
-##     before を指定した時、処理 proc を関数 function の前に挿入します。
-##     after を指定した時、処理 proc を関数 function の後に挿入します。
-##     around を指定した時、関数 function の呼び出し前後に処理 proc を行います。
-##     around proc の中では本来の関数を呼び出す為に ble/function#advice/do
-##     を実行する必要があります。
+##     When before is specified, the process proc is inserted before the function function.
+##     When after is specified, the process proc is inserted after the function function.
+##     When around is specified, processing proc is performed before and after calling function.
+##     Inside proc, use ble/function#advice/do to call the original function
+##     must be executed.
 ##
 ##   @fn ble/function#advice/do
-##     around proc の中から呼び出せる関数です。
-##     本来の関数を呼び出します。
+##     A function that can be called from around proc.
+##     Call the original function.
 ##
 ##   @arr[in,out] ADVICE_WORDS
-##     proc の中から参照できる変数です。関数の呼び出しに使うコマンドを提供しま
-##     す。例えば元の関数呼び出しが function arg1 arg2 だった場合、
-##     ADVICE_WORDS=(function arg1 arg2) が設定されます。before/around に於いて
-##     本来の関数の呼び出し前にこの配列を書き換える事で呼び出す関数または関数の
-##     引数を変更する事ができます。
+##     This is a variable that can be referenced from within proc. Provides commands used to call functions.
+##     Yes. For example, if the original function call was function arg1 arg2,
+## ADVICE_WORDS=(function arg1 arg2) is set. before/around
+##     The function to be called or the function to be called can be changed by rewriting this array before calling the original function.
+##     You can change the arguments.
 ##
 ##   @var[in.out] ADVICE_EXIT
-##     proc の中から参照できる変数です。after/around に於いて関数実行後の戻り値
-##     を参照または変更するのに使います。
+##     This is a variable that can be referenced from within proc. Return value after function execution in after/around
+##     Used to refer to or change.
 ##
 ##   @var[in.out] ADVICE_FUNCNAME
-##     proc の中から参照できる変数です。FUNCNAME から ble/function#advice の調
-##     整による余分な関数呼び出しを取り除いたものを保持します。
+##     This is a variable that can be referenced from within proc. Adjustment of ble/function#advice from FUNCNAME
+##     Saves the result with unnecessary function calls removed.
 ##
 function ble/function#advice/do {
   ble/util/setexit "$advice_lastexit" "$advice_lastarg"
@@ -2839,7 +2839,7 @@ function ble/function#advice {
 
 ## @fn ble/function#push name [proc]
 ## @fn ble/function#pop name
-##   関数定義を保存・復元する関数です。
+##   This function saves and restores function definitions.
 ##
 function ble/function#push {
   local name=$1 proc=$2
@@ -2909,7 +2909,7 @@ ble/function#trace ble/function#push/call-top
 
 : "${_ble_util_lambda_count:=0}"
 ## @fn ble/function#lambda var body
-##   無名関数を定義しその実際の名前を変数 var に格納します。
+##   Define an anonymous function and store its actual name in the variable var.
 function ble/function#lambda {
   local _ble_local_q=\' _ble_local_Q="'\''"
   if ((_ble_bash>=50300)); then
@@ -2929,7 +2929,7 @@ function ble/function#suppress-stderr {
     return 2
   fi
 
-  # 重複して suppress-stderr した時の為、未定義の時のみ実装を待避
+  # In case of duplicate suppress-stderr, save the implementation only when it is undefined
   local lambda=ble/function#suppress-stderr:$name
   if ! ble/is-function "$lambda"; then
     ble/function#.copy-primitive "$name" "$lambda"
@@ -3017,9 +3017,9 @@ fi
 
 ## @fn ble/util/type varname command
 ##   @param[out] varname
-##     結果を格納する変数名を指定します。
+##     Specify the variable name to store the result.
 ##   @param[in] command
-##     種類を判定するコマンド名を指定します。
+##     Specify the command name to determine the type.
 function ble/util/type {
   ble/util/assign-array "$1" 'builtin type -a -t -- "$3" 2>/dev/null' "$2"
 }
@@ -3035,7 +3035,7 @@ if ((_ble_bash>=40000)); then
   ## @fn ble/alias#expand word
   ##   @var[out] ret
   ##   @exit
-  ##     エイリアス展開が実際に行われた時に成功します。
+  ##     Succeeds when alias expansion actually occurs.
   function ble/alias#expand {
     ret=$1
     ble/alias#active "$1" && ret=${BASH_ALIASES[$1]}
@@ -3150,7 +3150,7 @@ function ble/util/load-standard-builtin {
 ##   @remarks When stdin (0) is connected to /dev/null, this function succeeds
 ##     unconditionally, even though a read from /dev/null will fail.
 if ((_ble_bash>=40000)); then
-  # #D1341 対策 変数代入形式だと組み込みコマンドにロケールが適用されない。
+  # #D1341 Countermeasure Locale is not applied to built-in commands in variable assignment format.
   function ble/util/is-stdin-ready {
     local IFS= LC_ALL= LC_CTYPE=C stdin=${1:-${_ble_util_fd_tui_stdin:-0}}
 
@@ -3189,7 +3189,7 @@ else
   function ble/util/is-stdin-ready { return "${2:-1}"; }
 fi
 
-# Note: BASHPID は Bash-4.0 以上
+# Note: BASHPID is Bash-4.0 or higher
 
 if ((_ble_bash>=40000)); then
   function ble/util/getpid { return 0; }
@@ -3202,9 +3202,9 @@ else
     ble/util/assign BASHPID 'ble/bin/sh -c "$command"'
   }
   function ble/util/is-running-in-subshell {
-    # Note: bash-4.3 以下では BASH_SUBSHELL はパイプやプロセス置換で増えないの
-    #   で信頼性が低いらしい。唯、関数内で実行している限りは大丈夫なのかもしれ
-    #   ない。
+    # Note: Under bash-4.3, BASH_SUBSHELL cannot be increased by pipes or process replacement.
+    #   It seems to have low reliability. However, as long as it is executed within a function, it may be okay.
+    #   No.
     ((BASH_SUBSHELL==0)) || return 0
     local BASHPID; ble/util/getpid
     [[ $$ != $BASHPID ]]
@@ -3383,18 +3383,18 @@ _ble_util_openat_nextfd=
 ## @fn ble/fd#alloc/.nextfd var [fdbase [opts]]
 ##   @param[out] var
 ##   @opt no-increment
-##     _ble_util_openat_nextfd を更新しません。
+##     Do not update _ble_util_openat_nextfd.
 function ble/fd#alloc/.nextfd {
   [[ $_ble_util_openat_nextfd ]] ||
     _ble_util_openat_nextfd=${bleopt_openat_base:-30}
-  # Note: Bash 3.1 では exec fd>&- で明示的に閉じても駄目。
-  #   開いた後に読み取りプロセスで読み取りに失敗する。
-  #   なので開いていない fd を探す必要がある。#D0992
-  # Note: 指定された fd が開いているかどうかを
-  #   可搬に高速に判定する方法を見つけたので
-  #   常に開いていない fd を探索する。#D1318
-  # Note: fd が枯渇すると探索が無限ループになるので fd 探索範囲の上限を 1024 に
-  #   制限する。もし見つからない場合には初期値の fd を上書きする。
+  # Note: In Bash 3.1, explicitly closing with exec fd>&- does not work.
+  #   The read process fails to read after opening.
+  #   So I need to find an fd that is not open. #D0992
+  # Note: Checks whether the specified fd is open or not.
+  #   I found a portable and fast way to determine
+  #   Always search for fds that are not open. #D1318
+  # Note: If the fd is exhausted, the search becomes an infinite loop, so set the upper limit of the fd search range to 1024.
+  #   limit. If not found, overwrite the initial value fd.
   local _ble_local_init=${2:-$_ble_util_openat_nextfd}
   local _ble_local_limit=$((_ble_local_init+1024))
   local _ble_local_nextfd=$_ble_local_init
@@ -3670,11 +3670,11 @@ function ble/fd#remove-cloexec {
 }
 
 ## @fn ble/fd#alloc fdvar redirect [opts]
-##   "exec {fdvar}>foo" に該当する操作を実行します。
+##   Executes the operation corresponding to "exec {fdvar}>foo".
 ##   @param[out] fdvar
-##     指定した変数に使用されたファイルディスクリプタを代入します。
+##     Assigns the used file descriptor to the specified variable.
 ##   @param[in] redirect
-##     リダイレクトを指定します。
+##     Specify a redirect.
 ##   @param[in,opt] opts
 ##     A colon-separated list of the options.  These control how the new file
 ##     descriptor should be allocated:
@@ -3766,7 +3766,7 @@ function ble/fd#is-cloexit {
   [[ :$_ble_util_fdlist_cloexit: == *:"$fd":* ]]
 }
 ## @fn ble/fd#close fd
-##   指定した fd を閉じます。
+##   Closes the specified fd.
 function ble/fd#close {
   set -- "$(($1))"
   (($1>=3)) || return 1
@@ -3878,9 +3878,9 @@ function ble/fd#close-all-tty {
   local ret
   ble/fd#list
 
-  # Note: 0 1 2 及び _ble_util_fd_std{in,out,err} を閉じる事を考えたが、どうも
-  # redirect によって待避されている物などたくさんある様なので全部チェックする事
-  # にした。
+  # Note: I thought about closing 0 1 2 and _ble_util_fd_std{in,out,err}, but somehow
+  # It seems that there are many things that are saved by redirect, so check them all.
+  # I made it.
   local fd
   for fd in "${ret[@]}"; do
     if ble/string#match "$fd" '^[0-9]+$' && [[ -t $fd ]]; then
@@ -3914,10 +3914,10 @@ function ble/util/print-quoted-command {
 function ble/util/declare-print-definitions {
   (($#==0)) && return 0
 
-  # Note (#D2055): mawk 1.3.3-20090705 bug の為に [:blank:] を正規表現内部で使
-  # 用する事ができない。Ubuntu 16.04 LTS 及び Ubuntu 18.04 LTS で mawk
-  # 1.3.3-20090705 が使用されている。なので _ble_term_blank という変数に
-  # <SP><TAB> を入れて使う。
+  # Note (#D2055): Due to mawk 1.3.3-20090705 bug, [:blank:] cannot be used inside regular expressions.
+  # cannot be used. mawk on Ubuntu 16.04 LTS and Ubuntu 18.04 LTS
+  # 1.3.3-20090705 is used. So, in a variable called _ble_term_blank
+  # Use by inserting <SP><TAB>.
 
   # Note (#D2404): the current version of msys-2.0 reports OSTYPE=cygwin.
   local ostype=$OSTYPE
@@ -3927,19 +3927,19 @@ function ble/util/declare-print-definitions {
     BEGIN {
       decl = "";
 
-#%    # 対策 #D1270: MSYS2 で ^M を代入すると消える
+#% # Solution #D1270: Disappears when ^M is substituted in MSYS2
       flag_escape_cr = OSTYPE == "msys";
     }
 
     function fix_value(value) {
-#%    # bash-3.0 の declare -p は改行について誤った出力をする。
+#% # bash-3.0's declare -p gives incorrect output about newlines.
       if (_ble_bash < 30100) gsub(/\\\n/, "\n", value);
 
-#%    # #D1238 bash-4.3 以前の declare -p は ^A, ^? を
-#%    #   ^A^A, ^A^? と出力してしまうので補正する。
-#%    # #D1325 更に Bash-3.0 では "x${_ble_term_DEL}y" とすると
-#%    #   _ble_term_DEL の中身が消えてしまうので
-#%    #   "x""${_ble_term_DEL}""y" とする必要がある。
+#% # #D1238 Before bash-4.3, declare -p changed ^A, ^?
+#% # ^A^A, ^A^? is output, so correct it.
+#% # #D1325 Furthermore, in Bash-3.0, "x${_ble_term_DEL}y"
+#% # The contents of _ble_term_DEL will be deleted.
+#% # Must be "x""${_ble_term_DEL}""y".
       if (_ble_bash < 30100) {
         gsub(/\001\001/, "\"\"${_ble_term_SOH}\"\"", value);
         gsub(/\001\177/, "\"\"${_ble_term_DEL}\"\"", value);
@@ -3953,9 +3953,9 @@ function ble/util/declare-print-definitions {
       return value;
     }
 
-#%  # #D1522 #D1614 Bash-3.2 未満で配列要素に ^A または ^? を含む場合は
-#%  #   arr=(...) の形式だと評価時に ^A, ^? が倍加するので、
-#%  #   要素ごとに代入を行う必要がある。
+#% # #D1522 #D1614 If the array element contains ^A or ^? under Bash-3.2
+#% # With the arr=(...) format, ^A, ^? are doubled during evaluation, so
+#% # Assignment must be made for each element.
     function print_array_elements(decl, _, name, out, key, value) {
       if (match(decl, /^[_a-zA-Z][_a-zA-Z0-9]*=\(/) == 0) return 0;
       name = substr(decl, 1, RLENGTH - 2);
@@ -3988,7 +3988,7 @@ function ble/util/declare-print-definitions {
       if (!decl) return 0;
       isArray = (decl ~ /^declare +-[ilucnrtxfFgGI]*[aA]/);
 
-#%    # declare 除去
+#% # declare remove
       sub(/^declare +(-[-aAilucnrtxfFgGI]+ +)?(-- +)?/, "", decl);
       if (isArray) {
         if (decl ~ /^([_a-zA-Z][_a-zA-Z0-9]*)='\''\(.*\)'\''$/) {
@@ -4018,14 +4018,14 @@ function ble/util/declare-print-definitions {
 }
 
 ## @fn ble/util/print-global-definitions/.print-decl name opts
-##   指定された変数の宣言を出力します。
+##   Prints the declaration of the specified variable.
 ##   @param[in] name
-##     処理対象の変数名を指定します。
+##     Specify the variable name to be processed.
 ##   @param[in] opts
-##     指定した名前の変数が見つからない時 unset が指定されます。
+##     unset is specified when a variable with the specified name is not found.
 ##   @stdout
-##     変数宣言を出力します。指定した名前の変数が見つからない時は unset 状態に
-##     するコマンドを出力します。
+##     Outputs variable declarations. If a variable with the specified name is not found, the state is unset.
+##     Outputs the command to do.
 function ble/util/print-global-definitions/.print-decl {
   local __ble_name=$1 __ble_decl=
   if [[ ! ${!__ble_name+set} || :$2: == *:unset:* ]]; then
@@ -4052,18 +4052,18 @@ function ble/util/print-global-definitions/.print-decl {
 ## @fn ble/util/print-global-definitions varnames...
 ##   @var[in] varnames
 ##
-##   指定した変数のグローバル変数としての定義を出力します。
+##   Outputs the definition of the specified variable as a global variable.
 ##
-##   制限: 途中同名の readonly ローカル変数がある場合は、
-##   グローバル変数の値は取得できないので unset を返す。
-##   そもそも readonly な変数には問題が多いので ble.sh では使わない。
+##   Restriction: If there is a readonly local variable with the same name,
+##   Returns unset because the value of the global variable cannot be obtained.
+## In the first place, there are many problems with readonly variables, so they are not used in ble.sh.
 ##
-##   制限: __ble_* という変数名はこの関数の実装に使用するので、
-##   対応しない。
+##   Limitation: The variable names __ble_* are used to implement this function, so
+##   Not compatible.
 ##
-##   Note: bash-4.2 にはバグがあって、グローバル変数が存在しない時に
-##   declare -g -r var とすると、ローカルに新しく読み取り専用の var 変数が作られる。
-##   現在の実装では問題にならない。
+##   Note: bash-4.2 has a bug where when a global variable does not exist
+##   declare -g -r var creates a new local read-only var variable.
+##   This is not a problem with the current implementation.
 ##
 function ble/util/print-global-definitions {
   local __ble_opts=
@@ -4074,14 +4074,14 @@ function ble/util/print-global-definitions {
 ## @fn ble/util/for-global-variables proc opts varnames...
 ##   @fn proc name opts
 ##     @param[in] name
-##       処理対象の変数名を指定します。
+##       Specify the variable name to be processed.
 ##     @param[in] opts
-##       指定した名前の変数が見つからない時 unset が指定されます。
+##       unset is specified when a variable with the specified name is not found.
 ##   @param[in] opts
-##     hidden-only が含まれている時、対応するグローバル変数が別のローカル変数で
-##     被覆されている時にのみ proc を呼び出します。
+##     When hidden-only is included, the corresponding global variable is another local variable.
+##     Call proc only when covered.
 ##   @param[in] varnames...
-##     処理対象の変数名の集合を指定します。
+##     Specifies a set of variable names to be processed.
 function ble/util/for-global-variables {
   local __ble_proc=$1 __ble_opts=$2; shift 2
   local __ble_hidden_only=
@@ -4091,7 +4091,7 @@ function ble/util/for-global-variables {
     ((_ble_bash>=50000)) && shopt -u localvar_unset
     __ble_error=
     __ble_q="'" __ble_Q="'\''"
-    # 補完で 20 階層も関数呼び出しが重なることはなかろう
+    # Completion will probably prevent function calls from overlapping 20 layers.
     __ble_MaxLoop=20
     builtin unset -v "${!_ble_processed_@}"
 
@@ -4141,12 +4141,12 @@ function ble/util/for-global-variables {
 }
 
 ## @fn ble/util/has-glob-pattern pattern
-##   指定したパターンがグロブパターンを含むかどうかを判定します。
+##   Determines whether the specified pattern contains a glob pattern.
 ##
-## Note: Bash 5.0 では変数に \ が含まれている時に echo $var を実行すると
-##   パス名展開と解釈されて failglob, nullglob などが有効になるが、
-##   echo \[a\] の様に明示的に書いている場合にはパス名展開と解釈されない。
-##   この判定では明示的に書いた時にグロブパターンと認識されるかどうかに基づく。
+## Note: In Bash 5.0, if a variable contains \, echo $var returns
+##   It is interpreted as pathname expansion, and failglob, nullglob, etc. are valid, but
+##   If it is explicitly written like echo \[a\], it will not be interpreted as pathname expansion.
+##   This judgment is based on whether it is recognized as a glob pattern when written explicitly.
 function ble/util/has-glob-pattern {
   [[ $1 ]] || return 1
 
@@ -4167,10 +4167,10 @@ function ble/util/has-glob-pattern {
 }
 
 ## @fn ble/util/is-cygwin-slow-glob word
-##   Cygwin では // で始まるパスの展開は遅い (#D1168) のでその判定を行う。
+##   In Cygwin, expansion of paths starting with // is slow (#D1168), so check accordingly.
 function ble/util/is-cygwin-slow-glob {
-  # Note: core-complete.sh ではエスケープを行うので
-  #   "'//...'" 等の様な文字列が "$1" に渡される。
+  # Note: core-complete.sh performs escaping, so
+  #   A string such as "'//...'" is passed to "$1".
   [[ ( $OSTYPE == cygwin || $OSTYPE == msys ) && ${1#\'} == //* && ! -o noglob ]] &&
     ble/util/has-glob-pattern "$1"
 }
@@ -4205,8 +4205,8 @@ function ble/util/eval-pathname-expansion {
     GLOBIGNORE=
   fi
 
-  # Note: eval で囲んでおかないと failglob 失敗時に続きが実行されない
-  # Note: failglob で失敗した時のエラーメッセージは殺す
+  # Note: If failglob fails, the continuation will not be executed unless it is enclosed in eval.
+  # Note: The error message when failglob fails is killed.
   builtin eval "ret=($1)" 2>/dev/null; local ext=$?
 
   # restore glob settings
@@ -4224,11 +4224,11 @@ function ble/util/eval-pathname-expansion {
 }
 
 
-# 正規表現は _ble_bash>=30000
+# The regular expression is _ble_bash>=30000
 _ble_util_rex_isprint='^[ -~]+' # disable=#D1440 (LC_COLLATE is set)
 ## @fn ble/util/isprint+ str
 ##
-##   @var[out] BASH_REMATCH ble-exit/text/update/position で使用する。
+##   @var[out] BASH_REMATCH Used in ble-exit/text/update/position.
 function ble/util/isprint+ {
   local LC_ALL= LC_COLLATE=C
   [[ $1 =~ $_ble_util_rex_isprint ]]
@@ -4318,9 +4318,9 @@ fi
 
 ## @fn ble/util/time
 ## @fn ble/util/timeval
-##   現在の UNIX 時刻を取得します。ble/util/time は秒を単位とし、
-##   ble/util/timeval はマイクロ秒を単位とします。Bash 5.0 未満では秒単位の分解
-##   能しかありません。
+##   Get the current UNIX time. ble/util/time is in seconds,
+##   ble/util/timeval is in microseconds. Decomposition into seconds before Bash 5.0
+##   There is only Noh.
 if ((_ble_bash>=50000)); then
   function ble/util/time { ret=$EPOCHSECONDS; }
   function ble/util/timeval { ret=${EPOCHREALTIME//[!0-9]}; }
@@ -4363,7 +4363,7 @@ function ble/util/msleep/.check-sleep-decimal-support {
 _ble_util_msleep_delay=2000 # [usec]
 function ble/util/msleep/.core {
   local sec=${1%%.*}
-  ((10#0${1##*.}&&sec++)) # 小数部分は切り上げ
+  ((10#0${1##*.}&&sec++)) # Round up the decimal part
   ble/bin/sleep "$sec"
 }
 function ble/util/msleep {
@@ -4379,8 +4379,8 @@ function ble/util/msleep/.calibrate-loop {
   local ret nsec _ble_measure_count=1 v=0
   _ble_util_msleep_delay=0 ble-measure -q 'ble/util/msleep 1'
   local delay=$((nsec/1000-1000)) count=$_ble_util_msleep_calibrate_count
-  ((count<=0||delay<_ble_util_msleep_delay)) && _ble_util_msleep_delay=$delay # 最小値
-  # ((_ble_util_msleep_delay=(count*_ble_util_msleep_delay+delay)/(count+1))) # 平均値
+  ((count<=0||delay<_ble_util_msleep_delay)) && _ble_util_msleep_delay=$delay # minimum value
+  # ((_ble_util_msleep_delay=(count*_ble_util_msleep_delay+delay)/(count+1))) # Average value
 }
 function ble/util/msleep/calibrate {
   ble/util/msleep/.calibrate-loop &>/dev/null
@@ -4391,23 +4391,23 @@ function ble/util/msleep/calibrate {
 ## @fn ble/util/msleep/.use-read-timeout type
 ##   @param[in] type
 ##     FILE.OPEN
-##       FILE=fifo mkfifo によりファイルを作成します。
-##       FILE=zero /dev/zero を開きます。
-##       FILE=ptmx /dev/ptmx を開きます。
-##       OPEN=open 毎回ファイルを開きます。
-##       OPEN=exec1 ファイルを読み取り専用で開きます。
-##       OPEN=exec2 ファイルを読み書き両用で開きます。
+##       FILE=fifo Create a file with mkfifo.
+##       Open FILE=zero /dev/zero.
+##       Open FILE=ptmx /dev/ptmx.
+##       OPEN=open Opens the file every time.
+##       OPEN=exec1 Opens the file read-only.
+##       OPEN=exec2 Opens a file for reading and writing.
 ##     socket
-##       /dev/udp/0.0.0.0/80 を使います。
+##       Use /dev/udp/0.0.0.0/80.
 ##     procsub
-##       9< <(sleep) を使います。
+##       Use 9< <(sleep).
 function ble/util/msleep/.use-read-timeout {
   local msleep_type=$1 opts=${2-}
   _ble_util_msleep_fd=
   case $msleep_type in
   (socket)
-    _ble_util_msleep_delay1=10000 # short msleep にかかる時間 [usec]
-    _ble_util_msleep_delay2=50000 # /bin/sleep 0 にかかる時間 [usec]
+    _ble_util_msleep_delay1=10000 # Time taken for short msleep [usec]
+    _ble_util_msleep_delay2=50000 # /bin/sleep 0 time [usec]
     function ble/util/msleep/.core2 {
       ((v-=_ble_util_msleep_delay2))
       ble/bin/sleep "$((v/1000000))"
@@ -4427,11 +4427,11 @@ function ble/util/msleep/.use-read-timeout {
 
       _ble_util_msleep_delay1=0 ble-measure 'ble/util/msleep 1'
       local delay=$((nsec/1000-1000)) count=$_ble_util_msleep_calibrate_count
-      ((count<=0||delay<_ble_util_msleep_delay1)) && _ble_util_msleep_delay1=$delay # 最小値
+      ((count<=0||delay<_ble_util_msleep_delay1)) && _ble_util_msleep_delay1=$delay # minimum value
 
       _ble_util_msleep_delay2=0 ble-measure 'ble/util/msleep/.core2'
       local delay=$((nsec/1000))
-      ((count<=0||delay<_ble_util_msleep_delay2)) && _ble_util_msleep_delay2=$delay # 最小値
+      ((count<=0||delay<_ble_util_msleep_delay2)) && _ble_util_msleep_delay2=$delay # minimum value
     } ;;
   (procsub)
     _ble_util_msleep_delay=300
@@ -4485,8 +4485,8 @@ function ble/util/msleep/.use-read-timeout {
       # fallback/switch
       if [[ $fall == '-coreutil' ]]; then
         _ble_util_msleep_switch=200 # [msec]
-        _ble_util_msleep_delay1=2000 # short msleep にかかる時間 [usec]
-        _ble_util_msleep_delay2=50000 # /bin/sleep 0 にかかる時間 [usec]
+        _ble_util_msleep_delay1=2000 # Time taken for short msleep [usec]
+        _ble_util_msleep_delay2=50000 # /bin/sleep 0 time [usec]
         function ble/util/msleep {
           if (($1<_ble_util_msleep_switch)); then
             local v=$((1000*$1-_ble_util_msleep_delay1))
@@ -4507,11 +4507,11 @@ function ble/util/msleep/.use-read-timeout {
           _ble_util_msleep_switch=200
           _ble_util_msleep_delay1=0 ble-measure 'ble/util/msleep 1'
           local delay=$((nsec/1000-1000)) count=$_ble_util_msleep_calibrate_count
-          ((count<=0||delay<_ble_util_msleep_delay1)) && _ble_util_msleep_delay1=$delay # 最小値を選択
+          ((count<=0||delay<_ble_util_msleep_delay1)) && _ble_util_msleep_delay1=$delay # Select minimum value
 
           _ble_util_msleep_delay2=0 ble-measure 'ble/bin/sleep 0'
           local delay=$((nsec/1000))
-          ((count<=0||delay<_ble_util_msleep_delay2)) && _ble_util_msleep_delay2=$delay # 最小値を選択
+          ((count<=0||delay<_ble_util_msleep_delay2)) && _ble_util_msleep_delay2=$delay # Select minimum value
           ((_ble_util_msleep_switch=_ble_util_msleep_delay2/1000+10))
         }
       else
@@ -4525,10 +4525,10 @@ function ble/util/msleep/.use-read-timeout {
     fi ;;
   esac
 
-  # Note: 古い Cygwin では双方向パイプで "Communication error on send" というエラーになる。
-  #   期待通りの振る舞いをしなかったらプロセス置換に置き換える。 #D1449
-  # #D1467 Cygwin/Linux では timeout は 142 だが、これはシステム依存。
-  #   man bash にある様に 128 より大きいかどうかで判定
+  # Note: Older versions of Cygwin will give you a "Communication error on send" error with bidirectional pipes.
+  #   If it does not behave as expected, replace it with process replacement. #D1449
+  # #D1467 On Cygwin/Linux, timeout is 142, but this is system dependent.
+  #   As shown in man bash, check if it is greater than 128
   if [[ :$opts: == *:check:* && $_ble_util_msleep_fd ]]; then
     if ble/bash/read-timeout 0.000001 -u "$_ble_util_msleep_fd" _ble_util_msleep_dummy 2>/dev/null; (($?<=128)); then
       ble/fd#close _ble_util_msleep_fd
@@ -4547,7 +4547,7 @@ if ((_ble_bash>=40400)) && ble/util/load-standard-builtin sleep; then
 
   ## @fn ble/builtin/sleep/.read-time time
   ##   @var[out] a1 b1
-  ##     それぞれ整数部と小数部を返します。
+  ##     Returns the integer and decimal parts respectively.
   ##   @var[in,out] flags
   function ble/builtin/sleep/.read-time {
     a1=0 b1=0
@@ -4657,32 +4657,32 @@ elif [[ -f $_ble_base/lib/init-msleep.sh ]] &&
        source -- "$_ble_base/lib/init-msleep.sh" &&
        ble/util/msleep/.load-compiled-builtin
 then
-  # 自前で sleep.so をコンパイルする。
+  # Compile sleep.so yourself.
   #
-  # Note: #D1452 #D1468 #D1469 元々使っていた read -t による手法が
-  # Bash のバグでブロックする事が分かった。bash 4.3..5.1 ならばどの OS
-  # でも再現する。仕方が無いので自前で loadable builtin をコンパイルす
-  # る事にした。と思ったがライセンスの問題でこれを有効にする訳には行か
-  # ない。
+  # Note: #D1452 #D1468 #D1469 The originally used read -t method is
+  # I found out that it was blocked due to a bug in Bash. If bash 4.3..5.1, which OS?
+  # But I will reproduce it. I have no choice but to compile loadable builtin myself.
+  # I decided to do it. I thought so, but I can't enable this due to licensing issues.
+  # No.
   function ble/util/msleep { ble/builtin/msleep "$1"; }
 elif ((40000<=_ble_bash&&!(40300<=_ble_bash&&_ble_bash<50200))) &&
        [[ $OSTYPE != cygwin* && $OSTYPE != msys* && $OSTYPE != haiku* && $OSTYPE != minix* ]]
 then
-  # FIFO (mkfifo) を予め読み書き両用で開いて置き read -t する方法。
+  # How to open FIFO (mkfifo) in advance for both reading and writing and use read -t.
   #
-  # Note: #D1452 #D1468 #D1469 Bash 4.3 以降では一般に read -t が
-  # SIGALRM との race condition で固まる可能性がある。socket
-  # (/dev/udp) や fifo で特に問題が発生しやすい。特に Cygwin で顕著。
-  # 但し、発生する頻度は環境や用法・手法によって異なる。Cygwin/MSYS,
-  # Haiku 及び Minix では fifo は思う様に動かない。
+  # Note: #D1452 #D1468 #D1469 Since Bash 4.3, read -t is generally
+  # It may become stuck due to race condition with SIGALRM. socket
+  # (/dev/udp) and fifos are particularly prone to problems. Especially noticeable on Cygwin.
+  # However, the frequency of occurrence varies depending on the environment, usage, and method. Cygwin/MSYS,
+  # fifo does not work as expected in Haiku and Minix.
   ble/util/msleep/.use-read-timeout fifo.exec2
 elif ((_ble_bash>=40000)) && ble/fd#is-open "$_ble_util_fd_zero"; then
-  # /dev/zero に対して read -t する方法。
+  # How to read -t to /dev/zero.
   #
-  # Note: #D1452 #D1468 #D1469 元々使っていた FIFO に対する方法が安全
-  # でない時は /dev/zero に対して read -t する。0 を読み続ける事になる
-  # ので CPU を使う事になるが短時間の sleep の時のみに使う事にして我慢
-  # する事にする。確認した全ての OS で /dev/zero は存在した (Linux,
+  # Note: #D1452 #D1468 #D1469 The originally used method for FIFO is safe.
+  # If not, read -t to /dev/zero. It will keep reading 0
+  # Therefore, it will use the CPU, but be patient and only use it for short sleep times.
+  # I'll do something. /dev/zero existed on all the OSs I checked (Linux,
   # Cygwin, FreeBSD, Solaris, Minix, Haiku, MSYS2)。
   ble/util/msleep/.use-read-timeout zero.exec1-coreutil
 elif ble/bin#freeze-utility-path sleepenh; then
@@ -4858,7 +4858,7 @@ function ble/util/conditional-sync {
 #------------------------------------------------------------------------------
 
 ## @fn ble/util/cat [files..]
-##   cat の代替。直接扱えない NUL で区切って読み出す。
+##   Alternative to cat. Read separated by NUL which cannot be handled directly.
 function ble/util/cat/.impl {
   local content= IFS=
   while ble/bash/read -d '' content; do
@@ -4901,7 +4901,7 @@ function ble/file/has-stat {
   if [[ ! $_ble_util_file_stat ]]; then
     _ble_util_file_stat=-
     if ble/bin#freeze-utility-path -n stat; then
-      # 参考: http://stackoverflow.com/questions/17878684/best-way-to-get-file-modified-time-in-seconds
+      # Reference: http://stackoverflow.com/questions/17878684/best-way-to-get-file-modified-time-in-seconds
       if ble/bin/stat -c %Y / &>/dev/null; then
         _ble_util_file_stat=c
       elif ble/bin/stat -f %m / &>/dev/null; then
@@ -4915,12 +4915,12 @@ function ble/file/has-stat {
 }
 
 ## @fn ble/file#mtime filename
-##   ファイル filename の mtime を取得します。
-##   @param[in] filename ファイル名を指定します。
+##   Get the mtime of the file filename.
+##   @param[in] filename Specifies the file name.
 ##
 ##   @var[out] ret
-##     時刻を Unix Epoch で取得します。
-##     秒以下の小数も取得できる場合には ret[1] に小数部を格納します。
+##     Gets the time in Unix Epoch.
+##     If a decimal fraction less than a second can also be obtained, store the fractional part in ret[1].
 ##
 function ble/file#mtime {
   # fallback: print current time
@@ -4929,7 +4929,7 @@ function ble/file#mtime {
   if ble/bin/date -r / +%s &>/dev/null; then
     function ble/file#mtime { local file=$1; ble/util/assign-words ret 'ble/bin/date -r "$file" +"%s %N"' 2>/dev/null; }
   elif ble/file/has-stat; then
-    # 参考: http://stackoverflow.com/questions/17878684/best-way-to-get-file-modified-time-in-seconds
+    # Reference: http://stackoverflow.com/questions/17878684/best-way-to-get-file-modified-time-in-seconds
     case $_ble_util_file_stat in
     (c) function ble/file#mtime { local file=$1; ble/util/assign ret 'ble/bin/stat -c %Y "$file"' 2>/dev/null; } ;;
     (f) function ble/file#mtime { local file=$1; ble/util/assign ret 'ble/bin/stat -f %m "$file"' 2>/dev/null; } ;;
@@ -5029,8 +5029,8 @@ function ble/util/buffer.flush {
   [[ $text ]] || return 0
 
   if [[ $_ble_term_state == internal ]]; then
-    # Note: 出力の瞬間だけカーソルを非表示にする。Windows terminal など途中
-    # のカーソル移動も無理やり表示しようとする端末に対する対策。
+    # Note: Hides the cursor only at the moment of output. Windows terminal etc.
+    # Measures against terminals that forcefully display cursor movement.
     if [[ $_ble_term_cursor_hidden_current == hidden ]]; then
       # Note: Even if the current cursor-hidden state is "hidden", the TEXT may
       # contain the transition sequence from "reveal" to "hidden", we anyway
@@ -5077,9 +5077,9 @@ function ble/dirty-range#clear {
 
 ## @fn ble/dirty-range#update [--prefix=PREFIX] beg end end0
 ##   @param[out] PREFIX
-##   @param[in]  beg    変更開始点。beg<0 は変更がない事を表す
-##   @param[in]  end    変更終了点。end<0 は変更が末端までである事を表す
-##   @param[in]  end0   変更前の end に対応する位置。
+##   @param[in] beg Starting point of change. beg<0 means no change
+##   @param[in] end End point of change. end<0 indicates that the change is to the end
+##   @param[in] end0 The position corresponding to end before the change.
 function ble/dirty-range#update {
   local prefix=
   if [[ $1 == --prefix=* ]]; then
@@ -5168,21 +5168,21 @@ function ble/urange#shift {
 
 #------------------------------------------------------------------------------
 ## @fn ble/util/joblist opts
-##   現在のジョブ一覧を取得すると共に、ジョブ状態の変化を調べる。
+##   Get a list of current jobs and check for changes in job status.
 ##
 ##   @param[in] opts
 ##     ignore-volatile-jobs
 ##
 ##   @var[in,out] _ble_util_joblist_events
-##   @var[out]    joblist                ジョブ一覧を格納する配列
-##   @var[in,out] _ble_util_joblist_jobs 内部使用
-##   @var[in,out] _ble_util_joblist_list 内部使用
+##   @var[out] joblist Array that stores job list
+##   @var[in,out] _ble_util_joblist_jobs Internal use
+##   @var[in,out] _ble_util_joblist_list Internal use
 ##
-##   @remark 実装方法について。
-##   終了したジョブを確認するために内部で2回 jobs を呼び出す。
-##   比較のために前回の jobs の呼び出し結果も _ble_util_joblist_{jobs,list} (#1) に記録する。
-##   先ず jobs0,list (#2) に1回目の jobs 呼び出し結果を格納して #1 と #2 の比較を行いジョブ状態の変化を調べる。
-##   次に #1 に2回目の jobs 呼び出し結果を上書きして #2 と #1 の比較を行い終了ジョブを調べる。
+##   @remark Regarding the implementation method.
+##   Internally calls jobs twice to check for finished jobs.
+##   For comparison, the results of the previous jobs call are also recorded in _ble_util_joblist_{jobs,list} (#1).
+##   First, store the results of the first jobs call in jobs0,list (#2) and compare #1 and #2 to check for changes in job status.
+##   Next, overwrite #1 with the result of the second jobs call, compare #2 and #1, and check the completed jobs.
 ##
 _ble_util_joblist_jobs=
 _ble_util_joblist_list=()
@@ -5199,16 +5199,16 @@ function ble/util/joblist {
   ((_ble_bash>=50300)) && jobs >/dev/null
 
   if [[ $jobs0 == "$_ble_util_joblist_jobs" ]]; then
-    # 前回の呼び出し結果と同じならば状態変化はないものとして良い。終了・強制終
-    # 了したジョブがあるとしたら "終了" だとか "Terminated" だとかいう表示にな
-    # っているはずだが、その様な表示は二回以上は為されないので必ず変化がある。
+    # If the result is the same as the previous call, it can be assumed that there is no change in state. Termination/forced termination
+    # If there is a completed job, it will be displayed as "Ended" or "Terminated".
+    # However, since such a display is not made more than once, there is always a change.
     joblist=("${_ble_util_joblist_list[@]}")
     return 0
   elif [[ ! $jobs0 ]]; then
-    # 前回の呼び出しで存在したジョブが新しい呼び出しで無断で消滅することは恐ら
-    # くない。今回の結果が空という事は本来は前回の結果も空のはずであり、だとす
-    # ると上の分岐に入るはずなのでここには来ないはずだ。しかしここに入った時の
-    # 為に念を入れて空に設定して戻るようにする。
+    # It is possible that the job that existed in the previous call will disappear without permission in the new call.
+    # Not. The fact that the current result is empty means that the previous result should also be empty.
+    # If you do that, you should enter the upper branch, so you shouldn't come here. But when I got here
+    # Therefore, be careful and set it to empty so that it returns.
     _ble_util_joblist_jobs=
     _ble_util_joblist_list=()
     joblist=()
@@ -5279,14 +5279,14 @@ function ble/util/joblist.split {
 }
 
 ## @fn ble/util/joblist.check
-##   ジョブ状態変化の確認だけ行います。
-##   内部的に jobs を呼び出す直前に、ジョブ状態変化を取り逃がさない為に明示的に呼び出します。
+##   Only check for job status changes.
+##   Call it explicitly just before calling jobs internally to ensure that job status changes are not missed.
 function ble/util/joblist.check {
   local joblist
   ble/util/joblist "$@"
 }
 ## @fn ble/util/joblist.has-events
-##   未出力のジョブ状態変化の記録があるかを確認します。
+##   Check whether there is a record of job status changes that have not been output.
 function ble/util/joblist.has-events {
   local joblist
   ble/util/joblist
@@ -5294,7 +5294,7 @@ function ble/util/joblist.has-events {
 }
 
 ## @fn ble/util/joblist.flush
-##   ジョブ状態変化の確認とそれまでに検出した変化の出力を行います。
+##   Confirm job status changes and output the changes detected so far.
 function ble/util/joblist.flush {
   local joblist
   ble/util/joblist
@@ -5312,7 +5312,7 @@ function ble/util/joblist.bflush {
 }
 
 ## @fn ble/util/joblist.clear
-##   bash 自身によってジョブ状態変化が出力される場合には比較用のバッファを clear します。
+##   Clears the comparison buffer when job status changes are output by bash itself.
 function ble/util/joblist.clear {
   _ble_util_joblist_jobs=
   _ble_util_joblist_list=()
@@ -5320,9 +5320,9 @@ function ble/util/joblist.clear {
 
 #------------------------------------------------------------------------------
 ## @fn ble/util/save-editing-mode varname
-##   現在の編集モード (emacs/vi/none) を変数に設定します。
+##   Set the current editing mode (emacs/vi/none) to a variable.
 ##
-##   @param varname 設定する変数の変数名を指定します。
+##   @param varname Specify the variable name of the variable to be set.
 ##
 function ble/util/save-editing-mode {
   if [[ -o emacs ]]; then
@@ -5334,9 +5334,9 @@ function ble/util/save-editing-mode {
   fi
 }
 ## @fn ble/util/restore-editing-mode varname
-##   編集モードを復元します。
+##   Restore edit mode.
 ##
-##   @param varname 編集モードを記録した変数の変数名を指定します。
+##   @param varname Specify the variable name of the variable that recorded the edit mode.
 ##
 function ble/util/restore-editing-mode {
   case ${!1} in
@@ -5347,9 +5347,9 @@ function ble/util/restore-editing-mode {
 }
 
 ## @fn ble/util/reset-keymap-of-editing-mode
-##   既定の keymap に戻す。bind 'set keymap vi-insert' 等で
-##   既定の keymap 以外になっている事がある。
-##   set -o emacs/vi を実行すれば既定の keymap に戻る。#D1038
+##   Revert to default keymap. bind 'set keymap vi-insert' etc.
+## The keymap may be other than the default keymap.
+##   Execute set -o emacs/vi to return to the default keymap. #D1038
 function ble/util/reset-keymap-of-editing-mode {
   if [[ -o emacs ]]; then
     set -o emacs
@@ -5367,7 +5367,7 @@ function ble/util/rlvar#load {
 }
 
 ## @fn ble/util/rlvar#has name
-##   指定した readline 変数に bash が対応しているか確認します。
+##   Check if bash supports the specified readline variable.
 function ble/util/rlvar#has {
   if [[ ! ${_ble_local_rlvars:-} ]]; then
     local _ble_local_rlvars
@@ -5412,14 +5412,14 @@ function ble/util/rlvar#bind-bleopt {
     ble/util/rlvar#load
   fi
 
-  # Bash が readline 変数に対応している場合、bleopt に対する代入と合わせて
-  # readline 変数にも対応する値を設定する。
+  # If Bash supports readline variables, along with assignments to bleopt.
+  # Also set the corresponding value in the readline variable.
   if ble/util/rlvar#has "$name"; then
-    # 値の同期
-    # Note (#D1148): ble.sh の側で Bash と異なる既定値を持っている物については
-    # (初期化時に --keep-rlvars を指定していない限りは) ble.sh の側に書き換えて
-    # しまう。多くのユーザは自分で設定しないので便利な機能が off になっている。
-    # 一方で設定するユーザは自分で off に戻すぐらいはできるだろう。
+    # Value synchronization
+    # Note (#D1148): For things that have different default values on the ble.sh side than Bash,
+    # (Unless --keep-rlvars is specified during initialization) Rewrite to ble.sh side.
+    # Put it away. Many users don't configure it themselves, so useful features are turned off.
+    # On the other hand, the user who sets it will probably be able to turn it back off himself.
     if [[ :$_ble_base_arguments_opts: == *:keep-rlvars:* ]]; then
       local ret; ble/util/rlvar#read "$name"
       [[ :$opts: == *:bool:* && $ret == off ]] && ret=
@@ -5477,7 +5477,7 @@ function ble/util/rlvar#bind-bleopt {
 # Functions for modules
 
 ## @fn ble/util/invoke-hook array
-##   array に登録されているコマンドを実行します。
+##   Execute the commands registered in array.
 function ble/util/invoke-hook {
   local -a hooks; builtin eval "hooks=(\"\${$1[@]}\")"
   local hook ext=0
@@ -5512,36 +5512,36 @@ function ble/util/.read-arguments-for-no-option-command {
 
 
 ## @fn ble-autoload scriptfile functions...
-##   関数が定義されたファイルを自動で読み取る設定を行います。
-##   scriptfile には functions の実体を定義します。
-##   functions に指定した関数が初めて呼び出された時に、
-##   scriptfile が自動的に source されます。
+##   Configure settings to automatically read the file in which the function is defined.
+##   Define the actual functions in scriptfile.
+##   When the function specified in functions is called for the first time,
+##   The scriptfile will be automatically sourced.
 ##
 ##   @param[in] scriptfile
-##     functions が定義されているファイル
+##     File where functions are defined
 ##
-##     注意: このファイル内でグローバルに変数を定義する際は
-##     declare/typeset を用いないで下さい。
-##     autoload を行う関数内から source されるので、
-##     その関数のローカル変数として扱われてしまいます。
-##     連想配列などの特殊変数を定義したい場合は ble-autoload
-##     の設定時に同時に行って下さい。
-##     ※declare -g は bash-4.3 以降です
+##     Note: When defining variables globally within this file,
+##     Do not use declare/typeset.
+##     Since it is sourced from within the function that performs autoload,
+##     It will be treated as a local variable of that function.
+##     If you want to define special variables such as associative arrays, use ble-autoload
+##     Please do this at the same time as setting.
+##     *Declare -g is for bash-4.3 or later.
 ##
 ##   @param[in] functions...
-##     定義する関数名のリスト
+##     List of function names to define
 ##
-##     scriptfile の source の起点となる関数です。
-##     scriptfile に定義される関数名を全て列挙する必要はなく、
-##     scriptfile 呼出の起点として使用する関数のみで充分です。
+##     This is the function that serves as the starting point for source in scriptfile.
+##     There is no need to list all the function names defined in scriptfile.
+##     The function used as the starting point for the scriptfile call is sufficient.
 ##
 function ble/util/autoload {
   local file=$1; shift
   ble/util/import/is-loaded "$file" && return 0
 
-  # ※$FUNCNAME は元から環境変数に設定されている場合、
-  #   特別変数として定義されない。
-  #   この場合無闇にコマンドとして実行するのは危険である。
+  # *If $FUNCNAME is originally set as an environment variable,
+  #   Not defined as a special variable.
+  #   In this case, it is dangerous to execute it as a command blindly.
 
   local q=\' Q="'\''" funcname
   for funcname; do
@@ -5609,13 +5609,13 @@ function ble-autoload {
 }
 
 ## @fn ble-import scriptfile...
-##   指定したファイルを検索して source で読み込みます。
-##   既に import 済みのファイルは読み込みません。
+##   Search for the specified file and read it with source.
+##   Files that have already been imported will not be read.
 ##
 ##   @param[in] scriptfile
-##     読み込むファイルを指定します。
-##     絶対パスで指定した場合にはそのファイルを使用します。
-##     それ以外の場合には $_ble_base:$_ble_base/local:$_ble_base/share から検索します。
+##     Specify the file to read.
+##     If you specify an absolute path, that file will be used.
+##     Otherwise, search from $_ble_base:$_ble_base/local:$_ble_base/share.
 ##
 _ble_util_import_files=()
 
@@ -5627,7 +5627,7 @@ function ble/util/import/search/.check-directory {
   local name=$1 dir=${2%/}
   [[ -d ${dir:=/} ]] || return 1
 
-  # {lib,contrib}/ で始まるパスの時は lib,contrib ディレクトリのみで探索
+  # If the path starts with {lib,contrib}/, only the lib,contrib directory is searched.
   if [[ $name == lib/* ]]; then
     [[ $dir == */lib ]] || return 1
     dir=${dir%/lib}
@@ -5776,7 +5776,7 @@ function ble/util/import/.read-arguments {
     ble/array#push files "$file"
   done
 
-  # 存在しないファイルがあった時
+  # When there is a file that does not exist
   if ((${#not_found[@]})); then
     flags=N$flags
     if [[ $flags != *[fq]* ]]; then
@@ -5793,7 +5793,7 @@ function ble/util/import/.read-arguments {
 function ble/util/import {
   local files file ext=0 ret enc
   files=("$@")
-  set -- # Note #D1859: source によって引数が継承されるのを防ぐ
+  set -- # Note #D1859: Prevent arguments from being inherited by source
   for file in "${files[@]}"; do
     ble/util/import/encode-filename "$file"; enc=$ret
     local guard=ble/util/import/guard:$enc
@@ -5921,12 +5921,12 @@ function ble/util/import/eval-after-load {
 
 ## @fn ble/util/stackdump [message]
 ## @fn ble-stackdump [message]
-##   現在のコールスタックの状態を出力します。
+##   Prints the current call stack state.
 ##
 ##   @param[in,opt] message
-##     スタック情報の前に表示するメッセージを指定します。
+##     Specifies the message to display before stack information.
 ##   @var[in] _ble_util_stackdump_title
-##     スタック情報の前に表示するタイトルを指定します。
+##     Specifies the title to be displayed before the stack information.
 ##
 _ble_util_stackdump_title=stackdump
 _ble_util_stackdump_start=
@@ -5981,12 +5981,12 @@ function ble-stackdump {
 
 ## @fn ble/util/assert command [message]
 ## @fn ble-assert command [message]
-##   コマンドを評価し失敗した時にメッセージを表示します。
+##   Evaluates the command and displays a message if it fails.
 ##
 ##   @param[in] command
-##     評価するコマンドを指定します。eval で評価されます。
+##     Specifies the command to evaluate. Evaluated with eval.
 ##   @param[in,opt] message
-##     失敗した時に表示するメッセージを指定します。
+##     Specify the message to display when failure occurs.
 ##
 function ble/util/assert {
   local expr=$1 message=$2
@@ -6048,8 +6048,8 @@ function ble-assert {
 bleopt/declare -v debug_idle ''
 
 ## @fn ble/util/clock
-##   時間を計測するのに使うことができるミリ秒単位の軽量な時計です。
-##   計測の起点は ble.sh のロード時です。
+##   A lightweight clock that can be used to measure time in milliseconds.
+##   The starting point of measurement is when ble.sh is loaded.
 ##   @var[out] ret
 _ble_util_clock_base=
 _ble_util_clock_reso=
@@ -6124,8 +6124,8 @@ ble/util/clock/.initialize 2>/dev/null
 
 if ((_ble_bash>=40000)); then
   ## @fn[custom] ble/util/idle/IS_IDLE
-  ##   他にするべき処理がない時 (アイドル時) に終了ステータス 0 を返します。
-  ##   Note: この設定関数は ble-decode.sh で上書きされます。
+  ##   Returns an exit status of 0 when there is nothing else to do (idle).
+  ##   Note: This configuration function is overwritten by ble-decode.sh.
   function ble/util/idle/IS_IDLE { ! ble/util/is-stdin-ready; }
 
   _ble_util_idle_sclock=0
@@ -6140,7 +6140,7 @@ if ((_ble_bash>=40000)); then
     function ble/util/idle.clock/.initialize { return 0; }
 
     ## @fn ble/util/idle.clock
-    ##   タスクスケジューリングに使用する時計
+    ##   Clock used for task scheduling
     ##   @var[out] ret
     function ble/util/idle.clock/.restart { return 0; }
     if [[ ! $_ble_util_clock_type || $_ble_util_clock_type == date ]]; then
@@ -6153,20 +6153,20 @@ if ((_ble_bash>=40000)); then
       }
     else
       ## @fn ble/util/idle/.adjusted-clock
-      ##   参照時計 (rclock) と sleep 累積時間 (sclock) を元にして、
-      ##   参照時計を秒以下に解像度を上げた時計 (aclock) を提供します。
+      ##   Based on the reference clock (rclock) and accumulated sleep time (sclock),
+      ## Provides a sub-second resolution clock (aclock) of the reference clock.
       ##
       ## @var[in,out] _ble_util_idle_aclock_tick_rclock
       ## @var[in,out] _ble_util_idle_aclock_tick_sclock
-      ##   最後に参照時計が切り替わった時の rclock と sclock の値を保持します。
+      ##   Retains the values of rclock and sclock from the last time the reference clock was switched.
       ##
       ## @var[in,out] _ble_util_idle_aclock_shift
-      ##   時刻のシフト量を表します。
+      ##   Represents the amount of time shift.
       ##
-      ##   初期化時の秒以下の時刻が分からないため、
-      ##   取り敢えず 0.000 になっていると想定して時刻を測り始めます。
-      ##   最初の秒の切り替わりの時点でずれの量が判明するので、それを記録します。
-      ##   一様時計を提供する為に、以降もこのずれを適用する為に使用します。
+      ##   Because I don't know the subsecond time at the time of initialization,
+      ##   Assuming that it is 0.000, start measuring the time.
+      ##   The amount of deviation is known at the first second transition and is recorded.
+      ##   In order to provide a uniform clock, we will also use this deviation to apply.
       ##
       _ble_util_idle_aclock_shift=
       _ble_util_idle_aclock_tick_rclock=
@@ -6206,48 +6206,48 @@ if ((_ble_bash>=40000)); then
   ble/util/idle/.initialize-options
 
   ## @arr _ble_util_idle_task
-  ##   タスク一覧を保持します。各要素は一つのタスクを表し、
-  ##   status|command の形式の文字列です。
-  ##   command にはタスクを実行する coroutine を指定します。
-  ##   status は以下の何れかの値を持ちます。
+  ##   Keep a task list. Each element represents one task,
+  ##   A string in the format status|command.
+  ##   command specifies the coroutine that executes the task.
+  ##   status has one of the following values:
   ##
   ##     R
-  ##       現在実行中のタスクである事を表します。
-  ##       ble/util/idle.push で設定されます。
+  ##       Indicates that the task is currently being executed.
+  ##       Set in ble/util/idle.push.
   ##     I
-  ##       次のユーザの入力を待っているタスクです。
-  ##       タスク内から ble/util/idle.wait-user-input で設定します。
+  ##       This task is waiting for the next user's input.
+  ##       Set it with ble/util/idle.wait-user-input from within the task.
   ##     S<rtime>
-  ##       時刻 <rtime> になるのを待っているタスクです。
-  ##       タスク内から ble/util/idle.sleep で設定します。
+  ##       Task waiting for time <rtime>.
+  ##       Set it with ble/util/idle.sleep from within the task.
   ##     W<stime>
-  ##       sleep 累積時間 <stime> になるのを待っているタスクです。
-  ##       タスク内から ble/util/idle.isleep で設定します。
+  ##       sleep Task waiting for cumulative time <stime>.
+  ##       Set it with ble/util/idle.isleep from within the task.
   ##     E<filename>
-  ##       ファイルまたはディレクトリ <filename> が現れるのを待っているタスクです。
-  ##       タスク内から ble/util/idle.wait-filename で設定します。
+  ##       Task waiting for file or directory <filename> to appear.
+  ##       Set it with ble/util/idle.wait-filename from within the task.
   ##     F<filename>
-  ##       ファイル <filename> が有限のサイズになるのを待っているタスクです。
-  ##       タスク内から ble/util/idle.wait-file-content で設定します。
+  ##       Task waiting for file <filename> to reach a finite size.
+  ##       Set it with ble/util/idle.wait-file-content from within the task.
   ##     P<pid>
-  ##       プロセス <pid> (ユーザからアクセス可能) が終了するのを待っているタスクです。
-  ##       タスク内から ble/util/idle.wait-process で設定します。
+  ##       A task waiting for process <pid> (accessible to the user) to exit.
+  ##       Set it with ble/util/idle.wait-process from within the task.
   ##     C<command>
-  ##       コマンド <command> の実行結果が真になるのを待っているタスクです。
-  ##       タスク内から ble/util/idle.wait-condition で設定します。
+  ##       A task waiting for the execution result of command <command> to become true.
+  ##       Set it with ble/util/idle.wait-condition from within the task.
   ##     Z
-  ##       停止中のタスクです。外部から状態を設定する事によって再開します。
+  ##       The task is stopped. It is restarted by setting the state from outside.
   ##
   _ble_util_idle_task=()
   _ble_util_idle_lasttask=
   _ble_util_idle_SEP=$_ble_term_FS
 
   ## @fn ble/util/idle.do
-  ##   待機状態の処理を開始します。
+  ##   Starts processing in standby state.
   ##
   ##   @exit
-  ##     待機処理を何かしら実行した時に成功 (0) を返します。
-  ##     何も実行しなかった時に失敗 (1) を返します。
+  ##     Returns success (0) when any wait processing is executed.
+  ##     Returns failure (1) when nothing is executed.
   ##
   function ble/util/idle.do {
     local IFS=$_ble_term_IFS
@@ -6290,8 +6290,8 @@ if ((_ble_bash>=40000)); then
           _ble_idle_processed=1
           ble/util/idle.do/.call-task "$_ble_idle_command"
 
-          # Note: #D1450 _ble_idle_command が 148 を返したとしても idle.do は中
-          # 断しない事にした。IS_IDLE と条件が同じとは限らないので。
+          # Note: #D1450 Even if _ble_idle_command returns 148, idle.do is
+          # I decided not to give up. Because the conditions are not necessarily the same as IS_IDLE.
           # ((ext==148)) && return 0
 
           ((_ble_idle_after_task++))
@@ -6316,7 +6316,7 @@ if ((_ble_bash>=40000)); then
   ##   @var[ref] _ble_idle_after_task
   function ble/util/idle.do/.do-after-task {
     if ((_ble_idle_after_task)); then
-      # 50ms 以上の待機時間があれば再描画などの処理を試行する。
+      # If there is a waiting time of 50ms or more, processing such as redrawing will be attempted.
       blehook/invoke idle_after_task
       _ble_idle_after_task=0
     fi
@@ -6393,7 +6393,7 @@ if ((_ble_bash>=40000)); then
     [[ $_ble_idle_running ]] && return 0
     local isfirst=1
     while
-      # ファイル等他の条件を待っている時は一回だけで外に戻り状態確認する
+      # If you are waiting for other conditions such as files, go back outside and check the status only once.
       [[ $_ble_idle_waiting && ! $isfirst ]] && break
 
       local sleep_amount=
@@ -6413,11 +6413,11 @@ if ((_ble_bash>=40000)); then
       fi
       [[ $_ble_idle_waiting ]] || ((sleep_amount>0))
     do
-      # Note: 変数 ble_util_idle_elapsed は
-      #   $((bleopt_idle_interval)) の評価時に参照される。
+      # Note: The variable ble_util_idle_elapsed is
+      #   Referenced when evaluating $((bleopt_idle_interval)).
       local ble_util_idle_elapsed=$((_ble_util_idle_sclock-_ble_idle_sclock_start))
 
-      # sleep_amount が十分に長い場合に idle_after_task が必要あれば実行する
+      # Run idle_after_task if necessary if sleep_amount is long enough
       ((sleep_amount>50)) && ble/util/idle.do/.do-after-task
 
       local interval=$((bleopt_idle_interval))
@@ -6602,14 +6602,14 @@ function ble/util/fiberchain#resume {
 }
 ## @fn ble/util/fiberchain#push fiber...
 ##   @param[in] fiber
-##     複数指定することができます。
-##     一つ一つは空白区切りの単語を並べた文字列です。
-##     コロン ":" を含むことはできません。
-##     一番最初の単語にファイバー名 name を指定します。
-##     引数 args... があれば二つ目以降の単語として指定します。
+##     You can specify more than one.
+##     Each is a string of words separated by spaces.
+##     Cannot contain colon ":".
+##     Specify the fiber name name as the first word.
+##     If there is an argument args..., specify it as the second and subsequent words.
 ##
 ##   @remarks
-##     実際に実行されるファイバーは以下のコマンドになります。
+##     The actual fiber that will be executed will be the following command.
 ##     "$_ble_util_fiber_chain_prefix/$name.fib" "${args[@]}"
 ##
 function ble/util/fiberchain#push {
@@ -6627,19 +6627,19 @@ bleopt/declare -v vbell_duration 2000
 bleopt/declare -n vbell_align right
 
 function ble/term:cygwin/initialize.hook {
-  # RIの修正
-  # Note: Cygwin console では何故か RI (ESC M) が
-  #   1行スクロールアップとして実装されている。
-  #   一方で CUU (CSI A) で上にスクロールできる。
+  # RI fix
+  # Note: For some reason, RI (ESC M) is not displayed in Cygwin console.
+  #   Implemented as a single line scroll up.
+  #   On the other hand, you can scroll up with CUU (CSI A).
   printf '\eM\e[B' >&"$_ble_util_fd_tui_stderr"
   _ble_term_ri=$'\e[A'
 
-  # DLの修正
+  # Modification of DL
   function ble/canvas/put-dl.draw {
     local value=${1-1} i
     ((value)) || return 1
 
-    # Note: DL が最終行まで消去する時、何も消去されない…。
+    # Note: When DL erases to the last line, nothing is erased...
     DRAW_BUFF[${#DRAW_BUFF[*]}]=$'\e[2K'
     if ((value>1)); then
       local ret
@@ -6698,20 +6698,20 @@ function ble/term/audible-bell {
   ble/util/put '' >&2
 }
 
-# visible-bell の表示の管理について。
+# About managing visible-bell display.
 #
-# vbell の表示の削除には worker サブシェルを使用する。
-# 現在の表示内容及び消去に関しては二つのファイルを使う。
+# Use the worker subshell to delete the vbell display.
+# Two files are used for the current display content and deletion.
 #
 #   workerfile=$_ble_base_run/$$.visible-bell.$i
-#     1つの worker に対して1つ割り当てられ、
-#     その worker が生きている間は非空である。
-#     またそのタイムスタンプは worker 起動時刻を表す。
+#     One is allocated to one worker,
+#     It is non-empty while the worker is alive.
+#     The timestamp also represents the worker startup time.
 #
 #   _ble_term_visible_bell_ftime=$_ble_base_run/$$.visible-bell.time
-#     最後に表示の更新を行った時刻を記録するのに使う。
+#     Used to record the time when the display was last updated.
 #
-# 前回の表示内容は以下の配列に格納する。
+# The previous display contents are stored in the following array.
 #
 # @arr _ble_term_visible_bell_prev=(vbell_type message [x0 y0 x y])
 
@@ -6735,7 +6735,7 @@ function ble/term/visible-bell:term/init {
     IFS= builtin eval '_ble_term_visible_bell_clear="${BUFF[*]}"'
   fi
 
-  # 一行に収まる様に切り詰める
+  # truncate to fit on one line
   local cols=${COLUMNS:-80}
   ((_ble_term_xenl||cols--))
   local message=${1::cols}
@@ -6827,7 +6827,7 @@ function ble/term/visible-bell:canvas/clear {
     ble/canvas/put.draw "$_ble_term_sgr0$_ble_term_rc"
     #[[ $_ble_attached ]] && ble/canvas/panel/load-position.draw "$ret" # WA #D1495
   else
-    : # 親プロセスの _ble_canvas_x が分からないので座標がずれる
+    : # Coordinates are shifted because _ble_canvas_x of the parent process is not known
     # ble/util/buffer.flush
     # ble/canvas/put.draw "$_ble_term_ri_or_cuu1$_ble_term_sgr0"
     # ble/canvas/put-hpa.draw "$((1+x0))"
@@ -6835,7 +6835,7 @@ function ble/term/visible-bell:canvas/clear {
     # ble/canvas/put-spaces.draw "$x"
     # ble/canvas/put.draw "$_ble_term_sgr0"
     # ble/canvas/put-cud.draw 1
-    # ble/canvas/put-hpa.draw "$((1+_ble_canvas_x))" # 親プロセスの _ble_canvas_x?
+    # ble/canvas/put-hpa.draw "$((1+_ble_canvas_x))" # _ble_canvas_x of parent process?
   fi
   ble/canvas/flush.draw >&2
 }
@@ -6890,7 +6890,7 @@ function ble/term/visible-bell/.create-workerfile {
 ## @fn ble/term/visible-bell/.worker
 ##   @var[in] workerfile
 function ble/term/visible-bell/.worker {
-  # Note: ble/util/assign は使えない。本体の ble/util/assign と一時ファイルが衝突する可能性がある。
+  # Note: ble/util/assign cannot be used. There may be a conflict between the main unit's ble/util/assign and the temporary file.
   ble/util/msleep 50
   [[ $workerfile -ot $_ble_term_visible_bell_ftime ]] && return 0 >| "$workerfile"
   ble/term/visible-bell/.update "$sgr2"
@@ -6919,8 +6919,8 @@ function ble/term/visible-bell {
   local message=$1 opts=$2
   message=${message:-$bleopt_vbell_default_message}
 
-  # Note: 1行しかない時は表示しない。0行の時は全てログに行くので出力する。空文
-  # 字列の時は設定されていないだけなので表示する。
+  # Note: It will not be displayed if there is only one line. When the line is 0, everything goes to the log, so it is output. empty sentence
+  # If it is a string, it is displayed because it is just not set.
   ((LINES==1)) && return 0
 
   [[ :$bleopt_vbell_align: == *:panel:* ]] &&
@@ -6948,11 +6948,11 @@ function ble/term/visible-bell {
   ble/term/visible-bell/.show "$sgr1" "$show_opts"
 
   local workerfile; ble/term/visible-bell/.create-workerfile
-  # Note: ble/util/joblist/__suppress__ を指定する事によって、
-  #   終了したジョブの一覧に現れない様にする。
-  #   対策しないと read の置き換え実装でジョブ一覧が表示されてしまう。
-  # Note: 標準出力を閉じて置かないと $() の中で
-  #   read を呼び出した時に visible-bell worker がブロックしてしまう。
+  # Note: By specifying ble/util/joblist/__suppress__,
+  #   Prevent it from appearing in the list of finished jobs.
+  #   If no measures are taken, a list of jobs will be displayed in the replacement implementation of read.
+  # Note: If you don't close the standard output, inside $()
+  #   visible-bell worker blocks when calling read.
   # ref #D1000, #D1087
   ( ble/util/joblist/__suppress__; ble/term/visible-bell/.worker 1>/dev/null & )
 }
@@ -6970,16 +6970,16 @@ function ble/term/visible-bell/erase {
 
 #---- stty --------------------------------------------------------------------
 
-# 改行 (C-m, C-j) の取り扱いについて
-#   入力の C-m が C-j に勝手に変換されない様に -icrnl を指定する必要がある。
-#   (-nl の設定の中に icrnl が含まれているので、これを取り消さなければならない)
-#   一方で、出力の LF は CR LF に変換されて欲しいので onlcr は保持する。
-#   (これは -nl の設定に含まれている)
+# Regarding handling of line breaks (C-m, C-j)
+#   -icrnl must be specified to prevent the input C-m from being converted to C-j automatically.
+#   (Since icrnl is included in the -nl setting, this must be canceled.)
+#   On the other hand, we want the output LF to be converted to CR LF, so onlcr is retained.
+#   (This is included in the -nl setting)
 #
-# -icanon について
-#   stty icanon を設定するプログラムがある。これを設定すると入力が buffering され
-#   その場で入力を受信する事ができない。結果として hang した様に見える。
-#   従って、enter で -icanon を設定する事にする。
+# -About icanon
+#   There is a program to configure stty icanon. Setting this will buffer the input.
+#   It is not possible to receive input on the spot. As a result, it looks like it is hung.
+#   Therefore, we will set -icanon on enter.
 
 [[ ${_ble_term_stty_save+set} ]] || _ble_term_stty_save=
 bleopt/declare -v term_stty_restore ''
@@ -6997,8 +6997,8 @@ function bleopt/check:term_stty_restore {
 ##   stty for the internal state, the variable is set to "1".  When ble.sh has
 ##   modified the stty for the external state, the variable is set to "0".
 ##
-## Note #D1238: arr=(...) の形式を用いると Bash 3.2 では勝手に ^? が ^A^? に化けてしまう
-##   仕方がないので此処では ble/array#push を使って以下の配列を初期化する事にする。
+## Note #D1238: When using the arr=(...) format, ^? automatically turns into ^A^? in Bash 3.2.
+##   Since there is no other choice, we will use ble/array#push to initialize the following array.
 _ble_term_stty_state=
 _ble_term_stty_flags_enter=()
 _ble_term_stty_flags_leave=()
@@ -7006,11 +7006,11 @@ ble/array#push _ble_term_stty_flags_enter intr undef quit undef susp undef
 ble/array#push _ble_term_stty_flags_leave intr '' quit '' susp ''
 function ble/term/stty/.initialize-flags {
   # # ^U, ^V, ^W, ^?
-  # # Note: lnext, werase は POSIX にはないので stty の項目に存在する
-  # #   かチェックする。
-  # # Note (#D1683): ble/decode/readline/adjust-uvw が正しい対策。以下の対
-  # #   策の効果は不明。寧ろ vim :term 内部で ^? が効かなくなるなど問
-  # #   題を起こす様なので取り敢えず無効化する。
+  # # Note: lnext and werase are not in POSIX, so they exist in stty items
+  # # Check.
+  # # Note (#D1683): ble/decode/readline/adjust-uvw is the correct solution. The following pairs
+  # # The effectiveness of the measures is unknown. Rather, there are problems such as ^? not working inside vim :term.
+  # # Disable it for now as it seems to cause problems.
   # ble/array#push _ble_term_stty_flags_enter kill undef erase undef
   # ble/array#push _ble_term_stty_flags_leave kill '' erase ''
   # local stty; ble/util/assign stty 'stty -a'
@@ -7078,7 +7078,7 @@ function ble/term/stty/TRAPEXIT {
     return 0
   fi
 
-  # exit の場合は echo
+  # echo for exit
   if [[ $bleopt_term_stty_restore && $_ble_term_stty_save ]]; then
     ble/bin/stty "$_ble_term_stty_save"
   else
@@ -7088,7 +7088,7 @@ function ble/term/stty/TRAPEXIT {
 }
 
 function ble/term/update-winsize {
-  # (0) checkwinsize による実装 (2167.054 usec/eval)
+  # (0) Implemented by checkwinsize (2167.054 usec/eval)
   if ((_ble_bash<50200||50300<=_ble_bash)); then
     function ble/term/update-winsize {
       if shopt -q checkwinsize; then
@@ -7105,7 +7105,7 @@ function ble/term/update-winsize {
 
   local ret
 
-  # (a) "tput lines cols" または "tput li co" による実装 (2909.052 usec/eval)
+  # (a) Implementation with "tput lines cols" or "tput li co" (2909.052 usec/eval)
   if ble/bin#freeze-utility-path tput; then
     if ble/util/assign-words ret 'ble/bin/tput lines cols' 2>/dev/null &&
         [[ ${#ret[@]} -eq 2 && ${ret[0]} =~ ^[0-9]+$ && ${ret[1]} =~ ^[0-9]+$ ]]
@@ -7134,7 +7134,7 @@ function ble/term/update-winsize {
     fi
   fi
 
-  # (b) "stty size" による実装 (2976.172 usec/eval)
+  # (b) Implementation with "stty size" (2976.172 usec/eval)
   if ble/util/assign-words ret 'ble/bin/stty size' 2>/dev/null &&
       [[ ${#ret[@]} -eq 2 && ${ret[0]} =~ ^[0-9]+$ && ${ret[1]} =~ ^[0-9]+$ ]]
   then
@@ -7148,7 +7148,7 @@ function ble/term/update-winsize {
     return 0
   fi
 
-  # (c) "resize" による実装 (3108.696 usec/eval)
+  # (c) Implementation using "resize" (3108.696 usec/eval)
   if ble/bin#freeze-utility-path resize &&
       ble/util/assign ret 'ble/bin/resize' &&
       ble/string#match "$ret" 'COLUMNS=([0-9]+).*LINES=([0-9]+)'
@@ -7164,7 +7164,7 @@ function ble/term/update-winsize {
     return 0
   fi
 
-  # (d) "bash -O checkwinsize -c ..." による実装 (bash-4.3 以上) (9094.595 usec/eval)
+  # (d) Implementation with "bash -O checkwinsize -c ..." (bash-4.3 and above) (9094.595 usec/eval)
   function ble/term/update-winsize {
     local ret script='LINES= COLUMNS=; (:); [[ $COLUMNS && $LINES ]] && builtin echo "$LINES $COLUMNS"'
     ble/util/assign-words ret '"$BASH" -O checkwinsize -c "$script"' 2>&"$_ble_util_fd_tui_stderr"
@@ -7175,19 +7175,19 @@ function ble/term/update-winsize {
   return 0
 }
 
-# bash-5.2 では "bind -x" 内部で checkwinsize が動作しないので
-# ble/term/stty/enter に於いて自前で端末サイズを取得して LINES COLUMNS を更新す
-# る。
+# In bash-5.2, checkwinsize does not work inside "bind -x", so
+# Obtain the terminal size yourself in ble/term/stty/enter and update LINES COLUMNS.
+# Ru.
 if ((50200<=_ble_bash&&_ble_bash<50300)); then
   ## @fn ble/term/update-winsize/.stty-enter.advice
-  ##   ble/term/stty/enter の実装を "stty size" を用いて調節します。
+  ##   Adjust the ble/term/stty/enter implementation using "stty size".
   ##
-  ##   最初の ble/term/stty/enter の呼び出し時に'stty "${enter_options[@]}"
-  ##   size' が動くか検査し、使えそうならば今後はstty に size を追加して呼び出
-  ##   してそれを元にして LINES, COLUMNS を再設定する様にする。
+  ##   'stty "${enter_options[@]}" on first ble/term/stty/enter call
+  ##   Check if 'size' works, and if it seems to work, add size to stty and call it from now on.
+  ##   Then, reset LINES and COLUMNS based on that.
   ##
-  ##   テスト自体が stty の設定を変更するので、初回の ble/term/stty/enter の呼
-  ##   び出しの時にテストも含めて調整を実行することにしている。
+  ##   The test itself changes stty settings, so the first call to ble/term/stty/enter
+  ##   We plan to carry out adjustments, including tests, at the time of launch.
   function ble/term/update-winsize/.stty-enter.advice {
     local ret stderr test_command='ble/bin/stty -echo -nl -icrnl -icanon "${_ble_term_stty_flags_enter[@]}" size'
     if ble/util/assign stderr 'ble/util/assign-words ret "$test_command" 2>&1' &&
@@ -7228,15 +7228,15 @@ _ble_term_cursor_internal=0
 _ble_term_cursor_hidden_current=unknown
 _ble_term_cursor_hidden_internal=reveal
 
-# #D1516 今迄にカーソル変更がなく、且つ既定値に戻そうとしている時は何
-#   もしない為、初めから 0 にしておく事にする。xterm.js で DECSCUSR(0)
-#   がユーザー既定値でない事への対策。外部コマンドがカーソル形状を復元
-#   するという事を前提にしている。
-# #D1873 単に 0 を指定しているだけだと cursor をユーザー設定していなく
-#   ても、コマンド実行後の term/enter の時に結局 unknown が設定されて、
-#   DECSCUSR(0) が送信されて問題になる。未だ一度も ble.sh として変更し
-#   ていない事を表す値として default という物を導入する事にした。
-#   default の時には term/enter 時のクリアをしない。
+# #D1516 What happens when the cursor has not been changed and you are trying to return it to the default value?
+# Since there is no such thing, we will set it to 0 from the beginning. DECSCUSR(0) in xterm.js
+#   is not the user's default value. External command restores cursor shape
+#   It is assumed that you will.
+# #D1873 If you simply specify 0, the cursor is not set by the user.
+#   However, when I use term/enter after executing the command, unknown is eventually set.
+#   DECSCUSR(0) is sent and becomes a problem. I have never changed it as ble.sh.
+#   I decided to introduce something called default as a value to indicate that it is not.
+#   When set to default, clearing is not performed on term/enter.
 _ble_term_cursor_current=default
 
 function ble/term/cursor-state/.update {
@@ -7251,7 +7251,7 @@ function ble/term/cursor-state/.update {
   fi
   local ret=${_ble_term_Ss//@1/"$state"}
   if [[ $ret ]]; then
-    # Note: 既に pass-through seq が含まれている時はスキップする。
+    # Note: Skip if pass-through seq is already included.
     [[ $ret != $'\eP'*$'\e\\' ]] &&
       ble/term/quote-passthrough "$ret" '' all
 
@@ -7291,13 +7291,13 @@ function ble/term/bracketed-paste-mode/.init {
 
   bleopt/declare -v term_bracketed_paste_mode on
   if ((_ble_bash>=50100)) && ! ble/util/rlvar#test enable-bracketed-paste; then
-    # Bash 5.1 以降では既定で on なのでもし無効になっていたら意図的にユーザーが
-    # off にしたという事。
+    # Since Bash 5.1, it is on by default, so if it is disabled, the user intentionally
+    # That means it's turned off.
     bleopt term_bracketed_paste_mode=
   elif [[ ${TERM%%-*} == eterm ]]; then
-    # Note (#D2087): eterm (Emacs 28.2) では eterm 中で bracketed paste を送信
-    # すると終了判定が壊れる様である。然し、シェルの側でこれを無効にしても解決
-    # しない。Emacs 自体が設定した bracketed paste の処理の問題と思われる。
+    # Note (#D2087): eterm (Emacs 28.2) sends bracketed paste in eterm
+    # Then, the end judgment seems to be broken. However, disabling this on the shell side also solves the problem.
+    # I don't. This seems to be a problem with bracketed paste processing set by Emacs itself.
     bleopt term_bracketed_paste_mode=
   fi
   function bleopt/check:term_bracketed_paste_mode {
@@ -7327,7 +7327,7 @@ function ble/term/bracketed-paste-mode/leave {
     ble/util/buffer $'\e[?2004l'
 }
 if [[ $TERM == minix ]]; then
-  # Minix console は DECSET も使えない
+  # Minix console cannot use DECSET either.
   function ble/term/bracketed-paste-mode/enter { return 0; }
   function ble/term/bracketed-paste-mode/leave { return 0; }
 fi
@@ -7356,15 +7356,15 @@ _ble_term_TERM_done=
 function ble/term/DA2/request {
   case $TERM in
   (linux)
-    # Note #D1213: linux コンソール (kernel 5.0.0) は "\e[>"
-    #  でエスケープシーケンスを閉じてしまう。5.4.8 は大丈夫。
+    # Note #D1213: Linux console (kernel 5.0.0) is "\e[>"
+    #  will close the escape sequence. 5.4.8 is fine.
     _ble_term_TERM=linux:- ;;
   (st|st-*)
-    # st の unknown csi sequence メッセージに対して文句を言う人がいた。
-    # st は TERM で判定できるので DA2 はスキップできる。
+    # Some people complained about st's unknown csi sequence message.
+    # Since st can be determined using TERM, DA2 can be skipped.
     _ble_term_TERM=st:- ;;
   (*)
-    ble/util/buffer $'\e[>c' # DA2 要求 (ble/decode/csi/.decode で受信)
+    ble/util/buffer $'\e[>c' # DA2 request (received in ble/decode/csi/.decode)
   esac
 }
 
@@ -7376,24 +7376,24 @@ function ble/term/DA2/initialize-term {
   local rex='^[0-9]*(;[0-9]*)*$'; [[ $da2r =~ $rex ]] || return 1
   local da2r_vec
   ble/string#split da2r_vec ';' "$da2r"
-  da2r_vec=("${da2r_vec[@]/#/10#0}") # 0で始まっていても10進数で解釈; WA #D1570 checked (is-array)
+  da2r_vec=("${da2r_vec[@]/#/10#0}") # Interpret as decimal even if it starts with 0; WA #D1570 checked (is-array)
 
   case $da2r in
-  # Note #D1946: Terminology は xterm と区別が付かないが決め打ちの様なので、丁
-  # 度 xterm の該当 version を使っている可能性は低いと見て、取り敢えず
-  # terminology と判断する事にする。
+  # Note #D1946: Terminology is indistinguishable from xterm, but it seems to be fixed, so
+  # Considering that it is unlikely that you are using the corresponding version of xterm, I decided to
+  # I will judge it as terminology.
   ('0;271;0')  _ble_term_TERM[depth]=terminology:200 ;;   # 2012-10-05 https://github.com/borisfaure/terminology/commit/500e7be8b2b876462ed567ef6c90527f37482adb
   ('41;285;0') _ble_term_TERM[depth]=terminology:300 ;;   # 2013-01-22 https://github.com/borisfaure/terminology/commit/526cc2aeacc0ae54825cbc3a3e2ab64f612f83c9
   ('61;337;0') _ble_term_TERM[depth]=terminology:10400 ;; # 2019-01-20 https://github.com/borisfaure/terminology/commit/96bbfd054b271f7ad7f31e699b13c12cb8fbb2e2
 
-  # Note #D1909: wezterm が 2022-04-07 に DA2 を変更している。xterm-277 と区別
-  # が付かないが、ちょうど該当 xterm version (2012-01-08) を使っている可能性は
-  # 低いと見て取り敢えず wezterm とする。更に mlterm-3.4.2..3.7.1
-  # (201412..201608) も 1;277;0 を使っていた。
+  # Note #D1909: wezterm has changed DA2 on 2022-04-07. Distinguished from xterm-277
+  # Although it is not marked, there is a possibility that you are using the corresponding xterm version (2012-01-08).
+  # Seeing that it is low, I decided to use wezterm for now. More mlterm-3.4.2..3.7.1
+  # (201412..201608) also used 1;277;0.
   ('0;0;0') _ble_term_TERM[depth]=wezterm:0 ;;
   ('1;277;0') _ble_term_TERM[depth]=wezterm:20220408 ;; # 2022-04-07 https://github.com/wez/wezterm/commit/ad91e3776808507cbef9e6d758b89d7ca92a4c7e
 
-  # Konsole も大体決め打ちにしている。最近変更した様だ。
+  # Konsole is also pretty much set in stone. Looks like it was changed recently.
   ('0;115;0') _ble_term_TERM[depth]=konsole:30000  ;; # 2001-09-16 https://github.com/KDE/konsole/commit/2d93fed82aa27e89c9d7301d09d2e24e4fa4416d
   ('1;115;0') _ble_term_TERM[depth]=konsole:220380 ;; # 2022-02-24 https://github.com/KDE/konsole/commit/0cc64dcf7b90075bd17e46653df3069208d6a590
 
@@ -7404,7 +7404,7 @@ function ble/term/DA2/initialize-term {
   # - 1;279;0  v3.7.2 (2016-08-06) https://github.com/arakiken/mlterm/commit/24a2a4886b70f747fba4ea7c07d6e50a6a49039d
   # * 24;279;0 v3.7.2 (2016-08-11) https://github.com/arakiken/mlterm/commit/d094f0f4a31224e1b8d2fa15c6ab37bd1c4c4713
   ('1;96;0')   _ble_term_TERM[depth]=mlterm:30102 ;;
-  ('1;277;0')  _ble_term_TERM[depth]=mlterm:30402 ;; # Note: wezterm:20220408 と同じ。wezterm の方を優先
+  ('1;277;0')  _ble_term_TERM[depth]=mlterm:30402 ;; # Note: Same as wezterm:20220408. Prefer wezterm
   ('24;279;0') _ble_term_TERM[depth]=mlterm:30702 ;;
 
   # iTerm2
@@ -7421,7 +7421,7 @@ function ble/term/DA2/initialize-term {
   ('64;2500;0') _ble_term_TERM[depth]=iTerm2:${LC_TERMINAL_VERSION-3.5.6+} ;;
 
   ('0;10;1') # Windows Terminal
-    # 現状ハードコードされている。
+    # Currently it is hardcoded.
     # https://github.com/microsoft/terminal/blob/bcc38d04/src/terminal/adapter/adaptDispatch.cpp#L779-L782
     _ble_term_TERM[depth]=wt:0 ;;
   ('0;'*';1')
@@ -7454,10 +7454,10 @@ function ble/term/DA2/initialize-term {
       local version=$((da2r_vec[1]))
       _ble_term_TERM[depth]=vte:$version
       if ((version<4000)); then
-        # Note #D1785: vte 0.40.0 未満では DECSCUSR に対応していない。更に未知のシーケ
-        # ンスを無視する事もできない。それにも拘らず vte-based な端末は
-        # TERM=xterm を設定するので DECSCUSR が出力されて表示が乱れる原因になる。
-        # vte の version を見て強制的に DECSCUSR を off にする。
+        # Note #D1785: DECSCUSR is not supported in vte below 0.40.0. Further unknown sequence
+        # It is also impossible to ignore the impact. Nevertheless, VTE-based terminals
+        # Since TERM=xterm is set, DECSCUSR will be output and the display will be distorted.
+        # Check the vte version and force DECSCUSR off.
         _ble_term_Ss=
       fi
     fi ;;
@@ -7496,7 +7496,7 @@ function ble/term/DA2/initialize-term {
   if rex='^xterm(-|$)'; [[ $TERM =~ $rex ]]; then
     local version=$((da2r_vec[1]))
     if rex='^1;[0-9]+;0$'; [[ $da2r =~ $rex ]]; then
-      # Note: vte (2000以上), kitty (4000以上) は処理済み
+      # Note: vte (2000 or more), kitty (4000 or more) have been processed
       builtin true
     elif rex='^0;[0-9]+;0$'; [[ $da2r =~ $rex ]]; then
       ((95<=version))
@@ -7515,9 +7515,9 @@ function ble/term/DA2/initialize-term {
 
 function ble/term/DA1/notify { _ble_term_DA1R=$1; blehook/invoke term_DA1R; }
 function ble/term/DA2/notify {
-  # Note #D1485: screen で attach した時に外側の端末の DA2R が混入する
-  # 事がある。2回目以降に受信した内容は ble.sh の内部では使用しない事
-  # にする。
+  # Note #D1485: DA2R from the outer terminal is mixed in when attaching with screen
+  # Something happened. The contents received from the second time onwards should not be used inside ble.sh.
+  # Make it.
   local depth=${#_ble_term_DA2R[@]}
   if ((depth==0)) || ble/string#match "${_ble_term_TERM[depth-1]}" '^(screen|tmux):'; then
     _ble_term_DA2R[depth]=$1
@@ -7526,8 +7526,8 @@ function ble/term/DA2/notify {
     local is_outermost=1
     case ${_ble_term_TERM[depth]} in
     (screen:*|tmux:*)
-      # 外側の端末にも DA2 要求を出す。[ Note: 最初の DA2 要求は
-      # ble/decode/attach (decode.sh) から送信されている。 ]
+      # Also issues DA2 requests to external terminals. [ Note: The first DA2 request is
+      # Sent from ble/decode/attach (decode.sh). ]
       local ret is_outermost=
       ble/term/quote-passthrough $'\e[>c' "$((depth+1))"
       ble/util/buffer "$ret" ;;
@@ -7536,9 +7536,9 @@ function ble/term/DA2/notify {
         _ble_term_Ss=$'\e[@1 q'
       fi ;;
     (terminology:*)
-      # Note #D1946: Terminology にはカーソル位置を戻した時に xenl 状態
-      # (ty->termstate.wrapnext) が残ってしまうバグがある。これを避ける為に一旦
-      # CR で行頭に戻ってから DECRC する。
+      # Note #D1946: Terminology has xenl state when returning cursor position.
+      # There is a bug where (ty->termstate.wrapnext) remains. In order to avoid this,
+      # Use CR to return to the beginning of the line, then DECRC.
       _ble_term_sc=$'\e7' _ble_term_rc=$'\r\e8' ;;
     esac
 
@@ -7550,7 +7550,7 @@ function ble/term/DA2/notify {
       ble/term/modifyOtherKeys/reset
     fi
 
-    # 外側の端末情報は以降では処理しない
+    # The external terminal information will not be processed later.
     ((depth)) && return 0
   fi
 
@@ -7558,26 +7558,26 @@ function ble/term/DA2/notify {
 }
 
 ## @fn ble/term/quote-passthrough seq [level] [opts]
-##   指定したシーケンスを、端末マルチプレクサを通過する様に加工します。
+##   Processes the specified sequence so that it passes through the terminal multiplexer.
 ##
 ##   @param[in] seq
-##     送信するシーケンスを指定します。
+##     Specify the sequence to send.
 ##
 ##   @param[in,opt] level
-##     シーケンスを届ける階層。0 が一番内側の Bash が動作している端末マルチプレ
-##     クサ。省略した場合は一番外側の端末にシーケンスを届ける。
+##     A layer that delivers sequences. 0 is the terminal multiplayer running the innermost Bash.
+##     Kusa. If omitted, the sequence is delivered to the outermost terminal.
 ##
 ##   @param[in,opt] opts
-##     コロン区切りの設定。
+##     Colon-separated settings.
 ##
 ##     all
-##       指定した階層以下の全ての端末・端末マルチプレクサに同じシーケンスを送信
-##       する。[ Note: terminal multiplexer 自体が処理して外側に作用するかもし
-##       れないので、先に pass-through で外側に送った後に terminal multiplexer
-##       自体にも送る。 ]
+## Send the same sequence to all terminals/terminal multiplexers below the specified layer
+##       I will. [Note: The terminal multiplexer itself may process and act on the outside.
+##       Since it is not sent to the outside using pass-through, the terminal multiplexer
+##       Send it to yourself too. ]
 ##
 ##   @var[out] ret
-##     加工されたシーケンスを格納します。
+##     Stores the processed sequence.
 ##
 function ble/term/quote-passthrough {
   local seq=$1 level=${2:-$((${#_ble_term_DA2R[@]}-1))} opts=$3
@@ -7587,14 +7587,14 @@ function ble/term/quote-passthrough {
   local i
   for ((i=level;--i>=0;)); do
     if [[ ${_ble_term_TERM[i]} == tmux:* ]]; then
-      # Note: tmux では pass-through seq の中に含まれる \e は \e\e の様に
-      # escape する。
+      # Note: In tmux, \e included in pass-through seq is changed to \e\e.
+      # escape
       ret=$'\ePtmux;'${ret//$'\e'/$'\e\e'}$'\e\\'${all:+$seq}
     else
-      # Note: screen は、最初に現れる \e\\ で pass-through sequence が終わって
-      # しまうので単純に pass-through sequence を入れ子にはできない。なので、例
-      # えば "\ePXXX\e\\YYY" を pass-through する時には、\e と \\ の間で
-      # [\ePXXX\e][\\YYY] の様に分割して、それぞれ pass-through する。
+      # Note: screen indicates that the first occurrence of \e\\ ends the pass-through sequence.
+      # Therefore, it is not possible to simply nest pass-through sequences. So, example
+      # For example, when pass-through "\ePXXX\e\\YYY", between \e and \\
+      # Divide it like [\ePXXX\e][\\YYY] and pass-through each.
       ret=$'\eP'${ret//$'\e\\'/$'\e\e\\\eP\\'}$'\e\\'${all:+$seq}
     fi
   done
@@ -7616,8 +7616,8 @@ function ble/term/test-DECSTBM.hook2 {
   fi
 }
 function ble/term/test-DECSTBM {
-  # Note: kitty 及び wezterm では SCORC と区別できる形の \e[;r では復
-  # 帰できない。
+  # Note: In kitty and wezterm, \e[;r in a form distinguishable from SCORC cannot be restored.
+  # I can't go home.
   local -a DRAW_BUFF=()
   ble/canvas/panel/goto-top-dock.draw
   ble/canvas/put.draw "$_ble_term_sc"$'\e[1;2r'
@@ -7675,9 +7675,9 @@ function ble/term/modifyOtherKeys/.update {
     [[ $state != 2 || "${_ble_term_TERM[*]}" == "$_ble_term_modifyOtherKeys_current_TERM" ]] &&
     return 0
 
-  # Note: RLogin では modifyStringKeys (\e[>5m) も指定しないと駄目。
-  #   また、RLogin は modifyStringKeys にすると S-数字 を
-  #   記号に翻訳してくれないので注意。
+  # Note: For RLogin, modifyStringKeys (\e[>5m) must also be specified.
+  #   Also, RLogin changes the S-number by modifyStringKeys.
+  #   Please note that it does not translate into symbols.
   local previous=${_ble_term_modifyOtherKeys_current%%:*} method
   if [[ $state == 2 ]]; then
     case $_ble_term_TERM in
@@ -7706,17 +7706,17 @@ function ble/term/modifyOtherKeys/.update {
     (*)
       method=modifyOtherKeys
       if [[ $1 == *:auto ]]; then
-        # 問題を起こす端末で無効化。
+        # Disable it on devices that cause problems.
         ble/term/modifyOtherKeys/.supported || method=disabled
       fi ;;
     esac
 
-    # Note #D2062: mc の内部にいる時は外側の端末に関係なく modifyOtherKeys は無
-    # 効化する。C-o が効かなくなるし、その他の mc に対するコマンドも効かなくな
-    # る可能性がある。
+    # Note #D2062: modifyOtherKeys has no effect when inside mc, regardless of the outer terminal.
+    # make effective. C-o will no longer work, and other commands for mc will no longer work.
+    # There is a possibility that
     [[ $MC_SID ]] && method=disabled
 
-    # 別の方式で有効化されている時は先に解除しておく。
+    # If it is enabled using another method, release it first.
     if ((previous>=2)) &&
       [[ $method != "$_ble_term_modifyOtherKeys_current_method" ]]
     then
@@ -7740,8 +7740,8 @@ function ble/term/modifyOtherKeys/.update {
     ;; # fallback to modifyOtherKeys
   (kitty_modifyOtherKeys)
     # Note: kitty has quirks in its implementation of modifyOtherKeys.
-    # Note #D1549: 1 では無効にならない。変な振る舞い。
-    # Note #D1626: 更に最近の kitty では \e[>4;0m でも駄目で \e[>4m としなければならない様だ。
+    # Note #D1549: 1 does not disable it. Weird behavior.
+    # Note #D1626: In more recent kitty, \e[>4;0m doesn't work either, so you have to use \e[>4m.
     case $state in
     (0|1) ble/util/buffer $'\e[>4;0m\e[>4m' ;;
     (2)   ble/util/buffer $'\e[>4;1m\e[>4;2m\e[m' ;;
@@ -7789,10 +7789,10 @@ function ble/term/modifyOtherKeys/.update {
     return 0 ;;
   esac
 
-  # Note: 対応していない端末が SGR と勘違いしても
-  #  大丈夫な様に SGR を最後にクリアしておく。
-  # Note: \e[>4;2m の時は、対応していない端末のため
-  #   一端 \e[>4;1m にしてから \e[>4;2m にする。
+  # Note: Even if an unsupported device mistakes it for SGR,
+  #  Clear SGR last to make sure it's okay.
+  # Note: If \e[>4;2m, it is because the device is not supported.
+  #   First set it to \e[>4;1m, then set it to \e[>4;2m.
   case $state in
   (0) ble/util/buffer $'\e[>4;0m\e[m' ;;
   (1) ble/util/buffer $'\e[>4;1m\e[m' ;;
@@ -7802,23 +7802,23 @@ function ble/term/modifyOtherKeys/.update {
 function ble/term/modifyOtherKeys/.supported {
   [[ $_ble_term_TERM_done ]] || return 1
 
-  # libvte は SGR(>4) を直接画面に表示してしまう。
+  # libvte displays SGR(>4) directly on the screen.
   [[ $_ble_term_TERM == vte:* ]] && return 1
 
-  # 改造版 Poderosa は通知でウィンドウサイズを毎回変更するので表示が乱れてしまう
+  # The modified version of Poderosa changes the window size each time with notifications, resulting in cluttered display.
   [[ $MWG_LOGINTERM == rosaterm ]] && return 1
 
   case $TERM in
   (linux)
-    # Note #D1213: linux (kernel 5.0.0) は "\e[>" でエスケープシーケンスを閉じ
-    # てしまう。5.4.8 は大丈夫だがそれでも modifyOtherKeys に対応していない。
+    # Note #D1213: Linux (kernel 5.0.0) closes escape sequences with "\e[>"
+    # I end up. 5.4.8 is fine, but it still doesn't support modifyOtherKeys.
     return 1 ;;
   (minix|sun*)
-    # minix, Solaris のコンソールもそのまま出力してしまう。
+    # The minix and Solaris consoles also output the same output.
     return 1 ;;
   (st|st-*)
-    # Note #D1631: st のエラーログに unknown csi が出るとの文句が出たので無効化。
-    # 恐らく将来に亘って st は modifyOtherKeys には対応しないだろう。
+    # Note #D1631: There was a complaint about unknown csi appearing in the st error log, so I disabled it.
+    # Probably st will not support modifyOtherKeys in the future.
     return 1 ;;
   esac
 
@@ -7941,7 +7941,7 @@ function ble/term/leave {
   ble/term/rl-convert-meta/leave
   ble/term/leave-for-widget
   [[ $_ble_term_cursor_current == default ]] ||
-    _ble_term_cursor_current=unknown # vim は復元してくれない
+    _ble_term_cursor_current=unknown # vim won't restore
   _ble_term_cursor_hidden_current=unknown
   _ble_term_state=external
 }
@@ -7982,14 +7982,14 @@ _ble_util_s2c_table_enabled=
 ##   @param[in,opt] index
 ##   @var[out] ret
 if ((_ble_bash>=50300)); then
-  # printf "'c" で Unicode が読める (どの LC_CTYPE でも Unicode になる)
+  # Unicode can be read with printf "'c" (any LC_CTYPE is Unicode)
   function ble/util/s2c {
     builtin printf -v ret %d "'$1"
   }
 elif ((_ble_bash>=40100)); then
   function ble/util/s2c {
-    # Note #D1881: bash-5.2 以前では printf %d "'x" に対して mbstate_t 状態が
-    # 残ってしまう。なので一旦 clear を試みる。
+    # Note #D1881: Before bash-5.2, the mbstate_t state for printf %d "'x" is
+    # It will remain. So try clearing it once.
     if ble/util/is-unicode-output; then
       builtin printf -v ret %d "'μ"
     else
@@ -7998,8 +7998,8 @@ elif ((_ble_bash>=40100)); then
     builtin printf -v ret %d "'$1"
   }
 elif ((_ble_bash>=40000&&!_ble_bash_loaded_in_function)); then
-  # - 連想配列にキャッシュできる
-  # - printf "'c" で unicode が読める
+  # - Can be cached in an associative array
+  # - Unicode can be read with printf "'c"
   declare -A _ble_util_s2c_table
   _ble_util_s2c_table_enabled=1
   function ble/util/s2c {
@@ -8018,17 +8018,17 @@ elif ((_ble_bash>=40000)); then
     ble/util/sprintf ret %d "'${1::1}"
   }
 else
-  # bash-3 では printf %d "'あ" 等としても
-  # "あ" を構成する先頭バイトの値が表示されるだけである。
-  # 何とかして unicode 値に変換するコマンドを見つけるか、
-  # 各バイトを取り出して unicode に変換するかする必要がある。
-  # bash-3 では read -n 1 を用いてバイト単位で読み取れる。これを利用する。
+  # In bash-3, printf %d "'ah" etc.
+  # Only the value of the first byte that makes up "a" is displayed.
+  # Either find a command to convert it to a unicode value somehow, or
+  # You need to extract each byte and convert it to unicode.
+  # In bash-3 you can read bytes using read -n 1. Take advantage of this.
   function ble/util/s2c {
     local s=${1::1}
     if [[ $s == [$'\x01'-$'\x7F'] ]]; then
       if [[ $s == $'\x7F' ]]; then
-        # Note: bash-3.0 では printf %d "'^?" とすると 0 になってしまう。
-        #   printf %d \'^? であれば問題なく 127 になる。
+        # Note: In bash-3.0, printf %d "'^?" returns 0.
+        #   printf %d \'^? will return 127 without any problem.
         ret=127
       else
         ble/util/sprintf ret %d "'$s"
@@ -8060,9 +8060,9 @@ if ((_ble_bash>=40200)); then
   function ble/util/.has-bashbug-printf-uffff {
     ((40200<=_ble_bash&&_ble_bash<50000)) || return 1
 
-    # Note: CentOS 7 に C.UTF-8 がなかったので 2>/dev/null する。macOS にも
-    # C.UTF-8 はない。何れにしてもこれらのシステムでは sizeof(wchar_t) == 2 で
-    # はないので正しく UTF-8 にならなくても良い。
+    # Note: CentOS 7 did not have C.UTF-8, so use 2>/dev/null. Also on macOS
+    # C.UTF-8 is not available. In any case, sizeof(wchar_t) == 2 on these systems
+    # There is no need to convert it to UTF-8 correctly.
     local LC_ALL=C.UTF-8 2>/dev/null
 
     local ret
@@ -8112,7 +8112,7 @@ else
     _ble_text_hexmap[i]=${_ble_text_xdigit[i>>4&0xF]}${_ble_text_xdigit[i&0xF]}
   done
 
-  # 動作確認済 3.1, 3.2, 4.0, 4.2, 4.3
+  # Operation confirmed 3.1, 3.2, 4.0, 4.2, 4.3
   function ble/util/c2s.impl {
     if (($1<0x80)); then
       builtin eval "ret=\$'\\x${_ble_text_hexmap[$1]}'"
@@ -8134,8 +8134,8 @@ else
     done
   }
   function ble/util/chars2s.impl {
-    # Note: 大量の引数を抱えた関数からの関数呼び出しは重いので
-    # B=160 毎に小分けにして関数を呼び出す事にする。
+    # Note: Calling a function from a function with a large number of arguments is expensive, so
+    # We will call the function in small parts every B=160.
     local -a buff=()
     local c i=0 b N=$# B=160
     for ((b=0;b+B<N;b+=B)); do
@@ -8146,7 +8146,7 @@ else
   }
 fi
 
-# どうもキャッシュするのが一番速い様だ
+# Apparently caching is the fastest way.
 _ble_util_c2s_table=()
 ## @fn ble/util/c2s char
 ##   @var[out] ret
@@ -8161,7 +8161,7 @@ function ble/util/c2s {
   fi
 }
 function ble/util/c2s.cached {
-  # locale check のない版
+  # Version without locale check
   ret=${_ble_util_c2s_table[$1]-}
   if [[ ! $ret ]]; then
     ble/util/c2s.impl "$1"
@@ -8176,7 +8176,7 @@ function ble/util/chars2s {
 
 ## @fn ble/util/c2bc
 ##   gets a byte count of the encoded data of the char
-##   指定した文字を現在の符号化方式で符号化した時のバイト数を取得します。
+##   Gets the number of bytes when encoding the specified character using the current encoding method.
 ##   @param[in]  $1 = code
 ##   @param[out] ret
 function ble/util/c2bc {
@@ -8185,7 +8185,7 @@ function ble/util/c2bc {
 
 ## @fn ble/util/.update-locale-cache
 ##
-##  使い方
+##  How to use
 ##
 ##    [[ $_ble_util_locale_triple != "$LC_ALL:$LC_CTYPE:$LANG" ]] &&
 ##      ble/util/.update-locale-cache
@@ -8198,7 +8198,7 @@ function ble/util/.test-C-locale {
   # Note: In Termux, even with the locale "C", the behavior appears to be that
   # of UTF-8.  This makes it impossible to manipulate binary data in the shell.
   local LC_ALL= LC_CTYPE= LANG=C
-  local s='あ'
+  local s='alpha'
   ((${#s}==3)); local ext=$?
   ble/util/unlocal LC_ALL LC_CTYPE LANG
   return "$ext"
@@ -8211,7 +8211,7 @@ function ble/util/.test-utf8-locale {
   # set the locale to "C" and use it to obtain the number of bytes, 3, and then
   # check the target locale.
   local LC_ALL= LC_CTYPE= LANG=C
-  local s='あ'
+  local s='alpha'
   LANG=$ctype
   ((${#s}==1)); local ext=$?
   ble/util/unlocal LC_ALL LC_CTYPE LANG
@@ -8332,7 +8332,7 @@ function ble/util/s2bytes {
   return "$?"
 } &>/dev/null
 
-# bind で使用される keyseq の形式
+# Format of keyseq used by bind
 
 ## @fn ble/util/c2keyseq char
 ##   @var[out] ret
@@ -8651,9 +8651,9 @@ _ble_util_message_precmd=()
 
 ## @fn ble/util/message/.encode-data target data
 ##   @param[in] target
-##     送信対象のプロセスの PID を指定します
+##     Specify the PID of the process to send
 ##   @param[in] data
-##     送るデータを指定します
+##     Specify the data to send
 ##   @var[out] ret
 function ble/util/message/.encode-data {
   local target=$1 data=$2

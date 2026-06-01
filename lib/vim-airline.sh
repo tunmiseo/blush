@@ -1,6 +1,6 @@
 # -*- mode: sh; mode: sh-bash -*-
 #
-# airline.vim (https://github.com/vim-airline/vim-airline) の模倣実装
+# Imitative implementation of airline.vim (https://github.com/vim-airline/vim-airline)
 #
 # * "g:airline_mode_map" is partially supported
 #
@@ -190,13 +190,13 @@ function ble/prompt/unit:_ble_lib_vim_airline_mode/update {
 }
 
 ## unit:_ble_lib_vim_airline_sep_width
-##   分割子の幅を計測してキャッシュします。
+##   Measure and cache the width of the divider.
 ## @arr _ble_lib_vim_airline_right_sep_width
-##   @var _ble_lib_vim_airline_right_sep_width[0] (unit内部使用) version
-##   @var _ble_lib_vim_airline_right_sep_width[1] (unit内部使用) hashref
-##   @var _ble_lib_vim_airline_right_sep_width[2] (unit内部使用) hash
-##   @var _ble_lib_vim_airline_right_sep_width[3] 左sepの幅
-##   @var _ble_lib_vim_airline_right_sep_width[4] 右sepの幅
+##   @var _ble_lib_vim_airline_right_sep_width[0] (unit internal use) version
+##   @var _ble_lib_vim_airline_right_sep_width[1] (unit internal use) hashref
+##   @var _ble_lib_vim_airline_right_sep_width[2] (unit internal use) hash
+##   @var _ble_lib_vim_airline_right_sep_width[3] Width of left sep
+##   @var _ble_lib_vim_airline_right_sep_width[4] Right sep width
 _ble_lib_vim_airline_sep_width_data=()
 function ble/prompt/unit:_ble_lib_vim_airline_sep_width/update {
   ble/prompt/unit/add-hash '$bleopt_char_width_version,$bleopt_char_width_mode'
@@ -305,7 +305,7 @@ function ble/prompt/unit:{vim-airline-section}/update {
   ble/prompt/unit/add-hash '$_ble_lib_vim_airline_mode_data'
   ble/prompt/unit/add-hash "\$$ref_ps"
   local trace_opts=confine:relative:noscrc:face0="$face":ansi:measure-bbox:measure-gbox
-  local prompt_rows=1 prompt_cols=$cols # Note: cols は \q{lib/vim-airline} で設定される
+  local prompt_rows=1 prompt_cols=$cols # Note: cols is set in \q{lib/vim-airline}
   ble/prompt/unit:{section}/update "$prefix" "${!ref_ps}" "$trace_opts"
 }
 function ble/prompt/unit:_ble_lib_vim_airline_section_a/update { ble/prompt/unit:{vim-airline-section}/update a; }

@@ -1,14 +1,14 @@
 #!/bin/bash
 
-# 現在の bash の version に従って以下の二つのファイルを生成します:
+# Generates the following two files according to the current bash version:
 #
 #   $_ble_base_cache/decode.bind.$_ble_bash.$bleopt_input_encoding.bind
 #   $_ble_base_cache/decode.bind.$_ble_bash.$bleopt_input_encoding.unbind
 #
-# Note: #D1300 bind -s で束縛するマクロの非終端文字は
-#   decode.sh (ble/decode/nonblocking-read) でチェックする必要がある。
-#   現在の実装では 0xC0 と 0xDE をチェックしている。
-#   マクロを追加する時にはそれに応じてチェックを追加する必要がある。
+# Note: #D1300 Non-terminal characters in macros bound with bind -s are
+#   Need to check with decode.sh (ble/decode/nonblocking-read).
+#   The current implementation checks 0xC0 and 0xDE.
+#   When adding macros, you need to add checks accordingly.
 #
 # 2025-05-04 Old attaching strategies have been removed in commit 514d177e.
 # * In the very initial code, to receive ESC, we have been binding the "-x"
@@ -44,7 +44,7 @@ function ble/init:bind/bind-s {
 function ble/init:bind/.generate {
   local q=\' Q="'\\''"
 
-  # ENCODING: UTF-8 2-byte code of 0, C-x, and ESC (UTF-8依存)
+  # ENCODING: UTF-8 2-byte code of 0, C-x, and ESC (UTF-8 dependent)
   local altdqs00='\xC0\x80'
   local altdqs24='\xC0\x98'
   local altdqs27='\xC0\x9B'
@@ -52,49 +52,49 @@ function ble/init:bind/.generate {
   local isolated27='\xDE\xBC'
   local prefixO='\xDE\xBA'
 
-  # ※bash-4.3 以降は bind -x の振る舞いがこれまでと色々と違う様だ
-  #   何より 3 byte 以上の物にも bind できる様になった点が大きい (が ble.sh では使っていない)
+  # *Since bash-4.3, the behavior of bind -x seems to be different from before.
+  #   Most importantly, it is now possible to bind to objects larger than 3 bytes (but it is not used in ble.sh)
 
-  # * C-@ (0) は bash-4.3 では何故か bind -x すると
-  #   bash: bash_execute_unix_command: コマンドのキーマップがありません
+  # * C-@ (0) for some reason bind -x in bash-4.3
+  #   bash: bash_execute_unix_command: No keymap for command
   #   bash_execute_unix_command: cannot find keymap for command
-  #   になってしまう。"C-@ *" に全て割り当てても駄目である。
-  #   bind '"\C-@":""' は使える様なので、UTF-8 の別表現に翻訳してしまう。
+  #   It becomes It doesn't work even if you allocate everything to "C-@ *".
+  #   bind '"\C-@":""' seems to work, so I translate it to a different representation in UTF-8.
   local esc00=$((40300<=_ble_bash&&_ble_bash<50000))
 
-  # * C-x (24) に単体で直接 bind -x するとクラッシュする問題。
+  # * Crash when directly bind -x to C-x (24).
   #   #D0017 #D0018 #D0057 #D0122 #D0148 #D0391 #D0583 #D1478
   #
-  #   [症状]
-  #   bash-4.3 を除く bash-3.0 ～ bash-4.4 の全てで、set -o emacs で問題が生じる。
-  #   例えば C-x C-b C-b などと入力すると、bash-3.2 では無限ループになって固まる。
-  #   bash-4.4 では "コマンドのキーマップがありません" というエラーメッセージになる。
-  #   それ以外の bash では、何秒かしてクラッシュする。
-  #   bash-5.0 では修正されたので対策は不要になった (#D1163)
+  #   [Symptoms]
+  #   Problems occur with set -o emacs on all versions of bash-3.0 to bash-4.4 except bash-4.3.
+  #   For example, if you type C-x C-b C-b, it will freeze in an infinite loop in bash-3.2.
+  #   In bash-4.4, the error message is "No keymap for command".
+  #   Any other bash will crash after a few seconds.
+  #   This has been fixed in bash-5.0, so no countermeasures are required (#D1163)
   #
-  #   [対処法1] "C-x ?" 全束縛 ... bash-3.0..4.2 で使用
+  #   [Workaround 1] "C-x ?" Full binding... used in bash-3.0..4.2
   #
-  #   C-x には直接 bind せずに 2 文字の組み合わせで bind -x '"\C-x?": ...' とする。
+  #   Instead of directly binding to C-x, use the two-character combination bind -x '"\C-x?": ...'.
   #
-  #   * bash-3.0..4.2: これをすると vi に切り替えた時に後遺症が残る。
-  #     cmd_xmap[24] に submap が追加される事により、\C-x に対して \C-x\C-x の
-  #     コマンドが実行される様になる。その対策として直接 "\C-x?" に対して bind
-  #     -x するのではなくて、"\C-x?" をマクロで UTF-8 代替表現に置き換えて受信
-  #     する。 (#D1478)
+  #   * bash-3.0..4.2: If you do this, aftereffects will remain when you switch to vi.
+  #     By adding submap to cmd_xmap[24], \C-x\C-x for \C-x
+  #     The command will now be executed. As a countermeasure, directly bind to "\C-x?"
+  #     Instead of -x, use a macro to replace "\C-x?" with UTF-8 alternative representation.
+  #     I will. (#D1478)
   #
-  #   [対処法2] 却下 #D0583
-  #   bind -s '"\C-x": "\xC0\x98"' のようにする。
-  #   クラッシュはしなくなるが、謎の遅延が残る。
-  #   遅延をなくすには 対処法1 を実行するしかない。
+  #   [Countermeasure 2] Reject #D0583
+  #   Do something like bind -s '"\C-x": "\xC0\x98"'.
+  #   It no longer crashes, but a mysterious delay remains.
+  #   The only way to eliminate the delay is to execute countermeasure 1.
   #
-  #   [対処法3] 単一 C-x (with \C-x\C-x shadow) ... bash-4.4 で使用 (#D1478)
+  #   [Workaround 3] Single C-x (with \C-x\C-x shadow) ... used in bash-4.4 (#D1478)
   #
-  #   一旦 bind -x '"\C-x\C-x":hook 24' としてから bind -r '\C-x\C-x' で削除す
-  #   る。この後で bind -x '"\C-x":...' で timeout すると "\C-x\C-x" のコマンド
-  #   が実行される。
+  #   First use bind -x '"\C-x\C-x":hook 24' and then remove it with bind -r '\C-x\C-x'
+  #   Ru. After this, if you timeout with bind -x '"\C-x":...', the command of "\C-x\C-x"
+  #   is executed.
   #
-  #   * bash-3.0..4.2 で \C-x\C-x に一度でも bind すると C-x で timeout しなく
-  #     なるので、この対策を実行するのは emacs keymap のみにする。
+  #   * If you bind to \C-x\C-x even once in bash-3.0..4.2, C-x will no longer timeout.
+  #     Therefore, only emacs keymap should be used to implement this measure.
   #
   local bind18XX=0
   if ((40400<=_ble_bash&&_ble_bash<50000)); then
@@ -105,33 +105,33 @@ function ble/init:bind/.generate {
     bind18XX=1
   fi
 
-  # ESC 受信方法
+  # ESC reception method
   #
-  # * 2017-10-22 新しい方法として
+  # * 2017-10-22 As a new method
   #
   #     bind '"\e":"\e[27;5;91~"'
   #     bind '"\e?":"\xC0\x9B?"'
   #     bind '"\e\e":"\xC0\x9B\e[27;5;91~"'
   #
-  #   などの様に bind -s で1文字のものと2文字のものを両方登録して、Readline に
-  #   ESC に続きがあるかどうかを判定させて単独 ESC を区別するという手がある。
+  #   Register both 1-character and 2-character characters with bind -s and write them to Readline.
+  #   One way is to distinguish between single ESCs by determining whether there is a continuation of the ESC.
 
   # bind1B4FXX 2025-05-03
   #
-  # * bind1B4FXX=1: bash 4.4 以下では SS3 の矢印キー (ESC O A) を受信した時、常
-  #   に is-stdin-ready が常に失敗する (bash が内部的に先読みして何か処理してい
-  #   る?)  ので wait-input で M-O と区別しようとしてもできない。isolated ESC
-  #   と同様に ESC O と ESC ? の両方に登録して区別する。
+  # * bind1B4FXX=1: In bash 4.4 and below, when SS3 arrow keys (ESC O A) are received,
+  # is-stdin-ready always fails (bash is internally prefetching and processing something).
+  #   ), so even if you try to distinguish it from M-O with wait-input, it will not work. isolated ESC
+  #   Similarly, register and distinguish between ESC O and ESC ?.
   #
-  #   "ESC O" に束縛を設定していることが前提。
+  #   It is assumed that a binding is set to "ESC O".
   local bind1B4FXX=$((40000<=_ble_bash&&_ble_bash<50000))
 
-  # Note: 'set convert-meta on' 対策
+  # Note: 'set convert-meta on' workaround
   #
-  #   bind 'set convert-meta on' の時、bind -p '"\200": ...' などが
-  #   "\C-@" などの cmd_xmap を上書きしてしまう。
-  #   呼び出し元で一時的に 'set convert-meta off' になる様にしているが、
-  #   保険として 128-255 を先に bind してから 0-127 を bind する。
+  #   When bind 'set convert-meta on', bind -p '"\200": ...' etc.
+  #   It overwrites cmd_xmap such as "\C-@".
+  #   I am trying to temporarily 'set convert-meta off' at the caller, but
+  #   As insurance, bind 128-255 first, then bind 0-127.
   local i
   for i in {128..255} {0..127}; do
     local ret; ble/decode/c2dqs "$i"
@@ -155,19 +155,19 @@ function ble/init:bind/.generate {
       # C-[
       ble/init:bind/append-macro '\e' "$isolated27" # C-[
     else
-      # Note: Bash-5.0 では \C-\\ で bind すると変な事になる #D1162 #D1078
+      # Note: In Bash-5.0, binding with \C-\\ causes strange things #D1162 #D1078
       ((i==28&&_ble_bash>=50000)) && ret='\x1C'
       ble/init:bind/append "$ret" "$i"
     fi
 
-    # # C-@ * for bash-4.3 (2015-02-11) 無駄?
+    # # C-@ * for bash-4.3 (2015-02-11) Wasted?
     # ble/init:bind/append "\\C-@$ret" "0 $i"
 
     # C-x *
     if ((bind18XX)); then
-      # emacs mode では "C-x ?" の組み合わせで登録する。
-      # Note: 普通に bind -x すると cmd_xmap の \C-x が曖昧になって vi 側の単一
-      # "C-x" が動かなくなるので、ここでは UTF-8 2B 表示を通して受信する。
+      # In emacs mode, register with the combination "C-x ?".
+      # Note: If you use bind -x normally, \C-x in cmd_xmap becomes ambiguous and becomes a single value on vi side.
+      # "C-x" doesn't work, so here we receive it through UTF-8 2B display.
       if ((i==0)); then
         ble/init:bind/append-macro "\C-x$ret" "$altdqs24$altdqs00" '[[ -o emacs ]]'
       elif ((i==24)); then
@@ -200,7 +200,7 @@ function ble/init:bind/.generate {
 
   ble/function#try ble/encoding:"$bleopt_input_encoding"/generate-binder
 
-  local hash='d2348e25759c982a945fb64c2a8bce9940f78eae'
+  local hash='d1692a9f725036b1bbed19c7bc0459d2bb5deca2'
   ble/util/print "_ble_decode_bind_cache_hash='$hash'" >&3
 }
 

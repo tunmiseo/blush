@@ -55,7 +55,7 @@ function ble/color/initialize-term-colors {
   local fields
   ble/string#split fields \; "$_ble_term_DA2R"
   if [[ $bleopt_term_true_colors == auto ]]; then
-    # truecolor support 自動判定 (暫定実装)
+    # truecolor support automatic determination (temporary implementation)
     local value=
     if [[ $TERM == *-24bit || $TERM == *-direct ]]; then
       value=colon
@@ -63,7 +63,7 @@ function ble/color/initialize-term-colors {
       value=semicolon
     else
       case ${fields[0]} in
-      (83) # screen (truecolor on にしている必要がある。判定方法は不明)
+      (83) # screen (needs to be truecolor on. How to determine is unknown)
         if ((fields[1]>=49900)); then
           value=semicolon
         fi ;;
@@ -178,12 +178,12 @@ function ble-palette {
 ##   @var[out] ret
 ##
 #
-# Note: もし SGR 以外の制御機能を使って (tput 等の出力を用いて) 描画シー
-#   ケンスを構築する様に拡張する場合には、
-#   ble/textarea#slice-text-buffer に於いて行っている CR LF の組の検出
-#   において、間に許容する制御機能の種類に注意する。もし考慮に入れてい
-#   ない物をここで使いたい時には、それを
-#   ble/textarea#slice-text-buffer の正規表現に追加しなければならない。
+# Note: If you use a control function other than SGR (using output such as tput) to
+#   When extended to build cans,
+#   Detection of CR LF pair in ble/textarea#slice-text-buffer
+#   Attention should be paid to the types of control functions allowed in between. If you take into account
+# If you want to use something that doesn't exist here, use it
+#   Must be added to the regular expression for ble/textarea#slice-text-buffer.
 #
 _ble_color_g2sgr_version=0
 _ble_color_g2sgr=()
@@ -336,7 +336,7 @@ function ble/color/g#setbg {
   fi
 }
 ## @fn ble/color/g#append g g2
-##   g に描画属性 g2 を上書きします。
+##   Overrides the drawing attribute g2 to g.
 ##   @param[ref] g
 ##   @param[in] g2
 function ble/color/g#append {
@@ -684,7 +684,7 @@ function ble/color/convert-color256-to-color88 {
 }
 ## @fn ble/color/convert-rgb24-to-color256 R G B
 ##   @param[in] R G B
-##     0..255 の階調値
+##     Gradation value of 0..255
 ##   @var[out] ret
 function ble/color/convert-rgb24-to-color256 {
   local R=$1 G=$2 B=$3
@@ -717,7 +717,7 @@ function ble/color/convert-rgb24-to-color256 {
 }
 ## @fn ble/color/convert-rgb24-to-color88 R G B
 ##   @param[in] R G B
-##     0..255 の階調値
+##     Gradation value of 0..255
 ##   @var[out] ret
 function ble/color/convert-rgb24-to-color88 {
   local R=$1 G=$2 B=$3
@@ -752,8 +752,8 @@ _ble_color_color2sgr_filter=
 ## @fn ble/color/.color2sgrfg color
 ## @fn ble/color/.color2sgrbg color
 ##   @param[in] color
-##     0-255 の値は index color を表します。
-##     1XXXXXX の値は 24bit color を表します。
+##     A value of 0-255 represents the index color.
+##     A value of 1XXXXXX represents 24bit color.
 ##   @var[out] ret
 function ble/color/.color2sgr-impl {
   local ccode=$1 prefix=$2 # 3 for fg, 4 for bg
@@ -995,7 +995,7 @@ function ble/color/read-sgrspec {
 }
 
 ## @fn ble/color/sgrspec2g str
-##   SGRに対する引数から描画属性を構築します。
+##   Constructs drawing attributes from arguments to SGR.
 ##   @var[out] ret
 function ble/color/sgrspec2g {
   local g=0
@@ -1004,8 +1004,8 @@ function ble/color/sgrspec2g {
 }
 
 ## @fn ble/color/ansi2g str
-##   ANSI制御シーケンスから描画属性を構築します。
-##   Note: canvas.sh を読み込んで以降でないと使えません。
+##   Construct drawing attributes from ANSI control sequences.
+##   Note: Can only be used after loading canvas.sh.
 ##   @var[out] ret
 function ble/color/ansi2g {
   local x=0 y=0 g=0
@@ -1016,11 +1016,11 @@ function ble/color/ansi2g {
 #------------------------------------------------------------------------------
 # _ble_faces
 
-# 遅延初期化登録
+# Lazy initialization registration
 # @hook color_defface_load (defined in src/def.sh)
 # @hook color_setface_load (defined in src/def.sh)
 
-# 遅延初期化
+# Lazy initialization
 if [[ ! ${_ble_faces_count-} ]]; then # reload #D0875
   _ble_faces_count=0
   _ble_faces=()
@@ -1099,7 +1099,7 @@ function ble-color-setface {
   return "$ext"
 }
 
-# 遅延関数 (後で上書き)
+# Delay function (later overwritten)
 function ble/color/defface   { local q=\' Q="'\''"; blehook color_defface_load+="ble/color/defface '${1//$q/$Q}' '${2//$q/$Q}'"; }
 function ble/color/setface   { local q=\' Q="'\''"; blehook color_setface_load+="ble/color/setface '${1//$q/$Q}' '${2//$q/$Q}'"; }
 function ble/color/face2g    { ble/color/initialize-faces && ble/color/face2g    "$@"; }
@@ -1110,7 +1110,7 @@ function ble/color/spec2g    { ble/color/initialize-faces && ble/color/spec2g   
 
 function ble/color/face2sgr-ansi { ble/color/initialize-faces && ble/color/face2sgr  "$@"; }
 
-# 遅延初期化子
+# lazy initializer
 _ble_color_faces_initialized=
 function ble/color/initialize-faces {
   [[ $_ble_color_faces_initialized ]] && return 0
@@ -1626,53 +1626,53 @@ function ble/highlight/layer/getg {
   LEVEL=${#_ble_highlight_layer_list[*]} ble/highlight/layer/update/getg "$1"
 }
 
-## レイヤーの実装
-##   先ず作成するレイヤーの名前を決めます。ここでは <layerName> とします。
-##   次に、以下の配列変数と二つの関数を用意します。
+## Implementing layers
+##   First, decide on the name of the layer you will create. Here it is <layerName>.
+##   Next, prepare the following array variables and two functions.
 ##
 ## @arr _ble_highlight_layer_<layerName>_VARNAMES
-##   レイヤーの動的な状態を保持する変数の一覧です。ble/textarea#save-state で参
-##   照されます。もしこの配列が定義されていない場合は、代わりに
-##   _ble_highlight_layer_<layerName>_ で始まる変数名を全て記録します。
+##   A list of variables that hold the dynamic state of the layer. Reference with ble/textarea#save-state
+##   will be illuminated. If this array is not defined, instead
+##   Record all variable names starting with _ble_highlight_layer_<layerName>_.
 ##
 ## @arr _ble_highlight_layer_<layerName>_buff=()
-##   グローバルに定義する配列変数です。
-##   後述の ble/highlight/layer:<layerName>/update が呼ばれた時に更新します。
+##   This is an array variable that is defined globally.
+##   Updated when ble/highlight/layer:<layerName>/update described below is called.
 ##
-##   各要素は編集文字列の各文字に対応しています。
-##   各要素は "<SGR指定><表示文字>" の形式になります。
+##   Each element corresponds to a character in the edit string.
+##   Each element has the format "<SGR specification><display character>".
 ##
-##   "SGR指定" には描画属性を指定するエスケープシーケンスを指定します。
-##   "SGR指定" は前の文字と同じ描画属性の場合には省略可能です。
-##   この描画属性は現在のレイヤーとその下層にある全てのレイヤーの結果を総合した物になります。
-##   この描画属性は後述する ble/highlight/layer/getg 関数によって得られる
-##   g 値と対応している必要があります。
+##   "SGR specification" specifies an escape sequence that specifies drawing attributes.
+##   "SGR specification" can be omitted if the drawing attribute is the same as the previous character.
+##   This drawing attribute is a combination of the results of the current layer and all layers below it.
+##   This drawing attribute can be obtained using the ble/highlight/layer/getg function described later.
+##   It must correspond to the g value.
 ##
-##   "<表示文字>" は編集文字列中の文字に対応する、予め定められた文字列です。
-##   基本レイヤーである plain の _ble_highlight_layer_plain_buff 配列に
-##   対応する "<表示文字>" が (SGR属性無しで) 格納されているのでこれを使用して下さい。
-##   表示文字の内容は基本的に、その文字自身と同一の物になります。
-##   但し、改行を除く制御文字の場合には、文字自身とは異なる "<表示文字>" になります。
-##   ASCII code 1-8, 11-31 の文字については "^A" ～ "^_" という2文字になります。
-##   ASCII code 9 (TAB) の場合には、空白が幾つか (端末の設定に応じた数だけ) 並んだ物になります。
-##   ASCII code 127 (DEL) については "^?" という2文字の表現になります。
-##   通常は _ble_highlight_layer_plain_buff に格納されている値をそのまま使えば良いので、
-##   これらの "<表示文字>" の詳細について考慮に入れる必要はありません。
+##   "<Display character>" is a predefined string that corresponds to the characters in the edit string.
+##   In the _ble_highlight_layer_plain_buff array of the base layer plain
+##   The corresponding "<display character>" is stored (without the SGR attribute), so please use this.
+##   The content of the displayed character is basically the same as the character itself.
+##   However, in the case of control characters other than line breaks, the "<display character>" is different from the character itself.
+##   For characters of ASCII code 1-8, 11-31, there are two characters "^A" to "^_".
+##   For ASCII code 9 (TAB), it is a series of blank spaces (depending on the terminal settings).
+##   For ASCII code 127 (DEL), the two-character expression is "^?".
+##   Normally, you can just use the value stored in _ble_highlight_layer_plain_buff, so
+##   You do not need to take these "<display character>" details into account.
 ##
 ## @fn ble/highlight/layer:<layerName>/update text player
-##   _ble_highlight_layer_<layerName>_buff の内容を更新します。
+##   Update the contents of _ble_highlight_layer_<layerName>_buff.
 ##
 ##   @param[in]     text
 ##   @var  [in]     DMIN DMAX DMAX0
-##     第一引数 text には現在の編集文字列が指定されます。
-##     シェル変数 DMIN DMAX DMAX0 には前回の呼出の後の編集文字列の変更位置が指定されます。
-##     DMIN<0 の時は前回の呼出から text が変わっていない事を表します。
-##     DMIN>=0 の時は、現在の text の DMIN から DMAX までが変更された部分になります。
-##     DMAX0 は、DMAX の編集前の対応位置を表します。幾つか例を挙げます:
-##     - aaaa の 境界2 に挿入があって aaxxaa となった場合、DMIN DMAX DMAX0 は 2 4 2 となります。
-##     - aaxxaa から xx を削除して aaaa になった場合、DMIN DMAX DMAX0 はそれぞれ 2 2 4 となります。
-##     - aaxxaa が aayyyaa となった場合 DMIN DMAX DMAX0 は 2 5 4 となります。
-##     - aaxxaa が aazzaa となった場合 DMIN DMAX DMAX0 は 2 4 4 となります。
+##     The first argument text specifies the current editing string.
+##     The shell variables DMIN DMAX DMAX0 specify the change position in the edit string since the previous invocation.
+##     When DMIN<0, it means that text has not changed since the last call.
+##     When DMIN>=0, the part of the current text from DMIN to DMAX will be changed.
+##     DMAX0 represents the corresponding position of DMAX before editing. Here are some examples:
+##     - If there is an insertion on boundary 2 of aaaa, resulting in aaxxaa, DMIN DMAX DMAX0 will be 2 4 2.
+##     - If you remove xx from aaxxaa to become aaaa, DMIN DMAX DMAX0 will be 2 2 4 respectively.
+##     - If aaxxaa becomes aayyyaa, DMIN DMAX DMAX0 becomes 2 5 4.
+##     - If aaxxaa becomes aazzaa, DMIN DMAX DMAX0 becomes 2 4 4.
 ##
 ##   @param[in]     player
 ##   @var  [in,out] LAYER_UMIN (unused)
@@ -1680,25 +1680,25 @@ function ble/highlight/layer/getg {
 ##   @param[in]     PREV_BUFF
 ##   @var  [in,out] PREV_UMIN
 ##   @var  [in,out] PREV_UMAX
-##     player には現在のレイヤーの一つ下にあるレイヤーの名前が指定されます。
-##     通常 _ble_highlight_layer_<layerName>_buff は
-##     _ble_highlight_layer_<player>_buff の値を上書きする形で実装します。
-##     LAYER_UMIN, LAYER_UMAX は _ble_highlight_layer_<player>_buff において、
-##     前回の呼び出し以来、変更のあった範囲が指定されます。
+##     player specifies the name of the layer one level below the current layer.
+##     Usually _ble_highlight_layer_<layerName>_buff is
+##     Implement it by overwriting the value of _ble_highlight_layer_<player>_buff.
+## LAYER_UMIN, LAYER_UMAX are in _ble_highlight_layer_<player>_buff,
+##     Specifies the range that has changed since the last call.
 ##
 ##   @param[in,out] _ble_highlight_layer_<layerName>_buff
-##     前回の呼出の時の状態で関数が呼び出されます。
-##     DMIN DMAX DMAX0, LAYER_UMIN, LAYER_UMAX を元に
-##     前回から描画属性の変化がない部分については、
-##     呼出時に入っている値を再利用する事ができます。
-##     ble/highlight/layer/update/shift 関数も参照して下さい。
+##     The function is called in the state it was in when it was last called.
+##     Based on DMIN DMAX DMAX0, LAYER_UMIN, LAYER_UMAX
+##     For areas where the drawing attributes have not changed since the last time,
+##     It is possible to reuse the value contained at the time of the call.
+##     See also the ble/highlight/layer/update/shift function.
 ##
 ## @fn ble/highlight/layer:<layerName>/getg index
-##   指定した index に対応する描画属性の値を g 値で取得します。
-##   前回の ble/highlight/layer:<layerName>/update の呼出に基づく描画属性です。
+##   Gets the value of the drawing attribute corresponding to the specified index as a g value.
+##   Drawing attributes based on the previous call to ble/highlight/layer:<layerName>/update.
 ##   @var[out] g
-##     結果は変数 g に設定する事によって返します。
-##     より下層のレイヤーの値を引き継ぐ場合には空文字列を設定します: g=
+##     The result is returned by setting it to the variable g.
+##     Set an empty string to inherit values from lower layers: g=
 ##
 
 #------------------------------------------------------------------------------
@@ -1778,12 +1778,12 @@ function ble/highlight/layer:{selection}/declare {
 }
 
 ## @fn ble/highlight/layer:{selection}/initialize-vars layer_name
-##   レイヤーで内部使用する配列を初期化します。
+##   Initializes an array for internal use by the layer.
 ##   @arr[out] _ble_highlight_layer_<layer_name>_buff
 ##   @arr[out] _ble_highlight_layer_<layer_name>_osel
-##     前回の選択範囲の端点を保持する配列です。
+##     An array that holds the endpoints of the previous selection.
 ##   @arr[out] _ble_highlight_layer_<layer_name>_ogflags
-##     前回の選択範囲の着色を保持します。
+##     Retains the previous selection coloring.
 ##
 function ble/highlight/layer:{selection}/initialize-vars {
   local layer_name=$1
@@ -1863,7 +1863,7 @@ function ble/highlight/layer:{selection}/update {
   fi
   local rlen=${#sel[@]}
 
-  # 変更がない時はそのまま通過
+  # Pass as is if there are no changes
   if ((DMIN<0&&(PREV_UMIN<0||rlen>=2&&sel[0]<=PREV_UMIN&&PREV_UMAX<=sel[1]))); then
     if [[ ${sel[*]} == "${osel[*]}" && ${gflags[*]} == "${ogflags[*]}" ]]; then
       [[ ${sel[*]} ]] && PREV_BUFF=${layer_prefix}buff
@@ -1875,11 +1875,11 @@ function ble/highlight/layer:{selection}/update {
 
   local umin=-1 umax=-1
   if ((rlen)); then
-    # 選択範囲がある時
+    # When there is a selection range
     local rmin=${sel[0]}
     local rmax=${sel[rlen-1]}
 
-    # 描画文字配列の更新
+    # Update drawing character array
     local -a buff=()
     local g ret
     local k=0 inext iprev=0
@@ -1904,12 +1904,12 @@ function ble/highlight/layer:{selection}/update {
     builtin eval -- "${layer_prefix}buff=(${buff[*]})"
     PREV_BUFF=${layer_prefix}buff
 
-    # (Dirty range 1) DMIN-DMAX の間
+    # (Dirty range 1) Between DMIN-DMAX
     if ((DMIN>=0)); then
       ble/highlight/layer:{selection}/.invalidate "$DMIN" "$DMAX"
     fi
 
-    # (Dirty range 2) 選択範囲の変更
+    # (Dirty range 2) Change selection range
     if ((olen==2&&rlen==2)); then
       # Optimized code for the case where both osel and sel are single
       # selections (i.e., the next `if ((omin>=0))` branch is general and
@@ -1920,11 +1920,11 @@ function ble/highlight/layer:{selection}/update {
       # these are semantically different when multiple ranges would be managed
       # by `.invalidate`.
       if [[ ${gflags[0]} != "${ogflags[0]}" ]]; then
-        # 色が変化する場合
+        # If the color changes
         ble/highlight/layer:{selection}/.invalidate "$omin" "$omax"
         ble/highlight/layer:{selection}/.invalidate "$rmin" "$rmax"
       else
-        # 端点の移動による再描画
+        # Redrawing by moving endpoints
         ble/highlight/layer:{selection}/.invalidate "$omin" "$rmin"
         ble/highlight/layer:{selection}/.invalidate "$omax" "$rmax"
       fi
@@ -1967,11 +1967,11 @@ function ble/highlight/layer:{selection}/update {
         break
       done
     else
-      # 新規選択
+      # New selection
       ble/highlight/layer:{selection}/.invalidate "$rmin" "$rmax"
     fi
 
-    # (Dirty range 3) 下層の変更 (rmin ～ rmax は表には反映されない)
+    # (Dirty range 3) Lower layer changes (rmin to rmax are not reflected in the table)
     local pmin=$PREV_UMIN pmax=$PREV_UMAX
     if ((rlen==2)); then
       # Optimized code for the single-selection case (i.e., the next `if
@@ -1980,7 +1980,7 @@ function ble/highlight/layer:{selection}/update {
       ((rmin<=pmin&&pmin<rmax&&(pmin=rmax),
         rmin<pmax&&pmax<=rmax&&(pmax=rmin)))
     elif ((rlen)); then
-      # この層の選択範囲で隠されている部分は省略可能
+      # Parts hidden by this layer's selection can be omitted.
       local k
       for ((k=0;k<rlen;k+=2)); do
         if ((pmin<sel[k])); then
@@ -2000,12 +2000,12 @@ function ble/highlight/layer:{selection}/update {
     fi
     ble/highlight/layer:{selection}/.invalidate "$pmin" "$pmax"
   else
-    # 選択範囲がない時
+    # When there is no selection range
 
-    # 下層の変更
+    # Lower layer changes
     umin=$PREV_UMIN umax=$PREV_UMAX
 
-    # 選択解除の範囲
+    # Range of deselection
     ble/highlight/layer:{selection}/.invalidate "$omin" "$omax"
   fi
 
@@ -2071,18 +2071,18 @@ blehook color_defface_load+=ble/color/defface.onload
 ## @arr _ble_highlight_layer_region_buff
 ##
 ## @arr _ble_highlight_layer_region_osel
-##   前回の選択範囲の端点を保持する配列です。
+##   An array that holds the endpoints of the previous selection.
 ##
 ## @var _ble_highlight_layer_region_ogflags
-##   前回の選択範囲の着色を保持します。
+##   Retains the previous selection coloring.
 ##
 ble/highlight/layer:{selection}/declare region
 
 function ble/highlight/layer:region/update {
   local -a sel=() gflags=()
   if [[ $_ble_edit_mark_active ]]; then
-    # 外部定義の選択範囲があるか確認
-    #   vi-mode のビジュアルモード (文字選択、行選択、矩形選択) の実装で使用する。
+    # Check if there is an externally defined selection range
+    #   Used to implement vi-mode's visual mode (character selection, line selection, rectangle selection).
     local -a selection=()
     if ! ble/function#try ble/highlight/layer:region/mark:"$_ble_edit_mark_active"/get-selection; then
       if ((_ble_edit_mark>_ble_edit_ind)); then
@@ -2095,7 +2095,7 @@ function ble/highlight/layer:region/update {
     sel=("${selection[@]}")
     local nsel=$((${#sel[@]}/2))
 
-    # gflags の決定
+    # Determining gflags
     local face=region
     ble/function#try ble/highlight/layer:region/mark:"$_ble_edit_mark_active"/get-face
     face=("${face[@]::nsel}")
@@ -2189,19 +2189,19 @@ function ble/highlight/layer:overwrite_mode/update {
 
       local g ret
 
-      # PREV_BUFF の内容をロード
+      # Load the contents of PREV_BUFF
       if ((PREV_UMIN<0&&oindex>=0)); then
-        # 前回の結果が残っている場合
+        # If previous results remain
         ble/highlight/layer/update/getg "$oindex"
         ble/color/g2sgr "$g"
         _ble_highlight_layer_overwrite_mode_buff[oindex]=$ret${_ble_highlight_layer_plain_buff[oindex]}
       else
-        # コピーした方が速い場合
+        # If it is faster to copy
         builtin eval "_ble_highlight_layer_overwrite_mode_buff=(\"\${$PREV_BUFF[@]}\")"
       fi
       PREV_BUFF=_ble_highlight_layer_overwrite_mode_buff
 
-      # 1文字着色
+      # 1 character coloring
       # ble/highlight/layer/update/getg "$index"
       # ((g^=_ble_color_gflags_Revert))
       ble/color/face2g overwrite_mode

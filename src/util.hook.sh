@@ -281,7 +281,7 @@ function blehook/invoke {
     blehook/invoke.sandbox "$@" || _ble_local_ext=$?
   done
   return "$_ble_local_ext"
-} 3>&2 2>/dev/null # set -x 対策 #D0930
+} 3>&2 2>/dev/null # set -x solution #D0930
 function blehook/eval-after-load {
   local hook_name=${1}_load value=$2
   if ((_ble_hook_c_$hook_name)); then
@@ -294,7 +294,7 @@ function blehook/eval-after-load {
 #------------------------------------------------------------------------------
 # blehook
 
-_ble_builtin_trap_inside=  # ble/builtin/trap 処理中かどうか
+_ble_builtin_trap_inside=  # Whether ble/builtin/trap is being processed
 
 ## @fn ble/builtin/trap/.read-arguments args...
 ##   @var[out] flags
@@ -434,11 +434,11 @@ _ble_builtin_trap_handlers=()
 _ble_builtin_trap_handlers_RETURN=()
 ## @fn ble/builtin/trap/user-handler#load sig
 ##   @param[in] sig
-##     トラップ番号を指定します。
+##     Specify the trap number.
 ##   @var[out] _ble_trap_handler
-##     ユーザートラップを格納します。
+##     Stores user traps.
 ##   @exit
-##     ユーザートラップが設定されている時に 0 を返します。
+##     Returns 0 when user trap is set.
 function ble/builtin/trap/user-handler#load {
   local sig=$1 name=${_ble_builtin_trap_sig_name[$1]}
   if [[ $name == RETURN ]]; then
@@ -449,13 +449,13 @@ function ble/builtin/trap/user-handler#load {
   fi
 }
 ## @fn ble/builtin/trap/user-handler#save sig handler
-##   指定したトラップに対するハンドラーを記録します。
+##   Records the handler for the specified trap.
 ##   @param[in] sig handler
-##     トラップ番号を指定します。
+##     Specify the trap number.
 ##   @var[out] _ble_trap_handler
-##     ユーザートラップを格納します。
+##     Stores user traps.
 ##   @exit
-##     ユーザートラップが設定されている時に 0 を返します。
+##     Returns 0 when user trap is set.
 function ble/builtin/trap/user-handler#save {
   local sig=$1 name=${_ble_builtin_trap_sig_name[$1]} handler=$2
   if [[ $name == RETURN ]]; then
@@ -506,7 +506,7 @@ function ble/builtin/trap/user-handler#save:RETURN {
   return 0
 }
 function ble/builtin/trap/user-handler#load:RETURN {
-  # この関数の呼び出し文脈・handler 探索開始関数レベルの決定
+  # Determining the calling context/handler search start function level for this function
   local offset= in_trap=
   for ((offset=1;offset<${#FUNCNAME[@]};offset++)); do
     case ${FUNCNAME[offset]} in
@@ -530,7 +530,7 @@ function ble/builtin/trap/user-handler#load:RETURN {
     search_level=$((${#FUNCNAME[@]}-offset))
   fi
 
-  # search_level 以降の最大 index に記録されている handler を取得
+  # Get handler recorded at maximum index after search_level
   local level found= handler=
   for level in "${!_ble_builtin_trap_handlers_RETURN[@]}"; do
     ((level>=search_level)) || continue
@@ -541,22 +541,22 @@ function ble/builtin/trap/user-handler#load:RETURN {
   [[ $found ]]
 }
 ## @fn ble/builtin/trap/user-handler#update:RETURN
-##   関数が戻る時に呼び出して RETURN トラップの呼び出し元への継承を実行します。
-##   この関数は ble/builtin/trap/.handler から呼び出される事を想定しています。
+##   Call when the function returns to perform inheritance of the RETURN trap to the caller.
+##   This function is expected to be called from ble/builtin/trap/.handler.
 function ble/builtin/trap/user-handler#update:RETURN {
-  # この関数の呼び出し文脈の取得
-  local offset=2 # ... ble/builtin/trap/.handler から直接呼び出されると仮定
+  # Get the calling context of this function
+  local offset=2 # ...assumed to be called directly from ble/builtin/trap/.handler
   local current_level=$((${#FUNCNAME[@]}-offset))
   ((current_level>0)) || return 0
 
-  # current_level 以降の最大 index に記録されている handler を取得
+  # Get handler recorded at maximum index after current_level
   local level found= handler=
   for level in "${!_ble_builtin_trap_handlers_RETURN[@]}"; do
     ((level>=current_level)) || continue
     found=1 handler=${_ble_builtin_trap_handlers_RETURN[level]}
 
-    # 自身及びそれ以下のレベルに記録した handler は削除する。見つかった handler
-    # は後でひとつ上のレベルにコピーする。
+    # Handlers recorded at the level itself and lower levels are deleted. Found handler
+    # will later be copied one level higher.
     if ((level>=current_level)); then
       builtin unset -v '_ble_builtin_trap_handlers_RETURN[level]'
     fi
@@ -577,7 +577,7 @@ function ble/builtin/trap/user-handler#init {
 function ble/builtin/trap/user-handler/is-internal {
   case $1 in
   ('ble/builtin/trap/'*) return 0 ;; # ble-0.4
-  ('ble/base/unload'*|'ble-edit/'*) return 0 ;; # bash-0.3 以前
+  ('ble/base/unload'*|'ble-edit/'*) return 0 ;; # bash-0.3 and earlier
   (*) return 1 ;;
   esac
 }
@@ -591,10 +591,10 @@ function ble/builtin/trap/finalize {
     local opts=${_ble_builtin_trap_sig_opts[sig]}
     [[ $name && :$opts: == *:override-builtin-signal:* ]] || continue
 
-    # Note (#D2021): reload の為に一旦設定を復元する時は readline によ
-    # る WINCH trap を破壊しない様に WINCH だけはそのままにして置く。
-    # 元々のユーザートラップは _ble_builtin_trap_handlers_reload に記
-    # 録し、後の ble/builtin/trap/install-hook で読み取る。
+    # Note (#D2021): When restoring settings for reload, use readline.
+    # Leave the WINCH alone so as not to destroy the WINCH trap.
+    # The original user trap was recorded in _ble_builtin_trap_handlers_reload.
+    # and read it later with ble/builtin/trap/install-hook.
     if [[ :$opts: == *:readline:* && :$unload_opts: == *:reload:* ]]; then
       if local _ble_trap_handler; ble/builtin/trap/user-handler#load "$sig"; then
         local q=\' Q="'\''"
@@ -682,39 +682,39 @@ function ble/builtin/trap {
         if ble/is-function "$custom_trap"; then
           trap_command='"$custom_trap" "$command" "$spec"'
         elif [[ :$install_opts: == *:readline:* ]] && ! ble/util/is-running-in-subshell; then
-          # Note (#D1345 #D1862): readline 介入を破壊しない為に親シェル内部では
-          # builtin trap 再設定はしない。
+          # Note (#D1345 #D1862): In order not to destroy readline intervention, inside the parent shell
+          # builtin trap Does not need to be reconfigured.
           trap_command=
         elif [[ $command == - ]]; then
           if [[ :$install_opts: == *:inactive:* ]]; then
-            # Note #D1858: 単に ble/builtin/trap/.handler 経由で処理する trap の場合。
-            # trap を解除する時にはそのまま解除して良い。
+            # Note #D1858: For traps simply handled via ble/builtin/trap/.handler.
+            # When you want to release a trap, you can just do so.
             trap_command='builtin trap - "$spec"'
           else
-            # Note #D1858: 内部処理の為に trap は常設しているので、trap の削除
-            # はしない。だからと言って改めて内部処理の為のコマンドを登録する訳
-            # でもない (特に subshell の中で改めて実行したい訳でもなければ)。
+            # Note #D1858: Trap is permanently installed for internal processing, so delete trap.
+            # I don't. That's why I have to register commands for internal processing again.
+            # No (especially if you don't want to run it again in a subshell).
             trap_command=
           fi
         elif [[ :$install_opts: == *:override-builtin-signal:* ]]; then
-          # Note #D1862: 内部処理の為に trap を常設していたとしても EXIT 等の
-          # 様に subshell に継承されない trap があるので毎回明示的に builtin
-          # trap を実行する。
+          # Note #D1862: Even if trap is permanently installed for internal processing, EXIT etc.
+          # Like this, there are traps that are not inherited by subshell, so you need to explicitly buildin them every time.
+          # Execute trap.
           ble/builtin/trap/install-hook/.compose-trap_command "$sig"
           trap_command="builtin $trap_command"
         else
-          # ble/builtin/trap/{.register,reserve} で登録したカスタム trap の場合
-          # は builtin trap 関係の操作は何もしない。発火の制御に関しては
-          # ble/builtin/trap/invoke を適切な場所で呼び出す様に実装するべき。
+          # For custom traps registered with ble/builtin/trap/{.register,reserve}
+          # does not perform any builtin trap related operations. Regarding control of ignition
+          # You should implement it so that ble/builtin/trap/invoke is called at the appropriate place.
           trap_command=
         fi
       fi
 
       if [[ $trap_command ]]; then
-        # Note #D1858: set -E (-o errtrace) が設定されていない限り、関数の中か
-        # ら trap ERR を削除する事はできない。仕方がないので空の command を
-        # trap として設定する事にする。元々 trap ERR が設定されていない時の動作
-        # は「何もしない」なので空文字列で問題ないはず。
+        # Note #D1858: Unless set -E (-o errtrace) is set,
+        # trap ERR cannot be deleted. I have no choice but to create an empty command.
+        # Let's set it as a trap. Operation when trap ERR is not originally set
+        # does not do anything, so there should be no problem with an empty string.
         if [[ $name == ERR && $command == - && $- != *E* ]]; then
           command=
         fi
@@ -739,25 +739,25 @@ function ble/builtin/trap/.TRAPRETURN {
   local IFS=$_ble_term_IFS
   local backtrace=" ${BLE_TRAP_FUNCNAME[*]-} "
   case $backtrace in
-  # 呼び出し元が RETURN trap の設置に用いた trap の時は RETURN は無視する。それ
-  # 以外の trap 呼び出しについても無視して良い。
+  # RETURN is ignored if the caller used the trap to set the RETURN trap. it
+  # You can also ignore other trap calls.
   (' trap '* | ' ble/builtin/trap '*) return 126 ;;
-  # ble/builtin/trap/.handler 内部処理に対する RETURN は無視するが、
-  # ble/builtin/trap/.handler から更に呼び出された blehook / trap_string の中で
-  # 呼び出されている関数については RETURN を発火させる。
+  # ble/builtin/trap/.handler Ignores RETURN for internal processing, but
+  # In blehook / trap_string which is further called from ble/builtin/trap/.handler
+  # Fires RETURN for the function being called.
   (*' ble/builtin/trap/.handler '*)
     case ${backtrace%%' ble/builtin/trap/.handler '*}' ' in
     (' '*' blehook/invoke.sandbox '* | ' '*' ble/builtin/trap/invoke.sandbox '*) ;;
     (*) return 126 ;;
     esac ;;
-  # 待避処理をしていないユーザーコマンド実行後に呼び出される関数達。
+  # Functions that are called after executing a user command that has not been saved.
   (*' _ble_edit_exec_gexec__save_lastarg ' | ' _ble_edit_exec_gexec__TRAPDEBUG_adjust ') return 126 ;;
   esac
   return 0
 }
 blehook internal_RETURN!=ble/builtin/trap/.TRAPRETURN
 
-# user trap handler 専用の $?, $_ の記録。
+# Record of $?, $_ exclusively for user trap handler.
 _ble_builtin_trap_user_lastcmd=
 _ble_builtin_trap_user_lastarg=
 _ble_builtin_trap_user_lastexit=
@@ -772,9 +772,9 @@ function ble/builtin/trap/invoke.sandbox {
   for ((_ble_trap_count=0;_ble_trap_count<1;_ble_trap_count++)); do
     local BASH_TRAPSIG=$_ble_trap_sig
     _ble_trap_done=return
-    # Note #D1757: そのまま制御を変更せずに trap handler の実行が終わっ
-    # た時は $? $_ を保存する。同じ eval の中でないと $_ が eval を抜
-    # けた時に eval の最終引数に置き換えられてしまう事に注意する。
+    # Note #D1757: If trap handler finishes executing without changing control,
+    # When $? $_ is saved. If they are not in the same eval, $_ will overtake the eval.
+    # Note that it will be replaced by the final argument of eval when the value is reached.
     ble/util/setexit "$_ble_trap_lastexit" "$_ble_trap_lastarg"
     builtin eval -- "$_ble_trap_handler"$'\n_ble_trap_lastexit=$? _ble_trap_lastarg=$_' 2>&3
     _ble_trap_done=done
@@ -782,7 +782,7 @@ function ble/builtin/trap/invoke.sandbox {
   done
   _ble_trap_lastexit=$? _ble_trap_lastarg=$_
 
-  # break/continue 検出
+  # break/continue detection
   if ((_ble_trap_count==0)); then
     _ble_trap_done=break
   else
@@ -834,22 +834,22 @@ function ble/builtin/trap/invoke {
       _ble_builtin_trap_postproc[_ble_trap_sig]=$_ble_trap_done
     fi ;;
   (return)
-    # Note #D1757: return 自体の lastarg は最早取得できないが、もし
-    # 仮に直接 builtin trap で実行されたとしても、return で関数を抜
-    # けた時に lastarg は書き換えられるので取得できない。精々関数を
-    # 呼び出す前の lastarg を設定して置いて return が失敗した時に前
-    # の状態を keep するぐらいしかない気がする。
+    # Note #D1757: The lastarg of return itself is no longer available, but if
+    # Even if it is executed directly with builtin trap, the function can be extracted with return.
+    # Since lastarg is rewritten when the digit is reached, it cannot be retrieved. function at best
+    # Set lastarg before the call and set it before return when return fails.
+    # I feel like the only option is to keep the state of .
     _ble_builtin_trap_lastarg[_ble_trap_sig]=$ext
     _ble_builtin_trap_postproc[_ble_trap_sig]="return $ext" ;;
   (exit)
-    # Note #D1782: trap handler の中で ble/builtin/exit (edit.sh) を呼
-    #   び出した時は、即座に bash を終了せずに取り敢えずは trap の処理
-    #   は完了させる。TRAPDEBUGによって _ble_trap_done=exit が設定され
-    #   る。また、元々 exit に渡された引数は $_ble_trap_lastarg に設定
-    #   される。
-    # Note #D1782: 他の trap の中で更にまた DEBUG trap が起動している
-    #   時などの為に、builtin exit ではなく ble/builtin/exit を再度呼
-    #   び出し直す。
+    # Note #D1782: Call ble/builtin/exit (edit.sh) in trap handler.
+    #   When a trap occurs, instead of immediately exiting bash, process the trap for the time being.
+    #   is completed. _ble_trap_done=exit is set by TRAPDEBUG
+    #   Ru. Also, the argument originally passed to exit is set to $_ble_trap_lastarg
+    #   be done.
+    # Note #D1782: Another DEBUG trap is activated among other traps.
+    #   call ble/builtin/exit again instead of builtin exit
+    #   Start again.
     _ble_builtin_trap_lastarg[_ble_trap_sig]=$_ble_trap_lastarg
     _ble_builtin_trap_postproc[_ble_trap_sig]="ble/builtin/exit $_ble_trap_lastarg" ;;
   esac
@@ -861,20 +861,20 @@ function ble/builtin/trap/invoke {
   fi
 
   return 0
-} 3>&2 2>/dev/null # set -x 対策 #D0930
+} 3>&2 2>/dev/null # set -x solution #D0930
 
 ## @var _ble_builtin_trap_processing
-##   ble/builtin/trap/.handler 実行中かどうかを表すローカル変数です。
-##   以下の二つの形式の内のどちらかを取ります。
+##   ble/builtin/trap/.handler A local variable that indicates whether it is running or not.
+##   It takes one of the following two formats.
 ##
 ##   SUBSHELL/SIG
-##     SUBSHELL は trap 処理の実行元のサブシェルの深さ (呼び出し元にお
-##     ける BASH_SUBSHELL の値) を記録します。SIG はシグナルを表す整数
-##     値です。
+##     SUBSHELL is the depth of the subshell from which the trap processing is performed (
+##     BASH_SUBSHELL value). SIG is an integer representing the signal
+##     Value.
 ##
 ##   SUBSHELL/exit:EXIT
-##     EXIT は ble/builtin/exit に渡された終了ステータスで、これは最終
-##     的な exit で使われる終了ステータスです。
+##     EXIT is the exit status passed to ble/builtin/exit, which is the final
+##     This is the exit status used for standard exits.
 ##
 _ble_builtin_trap_processing=
 _ble_builtin_trap_postproc=()
@@ -902,14 +902,14 @@ function ble/builtin/trap/.handler {
   local _ble_trap_sig=$1 _ble_trap_bash_command=$2
   shift 2
 
-  # Note: bash-5.2 では read -t の最中に WINCH が来るとその場で発火して変なこと
-  #   が色々起こる。(1) 内部で ble/util/msleep を実行しようとすると外側の
-  #   timeout 設定が削除されて、外側の read -t が永遠に終わらない状態になる。特
-  #   に msleep では終端しないストリームから読み出そうとするのでデッドロックす
-  #   る。(2) 中でコマンド置換 $() や mapfile を使おうとすると、
-  #   run_pending_trap (trap.c) が途中で予期せず中断してしまって running_trap
-  #   が放置された状態になる。trap 処理入れ子状態になってしまってずっと WINCH
-  #   を受信できない状態になってしまう。
+  # Note: In bash-5.2, if WINCH comes during read -t, it fires on the spot and something strange happens.
+  #   A lot of things happen. (1) When I try to run ble/util/msleep inside, the outside
+  #   The timeout setting is removed, causing the outer read -t to never finish. Special
+  #   msleep tries to read from a stream that never terminates, which can lead to deadlocks.
+  #   Ru. (2) If you try to use command substitution $() or mapfile in
+  #   run_pending_trap (trap.c) was unexpectedly interrupted midway and running_trap
+  #   becomes abandoned. WINCH keeps trap processing nested
+  #   It becomes impossible to receive.
   if [[ $_ble_bash_read_winch && ${_ble_builtin_trap_sig_name[_ble_trap_sig]} == SIGWINCH ]]; then
     local ret
     ble/string#quote-command "$FUNCNAME" "$_ble_trap_sig" "$_ble_trap_bash_command" "$@"
@@ -930,9 +930,9 @@ function ble/builtin/trap/.handler {
   local _ble_trap_name=${_ble_builtin_trap_sig_name[_ble_trap_sig]#SIG}
   local -a _ble_trap_args; _ble_trap_args=("$@")
   if [[ ! $_ble_trap_bash_command ]] || ((_ble_bash<30200)); then
-    # Note: Bash 3.0, 3.1 は trap 中でも BASH_COMMAND は trap 発動対象ではなく
-    # て現在実行中のコマンドになっている。_ble_trap_bash_command には単に
-    # ble/builtin/trap/.handler が入っているので別の適当な値で置き換える。
+    # Note: Bash 3.0 and 3.1 have traps, but BASH_COMMAND is not a trap target.
+    # is the command currently being executed. _ble_trap_bash_command simply has
+    # ble/builtin/trap/.handler is included, so replace it with another appropriate value.
     if [[ $_ble_attached ]]; then
       _ble_trap_bash_command=$_ble_edit_exec_BASH_COMMAND
     else
@@ -945,15 +945,15 @@ function ble/builtin/trap/.handler {
   _ble_builtin_trap_lastarg[_ble_trap_sig]=$_ble_trap_lastarg
   _ble_builtin_trap_postproc[_ble_trap_sig]="ble/util/setexit $_ble_trap_lastexit"
 
-  # Note #D1782: ble/builtin/exit で "builtin exit ... &>/dev/null" と
-  #   したリダイレクションを元に戻す。元々 builtin exit が出力するエラー
-  #   を無視する為のリダイレクトだが、続いて呼び出される EXIT trap に
-  #   対してもこのリダイレクションが有効なままになる (但し、
-  #   bash-4.4..5.1 ではバグで top-level まで制御を戻してから EXIT
-  #   trap 他の処理が実行されるので、EXIT trap は tty に繋がった状態で
-  #   実行される)。他の trap が予期せず呼び出された場合にも同様の事が
-  #   起こる。trap handler を exit を実行した文脈での stdout/stderr で
-  #   実行する為に、stdout/stderr を保存していた物に繋ぎ戻す。
+  # Note #D1782: "builtin exit ... &>/dev/null" in ble/builtin/exit
+  #   Undo the redirection. Error originally output by builtin exit
+  #   This is a redirect to ignore the EXIT trap that is subsequently called.
+  #   This redirection will remain in effect even for
+  #   In bash-4.4..5.1, due to a bug, EXIT after returning control to top-level
+  #   trap Other processing is executed, so EXIT trap is executed while connected to the tty.
+  #   executed). The same thing happens when other traps are called unexpectedly.
+  #   It happens. trap handler on stdout/stderr in the context of exit
+  #   To execute, connect stdout/stderr back to what was saved.
   if [[ $_ble_builtin_exit_processing ]]; then
     exec 1>&- 1>&"$_ble_builtin_exit_stdout"
     exec 2>&- 2>&"$_ble_builtin_exit_stderr"
@@ -984,7 +984,7 @@ function ble/builtin/trap/.handler {
     # user hook
     local install_opts=${_ble_builtin_trap_sig_opts[_ble_trap_sig]}
     if [[ :$install_opts: == *:user-trap-in-postproc:* ]]; then
-      # ユーザートラップを外で実行 (Note: user-trap lastarg は反映されず)
+      # Execute user trap outside (Note: user-trap lastarg is not reflected)
       local q=\' Q="'\''" _ble_trap_handler postproc=
       ble/builtin/trap/user-handler#load "$_ble_trap_sig"
       if [[ $_ble_trap_handler == *[!$_ble_term_IFS]* ]]; then
@@ -1001,26 +1001,26 @@ function ble/builtin/trap/.handler {
     fi
   fi
 
-  # 何処かの時点で exit が要求された場合
+  # If exit is requested at some point
   if [[ $_ble_builtin_trap_processing == */exit:* && ${_ble_builtin_trap_postproc[_ble_trap_sig]} != 'ble/builtin/exit '* ]]; then
     _ble_builtin_trap_postproc[_ble_trap_sig]="ble/builtin/exit ${_ble_builtin_trap_processing#*/exit:}"
   fi
 
-  # Note #D1757: 現在 eval が終わった後の $_ を設定する為には eval に
-  # '#' "$lastarg" を余分に渡すしかないので改行を含める事はできない。
-  # 中途半端な値を設定するよりは最初から何も設定しない事にする。ここ設
-  # 定する lastarg は一見して誰も使わない様な気がするが、裸で設定され
-  # た user trap が参照するかもしれないので一応設定する。
+  # Note #D1757: Currently, to set $_ after eval is
+  # '#' The only option is to pass an extra "$lastarg", so line breaks cannot be included.
+  # Rather than setting a halfway value, it is better not to set anything from the beginning. Set here
+  # At first glance, it seems that no one uses lastarg, but it is set bare.
+  # Since the user trap may refer to it, set it just in case.
   [[ ${_ble_builtin_trap_lastarg[_ble_trap_sig]} == *$'\n'* ]] &&
     _ble_builtin_trap_lastarg[_ble_trap_sig]=
 
   if ((_ble_trap_sig==_ble_builtin_trap_EXIT)); then
-    # Note #D1797: EXIT に対する ble/base/unload は trap handler のできるだけ最
-    # 後に実行する。勝手に削除されても困るし、他の handler が ble.sh の機能を使っ
-    # た時に問題が起こらない様にする為。
+    # Note #D1797: ble/base/unload for EXIT is the lowest possible trap handler.
+    # Execute later. It would be a problem if it were deleted without permission, and if another handler uses the ble.sh function.
+    # To prevent problems from occurring when
     ble/base/unload EXIT
   elif ((_ble_trap_sig==_ble_builtin_trap_RETURN)); then
-    # Note #D1863: RETURN trap の呼び出し元への継承処理を実行する。
+    # Note #D1863: Perform inheritance processing to the caller of RETURN trap.
     ble/builtin/trap/user-handler#update:RETURN
   fi
 
@@ -1029,13 +1029,13 @@ function ble/builtin/trap/.handler {
 
 ## @fn ble/builtin/trap/install-hook sig [opts]
 ##   @param[in] sig
-##     シグナル名、もしくは番号
+##     signal name or number
 ##   @param[in,opt] opts
-##     readline readline による処理が追加されることが期待される trap handler で
-##              ある事を示します。既に設定済みのハンドラーが存在している場合に
-##              はハンドラーの再設定を行いません。
-##     inactive ユーザートラップが設定されていない時は builtin trap からハンド
-##              ラの登録を削除します。
+##     readline A trap handler that is expected to have additional processing by readline.
+##              indicates something. If there is already a configured handler
+##              does not reconfigure the handler.
+##     If no inactive user trap is set, hand from builtin trap.
+##              Delete the registration.
 function ble/builtin/trap/install-hook {
   local ret opts=${2-}
   ble/builtin/trap/sig#resolve "$1"
@@ -1046,28 +1046,28 @@ function ble/builtin/trap/install-hook {
   local trap_string; ble/util/assign trap_string "builtin trap -p $name"
 
   if [[ :$opts: == *:readline:* ]] && ! ble/util/is-running-in-subshell; then
-    # Note #D1345: ble.sh の内部で "builtin trap -- WINCH" 等とすると
-    # readline の処理が行われなくなってしまう (COLUMNS, LINES が更新さ
-    # れない)。
+    # Note #D1345: If you use "builtin trap -- WINCH" etc. inside ble.sh
+    # readline processing is no longer performed (COLUMNS, LINES are updated)
+    # ).
     #
-    # Bash では TSTP, TTIN, TTOU, INT, TERM, HUP, QUIT, WINCH について
-    # は readline が処理を追加している。builtin trap を実行すると、一旦
-    # は trap の設定した trap_handler が設定されるが、"コマンド実行後"
-    # に readline が rl_maybe_set_sighandler という関数を用いて上書きし
-    # てreadline 特有の処理を挿入する。ble.sh は readline の "コマンド
-    # 実行"を使わないので、readline による追加処理が消滅する。
+    # About TSTP, TTIN, TTOU, INT, TERM, HUP, QUIT, WINCH in Bash
+    # readline has added processing. Once you run builtin trap,
+    # The trap_handler set by trap is set, but "after command execution"
+    # readline uses a function called rl_maybe_set_sighandler to override
+    # Insert readline-specific processing. ble.sh is readline's "command
+    # Since "execute" is not used, additional processing by readline disappears.
     #
-    # 対策として、今から登録しようとしている文字列が既に登録されている
-    # 物と一致する場合には、builtin trap の呼び出しを省略する。
+    # As a countermeasure, if the character string you are about to register is already registered.
+    # If it matches, skip calling builtin trap.
     #
-    # - 現状では問題になっているのは WINCH だけなので取り敢えず WINCH
-    #   だけ対策をする。
-    # - INT は bind -x 内だと改めて設定しないと有効にならない(?)様なの
-    #   で既に登録されていても、builtin trap は省略できない。
+    # - Currently, WINCH is the only one that is a problem, so let's try WINCH for now.
+    #   Just take measures.
+    # - It seems that INT does not become effective (?) if it is set within bind -x unless it is set again.
+    #   Builtin trap cannot be omitted even if it is already registered in .
     #
     [[ $trap_command == "$trap_string" ]] && trap_command= trap_string=
 
-    # Note (#D2021): reload 時に元の trap が保存されていればそれを読み取る。
+    # Note (#D2021): If the original trap is saved when reloading, read it.
     [[ $trap_string ]] || trap_string=${_ble_builtin_trap_handlers_reload[sig]-}
   fi
 
@@ -1076,14 +1076,14 @@ function ble/builtin/trap/install-hook {
 
   local q=\'
   if [[ $trap_string == "trap -- '"* ]] && ! ble/builtin/trap/user-handler/is-internal "${trap_string#*$q}"; then
-    # Note: 1000 以上はデバグ用の trap (DEBUG, RETURN, EXIT) で既定では trapが
-    # 関数呼び出しで継承されないので、trap_string の内容は信用できない。
+    # Note: 1000 or more are traps for debugging (DEBUG, RETURN, EXIT), and traps are set by default.
+    # The contents of trap_string cannot be trusted because it is not inherited by function calls.
     ((sig<1000)) &&
-      # Note: 既存の handler がない時のみ設定を読み取る。既存の設定がある時は
-      # ble.sh をロードしてから trap が実行された事を意味する。一方で、ble.sh
-      # がロードされて以降に builtin trap の設定がユーザーによって直接変更され
-      # る事は想定していないので、builtin trap から読み取った結果は ble.sh ロー
-      # ド前と想定して良い。
+      # Note: Read configuration only if there is no existing handler. If there are existing settings
+      # This means that trap was executed after loading ble.sh. On the other hand, ble.sh
+      # If the builtin trap configuration has been changed directly by the user since it was loaded.
+      # The results read from the builtin trap are stored in the ble.sh row.
+      # You can assume that it is before.
       ! ble/builtin/trap/user-handler#has "$sig" &&
       builtin eval -- ble/builtin/"$trap_string"
   fi

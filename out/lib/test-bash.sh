@@ -4,12 +4,12 @@ ble-import lib/core-test
 
 ble/test/start-section 'bash' 117
 
-# case $word を quote する必要がある条件は?
+# Under what conditions does case $word need to be quoted?
 
-# 当然 bash の文法的に特別な意味がある文字を直接記述する時は quote が必要。word
-# splitting 及び pathname expansions は発生しない。$* や ${arr[*]} が含まれる場
-# 合は quote していてもしていなくても要素が IFS で連結されるので IFS には注意が
-# 必要。
+# Of course, quote is required when directly writing characters that have special meaning in bash's syntax. word
+# No splitting or pathname expansions occur. If $* or ${arr[*]} is included,
+# In this case, the elements are concatenated using IFS regardless of whether they are quoted or not, so be careful with IFS.
+# Necessary.
 (
   # word splitting does not happen
   a='x y'
@@ -54,7 +54,7 @@ ble/test/start-section 'bash' 117
 # Arithmetic bugs
 (
   # BUG bash 3.0..4.1
-  #   && の遅延評価が働かない。従って愚直な条件付き算術式再帰はできない。
+  #   Lazy evaluation of && doesn't work. Therefore, naive conditional arithmetic recursion is not possible.
   L='0&&L'
   if ((40200<=_ble_bash)); then
     ble/test '((L,1))'
@@ -74,8 +74,8 @@ ble/test/start-section 'bash' 117
 # Variable bugs
 (
   # BUG bash-3.1
-  #   a=(""); echo "a${a[*]}b" | cat -A とするとa^?b となって謎の文字が入る。
-  #   echo "a""${a[*]}""b" 等とすれば大丈夫。
+  #   a=(""); echo "a${a[*]}b" | cat -A will result in a^?b and a mysterious character will be inserted.
+  #   You can do something like echo "a""${a[*]}""b" etc.
   a=("")
   function f1 { ret=$1; }
   if ((30100<=_ble_bash&&_ble_bash<30200)); then
@@ -91,7 +91,7 @@ ble/test/start-section 'bash' 117
   fi
 
   # BUG bash-3.0..3.1
-  #   "${var//%d/123}" は動かない。"${var//'%d'/123}" 等とすればOK。
+  #   "${var//%d/123}" doesn't work. You can use something like "${var//'%d'/123}".
   var=X%dX%dX
   if ((_ble_bash<30200)); then
     ble/test code:'ret=${var//%d/.}' ret='X%dX%dX'
@@ -100,9 +100,9 @@ ble/test/start-section 'bash' 117
   fi
 
   # BUG bash-3.0..3.1
-  #   local GLOBIGNORE すると、関数を出てもパス名展開の時にその影響が残っている。
-  #   (直接変数の中身を見ても何もない様に見えるが。) unset GLOBIGNORE などとす
-  #   ると直る。
+  #   local GLOBIGNORE Then, even after exiting the function, the effect remains during pathname expansion.
+  #   (Even if you look at the contents of the variable directly, it looks like there is nothing.) With unset GLOBIGNORE etc.
+  #   It will be fixed.
   ble/test/chdir || exit
   touch {a..c}.txt
   function f1 { local GLOBIGNORE='*.txt'; }
@@ -113,10 +113,10 @@ ble/test/start-section 'bash' 117
   fi
 
   # BUG bash-3.0..3.1 (#D2221)
-  #   local POSIXLY_CORRECT すると、関数を出ても set -o posix が有効の儘になる。
-  #   変数は何も定義されていないが、[[ -o posix ]] や echo "$SHELLOPTS" や実際
-  #   の振る舞いで確認すると POSIX mode が有効になっている。unset -v
-  #   POSIXLY_CORRECT とすると直る。
+  #   local POSIXLY_CORRECT allows set -o posix to remain in effect even after exiting the function.
+  #   Although no variables are defined, [[ -o posix ]], echo "$SHELLOPTS", or actually
+  #   If you check the behavior, POSIX mode is enabled. unset -v
+  #   Setting POSIXLY_CORRECT fixes it.
   function f1 { local POSIXLY_CORRECT=y; builtin unset -v POSIXLY_CORRECT; }
   set +o posix
   if ((_ble_bash<30200)); then
@@ -129,8 +129,8 @@ ble/test/start-section 'bash' 117
   set +o posix
 
   # BUG bash-3.0..4.3 (#D2221)
-  #   関数内で local POSIXLY_CORRECT; unset -v POSIXLY_CORRECT とすると寧ろ
-  #   posix mode は有効になる。
+  #   local POSIXLY_CORRECT; unset -v POSIXLY_CORRECT in the function
+  #   posix mode is enabled.
   function f1 { local POSIXLY_CORRECT; builtin unset -v POSIXLY_CORRECT; [[ ! -o posix ]]; }
   if ((_ble_bash<40400)); then
     ble/test '! f1'
@@ -140,7 +140,7 @@ ble/test/start-section 'bash' 117
   set +o posix
 
   # COMPAT bash-5.3+ (#D2221)
-  #   Bash 5.3 以降ではスラッシュを名前に含む関数は POSIX mode で呼び出せない。
+  # In Bash 5.3 and later, functions with slashes in their names cannot be called in POSIX mode.
   function f1/sub { return 0; }
   if ((_ble_bash<50300)); then
     ble/test 'set -o posix; f1/sub; ret=$?; set +o posix' ret=0
@@ -149,21 +149,21 @@ ble/test/start-section 'bash' 117
   fi
 
   # BUG bash-3.0
-  #   ${#param} は文字数ではなくバイト数を返す、という事になっているらしいが、
-  #   実際に試してみると文字数になっている (bash-3.0.22)。何処かで patch が当たっ
-  #   たのだろうか → これは bash-3.0.4 で修正された様だ。
+  #   It seems that ${#param} is supposed to return the number of bytes rather than the number of characters, but
+  #   When I actually try it, it is the number of characters (bash-3.0.22). A patch hit somewhere.
+  #   → This seems to have been fixed in bash-3.0.4.
   #
-  #   (※${param:ofs:len} は 3.0-beta1 以降であれば文字数でカウントされる)
+  #   (*${param:ofs:len} is counted by the number of characters if it is 3.0-beta1 or later)
   if ((_ble_bash<30004)); then
-    ble/test code:'a=あ ret=${#a}' ret=3
+    ble/test code:'a=alpha ret=${#a}' ret=3
   else
-    ble/test code:'a=あ ret=${#a}' ret=1
+    ble/test code:'a=alpha ret=${#a}' ret=1
   fi
 
   # BUG bash-3.0
-  #   declare -p A で改行を含む変数を出力すると改行が消える。例: 一見正しく出力
-  #   されている様に錯覚するが "\ + 改行" は改行のエスケープではなく、長い文字
-  #   列リテラルを二行に書く為の記法である。つまり、無視される。
+  #   If you output a variable that includes a newline with declare -p A, the newline will disappear. Example: seemingly correct output
+  #   However, "\ + newline" is not an escape for a newline, but a long character.
+  #   This is a notation for writing column literals on two lines. In other words, it is ignored.
   #
   #   $ A=$'\n'; declare -p A
   #   | A="\
@@ -179,9 +179,9 @@ ble/test/start-section 'bash' 117
   fi
 
   # BUG bash-3.0 [Ref #D1774]
-  #   "${...#$'...'}" (#D1774) という形を使うと $'...' の展開結果が ... ではな
-  #   く '...'  の様に、余分な引用符が入ってしまう。extquote を設定しても結果は
-  #   変わらない。
+  #   When you use the form "${...#$'...'}" (#D1774), the expansion result of $'...' is not ...
+  #   There will be extra quotation marks, like '...'. Even if I set extquote, the result is
+  #   No change.
   builtin unset -v scalar
   if ((_ble_bash<30100)); then
     ble/test code:'ret="[${scalar-$'\''hello'\''}]"' ret="['hello']" # disable=#D1774
@@ -202,9 +202,9 @@ ble/test/start-section 'bash' 117
   }
 
   # BUG bash-4.2..5.1 [Ref #D2352]
-  #   a=(""); b=("${a[@]#$empty}") で要素が消滅する。これは以下の bash-4.2 のバ
-  #   グと同系統のバグであろう。また a=(x); b=("${a[@]#x}") でも要素が消滅する。
-  #   要素が二個以上存在する時は問題ない。
+  #   The element disappears with a=(""); b=("${a[@]#$empty}"). This is the bash-4.2 version below.
+  #   It's probably a bug of the same type as Google. Also, a=(x); b=("${a[@]#x}") also causes the element to disappear.
+  #   There is no problem when there are two or more elements.
   empty= nonempty=x
   if ((40200<=_ble_bash&&_ble_bash<50200)); then
     # bash-4.2..5.1 bug: the element vanish
@@ -229,13 +229,13 @@ ble/test/start-section 'bash' 117
   ble/test:bash/count-words '"${@#$nonempty}"'    "$bugD2352" 'x'
 
   # BUG bash-4.0..4.4 [Ref #D0924]
-  #   ローカルで local -a x; local -A x とすると segfault する。
+  #   Local -a x; local -A x will segfault.
   #   ref http://lists.gnu.org/archive/html/bug-bash/2019-02/msg00047.html,
-  #   f() { local -a a; local -A a; }; f # これで segfault する
+  #   f() { local -a a; local -A a; }; f # segfault with this
   #
-  #   - 別のスコープで定義された配列を -A とした場合には起こらない。
-  #   - 同じスコープの場合でも unset a してから local -A a すれば大丈夫。
-  #   - グローバルでは起こらない。
+  #   - Does not occur if -A is used for an array defined in another scope.
+  #   - Even if the scope is the same, you can unset a and then local -A a.
+  #   - Doesn't happen globally.
   function f1 { local -a a; local -A a; }
   if ((_ble_bash<40000)); then
     ble/test f1 exit=2
@@ -246,8 +246,8 @@ ble/test/start-section 'bash' 117
   fi
 
   # BUG bash-3.0..4.4
-  #   配列要素または $* を case 単語もしくは here strings で連結する時 IFS が "
-  #   " に置き換わる。
+  #   When concatenating array elements or $* with case words or here strings, IFS says "
+  #   " is replaced.
   c=(a b c)
   IFS=x
   if ((_ble_bash<50000)); then
@@ -263,12 +263,12 @@ ble/test/start-section 'bash' 117
   IFS=$' \t\n'
 
   # BUG bash-3.0 and 4.3 [Ref #D1570]
-  #   * "${var[@]/xxx/yyy}" (#D1570) はスカラー変数に対して空の結果を生む。
-  #     ${var[@]//xxx/yyy}, ${var[@]/%/yyy}, ${var[@]/#/yyy} (#D1570) について
-  #     も同様である。
-  #   * "${scalar[@]/xxxx}" (#D1570) は全て空になる。変数名が配列である事が保証
-  #     されている必要がある。
-  #   * bash-4.3 では \001 が各文字の前に追加されてしまうというバグが発生する。
+  #   * "${var[@]/xxx/yyy}" (#D1570) produces empty results for scalar variables.
+  #     About ${var[@]//xxx/yyy}, ${var[@]/%/yyy}, ${var[@]/#/yyy} (#D1570)
+  #     The same is true.
+  #   * "${scalar[@]/xxxx}" (#D1570) will be completely empty. Guaranteed that the variable name is an array
+  #     Must have been.
+  #   * bash-4.3 has a bug where \001 is added before each character.
   builtin unset -v scalar
   scalar=abcd
   if ((_ble_bash<30100)); then
@@ -283,9 +283,9 @@ ble/test/start-section 'bash' 117
   fi
 
   # BUG bash-4.2 [Ref #D2352]
-  #   a=(""); b=("${a[@]/#}") で要素が消滅する (disable=#D1570)。要素が二つ以上
-  #   ある時は問題ない。要素が非空文字列の時は問題ない。置換後の文字列が有限の
-  #   場合も問題ない。
+  #   a=(""); b=("${a[@]/#}") causes the element to disappear (disable=#D1570). two or more elements
+  #   Sometimes it's fine. There is no problem when the element is a non-empty string. If the string after replacement is finite
+  #   There is no problem in that case.
   empty= nonempty=1
   if ((40200<=_ble_bash&&_ble_bash<40300)); then
     # bash-4.2..5.1 bug: the element vanish
@@ -332,12 +332,12 @@ ble/test/start-section 'bash' 117
   ble/test:bash/count-words '"${@/#/$nonempty}"'    2           '' '' # disable=#D1570,#D1738
 
   # BUG bash-3.0..4.2
-  #   配列要素を代入右辺で連結する時 IFS が " " に置き換わる。
-  #   動く例:
+  #   When concatenating array elements on the right side of an assignment, IFS is replaced with " ".
+  #   Working example:
   #     IFS= eval 'value=${arr[*]}'
   #     IFS= eval 'value="${arr[*]}"'
   #     IFS= eval 'local value="${arr[*]}"'
-  #   動かない例 (間に空白が入ってしまう):
+  #   Example that doesn't work (there are spaces in between):
   #     IFS= eval 'local value=${arr[*]}'
   c=(a b c)
   ble/test code:'ret=${c[*]}' ret="a b c"
@@ -355,27 +355,27 @@ ble/test/start-section 'bash' 117
   IFS=$' \t\n'
 
   # BUG bash-3.0..4.1
-  #   宣言されているが unset の変数について ${#a[*]} が 1 を返す。
-  #   a[${#a[*}]=value もしくは ble/array#push a value するとき、その配列を事前
-  #   に宣言したければ local -a a のように -a を指定する必要がある。
+  #   ${#a[*]} returns 1 for variables that are declared but unset.
+  #   a[${#a[*}]=value or ble/array#push a value when you push the array in advance.
+  #   If you want to declare it, you need to specify -a like local -a a.
   #
-  #   [問題]
+  #   [Problem]
   #
-  #   bash-4.0, 4.1 (local): bash-4.1 以下で関数内で local arr しただけで
-  #   ${#arr[*]} が 1 になる。その後、要素 #1 を設定しても ${#arr[*]} は 1 のま
-  #   まである。これの所為で arr[${#arr[*]}]=... としても常に要素 #1 にしか代入
-  #   されない事になる。
+  #   bash-4.0, 4.1 (local): If you just use local arr in a function under bash-4.1
+  #   ${#arr[*]} becomes 1. After that, even if you set element #1, ${#arr[*]} remains 1.
+  #   There is even. Because of this, even if arr[${#arr[*]}]=... it is always assigned only to element #1
+  #   It will not be done.
   #
-  #   bash-3.0 ～ 3.2 (declare): bash-3.2 以下では関数内に限らず declare arr し
-  #   ただけで ${#arr[*]} が 1 になる。但し、要素[1] に設定をすると ${#arr[*]}
-  #   は 2 に増加する。従って余分な空要素があるものの ble/array#push は失敗しな
-  #   い。
+  #   bash-3.0 to 3.2 (declare): In bash-3.2 and below, declare arr is not limited to functions.
+  #   Just ${#arr[*]} becomes 1. However, if you set it to element [1], ${#arr[*]}
+  #   increases to 2. Therefore, ble/array#push will not fail even though there is an extra empty element.
+  #   Yes.
   #
-  #   [解決]
+  #   [Solved]
   #
-  #   local -a arr とすれば問題は起きない。※local arr=() (#D0184) としても問題
-  #   は起きないがこの記述だと今度は bash-3.0 で文字列 '()' が代入されて問題で
-  #   ある。
+  #   If you run local -a arr, the problem will not occur. *There is also a problem with local arr=() (#D0184)
+  #   does not occur, but with this description, the string '()' is assigned in bash-3.0, causing a problem.
+  #   There is.
   builtin unset -v arr1 arr2
   local arr1
   local -a arr2
@@ -387,7 +387,7 @@ ble/test/start-section 'bash' 117
   ble/test code:'ret=${#arr2[@]}' ret=0
 
   # BUG bash-3.0..3.2 [Ref #D1241]
-  #   ^? や ^A の値が declare -p で ^A^? や ^A^A に変換されてしまう。
+  #   The value of ^? or ^A is converted to ^A^? or ^A^A by declare -p.
   a=($'\x7F' $'\x01')
   if ((_ble_bash<40000)); then
     ble/test 'declare -p a' stdout=$'declare -a a=\'([0]="\x01\x01\x01\x7F" [1]="\x01\x01\x01\x01")\'' # '
@@ -398,13 +398,13 @@ ble/test/start-section 'bash' 117
   fi
 
   # BUG bash-3.1
-  #   呼出先の関数で、呼出元で定義されているのと同名の配列を作っても、中が空になる。
+  # Even if the called function creates an array with the same name as the one defined in the caller, it will be empty.
   #   > $ function dbg/test2 { local -a hello=(1 2 3); echo "hello=(${hello[*]})";}
   #   > $ function dbg/test1 { local -a hello=(3 2 1); dbg/test2;}
   #   > $ dbg/test1
   #   > hello=()
   #
-  #   これは bash-3.1-patches/bash31-004 で修正されている様だ。
+  #   This seems to have been fixed in bash-3.1-patches/bash31-004.
   function f1 { local -a arr=(b b b); ble/util/print "(${arr[*]})"; }
   function f2 { local -a arr=(a a a); f1; }
   if ((30100<=_ble_bash&&_ble_bash<30104)); then
@@ -414,8 +414,8 @@ ble/test/start-section 'bash' 117
   fi
 
   # BUG bash-3.1
-  #   そもそも bash-3.1 は function a { local -a alpha=() beta=(); } を parse
-  #   できないので ble.sh のテストを起動するのもままならない。
+  #   In the first place, bash-3.1 parses function a { local -a alpha=() beta=(); }
+  #   Since I can't do it, I can't even start the ble.sh test.
   if ((30100<=_ble_bash&&_ble_bash<30104)); then
     ble/test 'function f1 { local -a alpha=(); local -a beta=(); }'
   else
@@ -423,16 +423,16 @@ ble/test/start-section 'bash' 117
   fi
 
   # BUG bash-3.0..3.1 [Ref #D0182]
-  #   ${#arr[n]} が文字数ではなくバイト数を返す
+  #   ${#arr[n]} returns number of bytes instead of number of characters
   if ((_ble_bash<30200)); then
-    ble/test code:'ret=あ ret=${#ret[0]}' ret=3 # disable=#D0182
+    ble/test code:'ret=alpha ret=${#ret[0]}' ret=3 # disable=#D0182
   else
-    ble/test code:'ret=あ ret=${#ret[0]}' ret=1 # disable=#D0182
+    ble/test code:'ret=alpha ret=${#ret[0]}' ret=1 # disable=#D0182
   fi
 
   # BUG bash-3.0 [Ref #D0184]
-  #   local a=(...) や declare a=(...) (#D0184) とすると、a="(...)" と同じ事に
-  #   なる。a=() の形式ならば問題ない。
+  #   local a=(...) or declare a=(...) (#D0184) is the same as a="(...)"
+  #   It will be. There is no problem if it is in the form a=().
   declare ret=(1 2 3) # disable=#D0184
   if ((_ble_bash<30100)); then
     ble/test ret='(1 2 3)'
@@ -441,10 +441,10 @@ ble/test/start-section 'bash' 117
   fi
 
   # BUG bash-3.0 [Ref #D0525]
-  #   今まで local -a a=() の形式ならば問題ないと信じてきたが、どうやらlocal -a
-  #   a=('1 2') (#D0525) が local -a a=(1 2) と同じ意味になってしまうようだ。
-  #   a="123 345"; declare -a arr=("$a"); (#D0525) このようにしても駄目だ。
-  #   a="123 345"; declare -a arr; arr=("$a"); こうする必要がある。
+  #   Until now, I had believed that there was no problem with the form local -a a=(), but apparently local -a
+  #   It seems that a=('1 2') (#D0525) has the same meaning as local -a a=(1 2).
+  #   a="123 345"; declare -a arr=("$a"); (#D0525) It doesn't work like this.
+  #   a="123 345"; declare -a arr; arr=("$a"); You need to do this.
   declare -a ret=("1 2") # disable=#D0525
   if ((_ble_bash<30100)); then
     ble/test ret='1'
@@ -460,8 +460,8 @@ ble/test/start-section 'bash' 117
   fi
 
   # BUG bash-3.0
-  #   IFS がデフォルト以外の時 declare -a arr2=("${arr1[@]}") (disable=#D0525)
-  #   も正しく動かない。
+  #   When IFS is non-default declare -a arr2=("${arr1[@]}") (disable=#D0525)
+  #   It also doesn't work properly.
   a=(1 2 3)
   IFS=x
   declare -a a1=("${a[@]}") # disable=#D0525
@@ -476,8 +476,8 @@ ble/test/start-section 'bash' 117
   fi
 
   # BUG bash-3.0
-  #   IFS がデフォルト以外の時 declare -a arr2=($v) による split は動かない。代
-  #   わりに空白で分割される。
+  #   When IFS is non-default, split using declare -a arr2=($v) does not work. teenager
+  #   Instead, it is separated by spaces.
   IFS=x
   v=1x2x3
   declare -a a1=($v)
@@ -504,31 +504,31 @@ ble/test/start-section 'bash' 117
 
 # Other bugs
 (
-  # BUG bash-3.0..4.0 (3.0..5.2 in 非対話セッション)
+  # BUG bash-3.0..4.0 (3.0..5.2 in non-interactive session)
 
-  # $'' 内に \' を入れていると履歴展開が '' の中で起こる? 例えば
-  # rex='a'$'\'\'''!a' とすると !a の部分が展開される (9f0644470 OK)。
+  # If you put \' inside $'', does history expansion occur inside ''? For example
+  # rex='a'$'\'\'''!a' will expand the !a part (9f0644470 OK).
   #
-  # 因みに対応する履歴がない場合には 4.1 以下でエラーメッセージが表示される。
+  # Incidentally, if there is no corresponding history, an error message will be displayed in versions 4.1 and below.
   #
-  # Note: bash -c や独立したスクリプト実行の中だと 3.0..5.2 および devel の全バー
-  # ジョンで問題は再現する。対話セッションや set +H を指定した場合には問題は
-  # 3.0..4.0 でしか発生しない。
+  # Note: All versions of 3.0..5.2 and devel are
+  # The problem is reproduced in John. The problem does not occur if you specify an interactive session or set +H.
+  # Only occurs on 3.0..4.0.
   #
-  # Note: 遡ってみるとこの項目は memo.txt に commit 9f064447 (2015-03-08) で追
-  # 加されている。但し対応する項目は memo.txt には記述されていない。#D0206 が近
-  # いが微妙に異なることを議論している。
+  # Note: Looking back, this item was added to memo.txt in commit 9f064447 (2015-03-08).
+  # has been added. However, the corresponding items are not described in memo.txt. #D0206 is near
+  # We are discussing slightly different things.
   #
   q=\' line='$'$q'\'$q'!!'$q'\'$q
   code='(builtin history -s histentry; builtin history -p "$line")'
   if ((_ble_bash<30100)); then
-    # 3.0 ではそもそも失敗する。
+    # 3.0 fails in the first place.
     ble/test "$code" stdout=
   elif ((_ble_bash<40100)) || [[ $- != *[iH]* ]]; then
-    # 非対話セッション または 3.1..4.0 では意図せず展開が起こる
+    # Unintentional expansion occurs in non-interactive sessions or 3.1..4.0
     ble/test "$code" stdout="${line//!!/histentry}"
   else
-    # 期待した振る舞い
+    # expected behavior
     ble/test "$code" stdout="$line"
   fi
   if ((_ble_bash<40100)); then
@@ -580,11 +580,11 @@ ble/test/start-section 'bash' 117
   fi
 
   # BUG bash-3.0 [Ref #D1956]
-  #   関数定義の一番外側でリダイレクトしてもリダイレクトされない。例えば、
+  #   Even if you redirect at the outermost part of the function definition, it will not be redirected. For example,
   #   function func { ls -l /proc/$BASHPID/fd/{0..2}; } <&"$fd0" >&"$fd1"
   #
-  #   どうも更に関数を func REDIRECT & で呼び出した時にのみ発生する様だ。呼び出
-  #   し元のリダイレクションリストで上書きされているという事だろうか。e
+  #   It seems that this only occurs when the function is called with func REDIRECT &. call
+  #   Does this mean that it has been overwritten with the original redirection list? e
   function f1 { ble/util/print hello; } >&"$fd1"
   function f2 { ble/util/print hello >&"$fd1"; }
   function f3 { { ble/util/print hello; } >&"$fd1"; }

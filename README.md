@@ -1,4 +1,4 @@
-[ Languages: **English** | [日本語](README-ja_JP.md) (Japanese) ]
+[ Languages: **English** | [Japanese](README-ja_JP.md) (Japanese) ]
 
 <h1 align="center"><ruby>ble.sh<rp> (</rp><rt>/blɛʃ/</rt><rp>)</rp></ruby> ―Bash Line Editor―</h1>
 <p align="center">

@@ -7,7 +7,7 @@ ble/test/start-section 'ble/util' 1278
 # bleopt
 
 (
-  # 定義・設定・出力
+  # Definition/Setting/Output
   ble/test 'bleopt a=1' \
            exit=2
   ble/test 'bleopt a' \
@@ -32,7 +32,7 @@ ble/test/start-section 'ble/util' 1278
   ble/test 'bleopt a' \
            stdout="bleopt a=123"
 
-  # 複数引数
+  # multiple arguments
   ble/test bleopt f:=10 g:=11
   ble/test bleopt f g \
            stdout="bleopt f=10${_ble_term_nl}bleopt g=11"
@@ -655,7 +655,7 @@ function is-global { (builtin readonly "$1"; ! local "$1" 2>/dev/null); }
 (
   #UB: ble/test 'ble/string#count-char hello' ret=5
   ble/test 'ble/string#count-char hello a' ret=0
-  ble/test 'ble/string#count-char hello あ' ret=0
+  ble/test 'ble/string#count-char hello alpha' ret=0
   ble/test 'ble/string#count-char hello e' ret=1
   ble/test 'ble/string#count-char hello l' ret=2
   ble/test 'ble/string#count-char hello olh' ret=4
@@ -667,7 +667,7 @@ function is-global { (builtin readonly "$1"; ! local "$1" 2>/dev/null); }
 # ble/string#count-string
 (
   ble/test 'ble/string#count-string hello a' ret=0
-  ble/test 'ble/string#count-string hello あ' ret=0
+  ble/test 'ble/string#count-string hello alpha' ret=0
   ble/test 'ble/string#count-string hello ee' ret=0
   ble/test 'ble/string#count-string hello e' ret=1
   ble/test 'ble/string#count-string hello l' ret=2
@@ -681,7 +681,7 @@ function is-global { (builtin readonly "$1"; ! local "$1" 2>/dev/null); }
 # ble/string#index-of
 (
   ble/test 'ble/string#index-of hello a' ret=-1
-  ble/test 'ble/string#index-of hello あ' ret=-1
+  ble/test 'ble/string#index-of hello alpha' ret=-1
   ble/test 'ble/string#index-of hello ee' ret=-1
   ble/test 'ble/string#index-of hello e' ret=1
   ble/test 'ble/string#index-of hello l' ret=2
@@ -695,7 +695,7 @@ function is-global { (builtin readonly "$1"; ! local "$1" 2>/dev/null); }
 # ble/string#last-index-of
 (
   ble/test 'ble/string#last-index-of hello a' ret=-1
-  ble/test 'ble/string#last-index-of hello あ' ret=-1
+  ble/test 'ble/string#last-index-of hello alpha' ret=-1
   ble/test 'ble/string#last-index-of hello ee' ret=-1
   ble/test 'ble/string#last-index-of hello e' ret=1
   ble/test 'ble/string#last-index-of hello l' ret=3
@@ -720,10 +720,10 @@ function is-global { (builtin readonly "$1"; ! local "$1" 2>/dev/null); }
   ble/test 'ble/string#tolower     a' ret=a
   ble/test 'ble/string#toupper     a' ret=A
   ble/test 'ble/string#capitalize  a' ret=A
-  ble/test 'ble/string#toggle-case あ' ret=あ
-  ble/test 'ble/string#tolower     あ' ret=あ
-  ble/test 'ble/string#toupper     あ' ret=あ
-  ble/test 'ble/string#capitalize  あ' ret=あ
+  ble/test 'ble/string#toggle-case A' ret=A
+  ble/test 'ble/string#tolower A' ret=A
+  ble/test 'ble/string#toupper A' ret=A
+  ble/test 'ble/string#capitalize A' ret=A
   ble/test 'ble/string#toggle-case +' ret=+
   ble/test 'ble/string#tolower     +' ret=+
   ble/test 'ble/string#toupper     +' ret=+
@@ -888,15 +888,15 @@ function is-global { (builtin readonly "$1"; ! local "$1" 2>/dev/null); }
   ble/test 'ble/util/strlen abc' ret=3
   ble/test 'ble/util/strlen α' ret=2
   ble/test 'ble/util/strlen αβγ' ret=6
-  ble/test 'ble/util/strlen あ' ret=3
-  ble/test 'ble/util/strlen あいう' ret=9
+  ble/test 'ble/util/strlen alpha' ret=3
+  ble/test 'ble/util/strlen aiu' ret=9
   ble/test 'ble/util/strlen aα' ret=3
-  ble/test 'ble/util/strlen aαあ' ret=6
+  ble/test 'ble/util/strlen aαalpha' ret=6
 
   LC_ALL=en_US.utf8
   ble/test 'ble/util/strlen a' ret=1
   ble/test 'ble/util/strlen α' ret=2
-  ble/test 'ble/util/strlen あ' ret=3
+  ble/test 'ble/util/strlen alpha' ret=3
 )
 
 # ble/util/substr
@@ -928,12 +928,12 @@ function is-global { (builtin readonly "$1"; ! local "$1" 2>/dev/null); }
   ble/test 'ble/util/substr abc 4 0' ret=
   ble/test 'ble/util/substr abc 4 1' ret=
 
-  ble/test 'ble/util/substr あいう 0 3' ret=あ
-  ble/test 'ble/util/substr あいう 3 6' ret=いう
-  ble/test 'ble/util/substr あいう 0 1' ret=$'\xe3'
-  ble/test 'ble/util/substr あいう 1 2' ret=$'\x81\x82'
-  ble/test 'ble/util/substr あいう 1 4' ret=$'\x81\x82\xe3\x81'
-  ble/test 'ble/util/substr あいう 7 5' ret=$'\x81\x86'
+  ble/test 'ble/util/substr aiu 0 3' ret=alpha
+  ble/test 'ble/util/substr aiu 3 6' ret=iu
+  ble/test 'ble/util/substr aiu 0 1' ret=$'\xe3'
+  ble/test 'ble/util/substr aiu 1 2' ret=$'\x81\x82'
+  ble/test 'ble/util/substr aiu 1 4' ret=$'\x81\x82\xe3\x81'
+  ble/test 'ble/util/substr aiu 7 5' ret=$'\x81\x86'
 )
 
 # ble/path#remove{,-glob}
@@ -1059,53 +1059,53 @@ function is-global { (builtin readonly "$1"; ! local "$1" 2>/dev/null); }
     $Dict#set $dict melon green
 
     ret=unchanged
-    ble/test $Dict'#has '$dict' banana' ret=unchanged # 先頭
-    ble/test $Dict'#has '$dict' apple'  ret=unchanged # 中
-    ble/test $Dict'#has '$dict' melon'  ret=unchanged # 末尾
-    ble/test '! '$Dict'#has '$dict' pear' ret=unchanged # 存在しない項目
-    ble/test $Dict'#get '$dict' banana' ret=yellow   # 先頭
-    ble/test $Dict'#get '$dict' apple'  ret=red      # 中
-    ble/test $Dict'#get '$dict' melon'  ret=green    # 末尾
-    ble/test '! '$Dict'#get '$dict' pear' ret=         # 存在しない項目
+    ble/test $Dict'#has '$dict' banana' ret=unchanged # top
+    ble/test $Dict'#has '$dict' apple' ret=unchanged # medium
+    ble/test $Dict'#has '$dict' melon' ret=unchanged # end
+    ble/test '! '$Dict'#has '$dict' pear' ret=unchanged # item that does not exist
+    ble/test $Dict'#get '$dict' banana' ret=yellow # top
+    ble/test $Dict'#get '$dict' apple' ret=red # medium
+    ble/test $Dict'#get '$dict' melon' ret=green # end
+    ble/test '! '$Dict'#get '$dict' pear' ret= # item that does not exist
 
-    # 空白類
-    ble/test '! '$Dict'#has '$dict' ""' # 末尾空要素で引けるか
-    ble/test '! '$Dict'#get '$dict' ""' # 末尾空要素で引けるか
+    # white space
+    ble/test '! '$Dict'#has '$dict' ""' # Can it be retrieved with a trailing empty element?
+    ble/test '! '$Dict'#get '$dict' ""' # Can it be retrieved with a trailing empty element?
     $Dict#set $dict '' transparent
-    ble/test $Dict'#has '$dict' ""' # 末尾空要素で引けるか
-    ble/test $Dict'#get '$dict' ""' ret=transparent # 末尾空要素で引けるか
+    ble/test $Dict'#has '$dict' ""' # Can it be retrieved with a trailing empty element?
+    ble/test $Dict'#get '$dict' ""' ret=transparent # Can it be retrieved with a trailing empty element?
     $Dict#set $dict 'alpha beta' pink
-    ble/test $Dict'#has '$dict' ""' # 中央空要素で引けるか
-    ble/test $Dict'#has '$dict' "alpha beta"' # 空白を含む見出し
-    ble/test $Dict'#get '$dict' ""' ret=transparent # 中央空要素で引けるか
-    ble/test $Dict'#get '$dict' "alpha beta"' ret=pink # 空白を含む見出し
+    ble/test $Dict'#has '$dict' ""' # Can it be retrieved with a central empty element?
+    ble/test $Dict'#has '$dict' "alpha beta"' # Heading with spaces
+    ble/test $Dict'#get '$dict' ""' ret=transparent # Can it be retrieved with central empty element?
+    ble/test $Dict'#get '$dict' "alpha beta"' ret=pink # Heading with spaces
     $Dict#set $dict ' apple ' ' red '
-    ble/test $Dict'#has '$dict' " apple "' # 空白で trim されないか
-    ble/test $Dict'#has '$dict' apple' # 既存項目を破壊していないか
-    ble/test $Dict'#get '$dict' " apple "' ret=' red ' # 空白で trim されないか
-    ble/test $Dict'#get '$dict' apple' ret=red # 既存項目を破壊していないか
+    ble/test $Dict'#has '$dict' " apple "' # Is it not trimmed with spaces?
+    ble/test $Dict'#has '$dict' apple' # Are existing items destroyed?
+    ble/test $Dict'#get '$dict' " apple "' ret=' red ' # Is it not trimmed with spaces?
+    ble/test $Dict'#get '$dict' apple' ret=red # Are existing items destroyed?
 
     # FS, colon
-    ble/test '! '$Dict'#has '$dict' "${_ble_term_FS}"' # 単一FS
-    ble/test '! '$Dict'#has '$dict' ":"' # 単一コロン
-    ble/test '! '$Dict'#has '$dict' "apple${_ble_term_FS}banana"' # FSを含む見出し
-    ble/test '! '$Dict'#has '$dict' apple:banana' # コロンを含む見出し
-    ble/test '! '$Dict'#get '$dict' "${_ble_term_FS}"' ret= # 単一FS
-    ble/test '! '$Dict'#get '$dict' ":"' ret= # 単一コロン
-    ble/test '! '$Dict'#get '$dict' "apple${_ble_term_FS}banana"' ret= # FSを含む見出し
-    ble/test '! '$Dict'#get '$dict' apple:banana' ret= # コロンを含む見出し
+    ble/test '! '$Dict'#has '$dict' "${_ble_term_FS}"' # Single FS
+    ble/test '! '$Dict'#has '$dict' ":"' # single colon
+    ble/test '! '$Dict'#has '$dict' "apple${_ble_term_FS}banana"' # Heading containing FS
+    ble/test '! '$Dict'#has '$dict' apple:banana' # Heading with colon
+    ble/test '! '$Dict'#get '$dict' "${_ble_term_FS}"' ret= # Single FS
+    ble/test '! '$Dict'#get '$dict' ":"' ret= # single colon
+    ble/test '! '$Dict'#get '$dict' "apple${_ble_term_FS}banana"' ret= # Heading containing FS
+    ble/test '! '$Dict'#get '$dict' apple:banana' ret= # Headings containing colons
     $Dict#set $dict "${_ble_term_FS}" Empty
     $Dict#set $dict ":" Colon
     $Dict#set $dict "apple${_ble_term_FS}banana" RedYellow
     $Dict#set $dict "apple:banana" __red_yellow__
-    ble/test $Dict'#has '$dict' "${_ble_term_FS}"' # 単一FS
-    ble/test $Dict'#has '$dict' ":"' # 単一コロン
-    ble/test $Dict'#has '$dict' "apple${_ble_term_FS}banana"' # FSを含む見出し
-    ble/test $Dict'#has '$dict' apple:banana' # コロンを含む見出し
-    ble/test $Dict'#get '$dict' "${_ble_term_FS}"' ret=Empty # 単一FS
-    ble/test $Dict'#get '$dict' ":"' ret=Colon # 単一コロン
-    ble/test $Dict'#get '$dict' "apple${_ble_term_FS}banana"' ret=RedYellow # FSを含む見出し
-    ble/test $Dict'#get '$dict' apple:banana' ret=__red_yellow__ # コロンを含む見出し
+    ble/test $Dict'#has '$dict' "${_ble_term_FS}"' # Single FS
+    ble/test $Dict'#has '$dict' ":"' # single colon
+    ble/test $Dict'#has '$dict' "apple${_ble_term_FS}banana"' # Heading containing FS
+    ble/test $Dict'#has '$dict' apple:banana' # Heading with colon
+    ble/test $Dict'#get '$dict' "${_ble_term_FS}"' ret=Empty # Single FS
+    ble/test $Dict'#get '$dict' ":"' ret=Colon # single colon
+    ble/test $Dict'#get '$dict' "apple${_ble_term_FS}banana"' ret=RedYellow # Headings containing FS
+    ble/test $Dict'#get '$dict' apple:banana' ret=__red_yellow__ # Heading with colon
 
     # unset
     $Dict#unset $dict banana
@@ -1117,17 +1117,17 @@ function is-global { (builtin readonly "$1"; ! local "$1" 2>/dev/null); }
     $Dict#unset $dict ""
     $Dict#unset $dict "alpha beta"
     $Dict#unset $dict " apple "
-    ble/test '! '$Dict'#has '$dict' ""' # 中央空要素で引けるか
-    ble/test '! '$Dict'#has '$dict' "alpha beta"' # 空白を含む見出し
-    ble/test '! '$Dict'#has '$dict' " apple "' # 空白で trim されないか
+    ble/test '! '$Dict'#has '$dict' ""' # Can it be retrieved with a central empty element?
+    ble/test '! '$Dict'#has '$dict' "alpha beta"' # Heading with spaces
+    ble/test '! '$Dict'#has '$dict' " apple "' # Is it not trimmed with spaces?
     $Dict#unset $dict "${_ble_term_FS}"
     $Dict#unset $dict ":"
     $Dict#unset $dict "apple${_ble_term_FS}banana"
     $Dict#unset $dict apple:banana
-    ble/test '! '$Dict'#has '$dict' "${_ble_term_FS}"' # 単一FS
-    ble/test '! '$Dict'#has '$dict' ":"' # 単一コロン
-    ble/test '! '$Dict'#has '$dict' "apple${_ble_term_FS}banana"' # FSを含む見出し
-    ble/test '! '$Dict'#has '$dict' apple:banana' # コロンを含む見出し
+    ble/test '! '$Dict'#has '$dict' "${_ble_term_FS}"' # Single FS
+    ble/test '! '$Dict'#has '$dict' ":"' # single colon
+    ble/test '! '$Dict'#has '$dict' "apple${_ble_term_FS}banana"' # Heading containing FS
+    ble/test '! '$Dict'#has '$dict' apple:banana' # Heading with colon
   done
 )
 
@@ -1322,8 +1322,8 @@ function is-global { (builtin readonly "$1"; ! local "$1" 2>/dev/null); }
 
 # ble/util/writearray
 (
-  # Note: Bash-3.x で arr=() の形式には ^A 及び ^? を変化させるバグが
-  # あるので、 改めて正しい値を代入する。
+  # Note: In Bash-3.x, the arr=() form has a bug that changes ^A and ^?
+  # Since there is, substitute the correct value again.
   x=($'\177' $'\1' $'\2' $'\32' ' ' $'\a' $'\b' $'\t' $'\n' $'\v' $'\f' $'\r' a \" \' \$ \! \` \~)
   x[0]=$'\177'
   x[1]=$'\1'
@@ -1338,7 +1338,7 @@ function is-global { (builtin readonly "$1"; ! local "$1" 2>/dev/null); }
 
   ble/test "ble/util/writearray -d '' x | ble/test/hash" stdout=$(printf '%s\0' "${x[@]}" | ble/test/hash)
 
-  # gawk では $'\302\203' という文字列を unescape する上で注意が必要
+  # With gawk, be careful when unescapeing the string $'\302\203'
   x=($'\302\203' alpha)
   ble/test "ble/util/writearray -d '' x | ble/test/hash" stdout=$(printf '%s\0' "${x[@]}" | ble/test/hash)
 
@@ -1535,7 +1535,7 @@ function is-global { (builtin readonly "$1"; ! local "$1" 2>/dev/null); }
 (
   shopt -s expand_aliases
 
-  # Note: 複数段階の展開は実行しない
+  # Note: Do not perform multi-stage deployments
   alias aaa1='aaa2 world'
   ble/test 'ble/alias#expand aaa1' ret='aaa2 world'
   alias aaa2='aaa3 hello'
@@ -1561,8 +1561,8 @@ if ((_ble_bash>=40000)); then
     ble/test 'ble/util/is-stdin-ready 0 <<< a'
     ble/test 'ble/util/is-stdin-ready 0 <<< ""'
 
-    # EOF は成功してしまう? これは意図しない振る舞いである。
-    # しかし bash 自体が終了するので関係ないのかもしれない。
+    # Does EOF succeed? This is unintended behavior.
+    # However, since bash itself terminates, it may not matter.
     ble/test ': | { sleep 0.01; ble/util/is-stdin-ready 0; }'
     ble/test 'ble/util/is-stdin-ready 0 < /dev/null'
   )
@@ -1616,7 +1616,7 @@ ble/test ble/util/is-running-in-subshell exit=1
   ble/util/print hello >&"$fd"
   ble/util/print world >&"$fd"
   if ((_ble_bash/100!=301)); then
-    # bash-3.1 はバグがあって一度開いた fd を閉じれない。
+    # bash-3.1 has a bug that prevents you from closing an fd once it has been opened.
     ble/test 'ble/fd#close fd; echo test >&"$fd"' exit=1
     ble/test 'cat a.txt' stdout={hello,world}
   fi
@@ -1658,8 +1658,8 @@ ble/test ble/util/is-running-in-subshell exit=1
     ble/util/declare-print-definitions a0 a1 a{2..8} 2>/dev/null)"
 
   for name in a0 a1 a{2..8}; do
-    # WA: msys bash では何故か配列代入形式 arr2=("${arr1[@]}") で要素に含まれる
-    # \r が全て消滅する。仕方がないのでスキップする。
+    # WA: For some reason, in msys bash, it is included in the element in the array assignment format arr2=("${arr1[@]}")
+    # All \r will disappear. I have no choice but to skip it.
     [[ $name == a5 ]] && ble/base/is-msys && continue
 
     stdout_var=s$name
@@ -1683,7 +1683,7 @@ ble/test ble/util/is-running-in-subshell exit=1
   function f1 {
     local v0=1 v1=2 v2=3 v4=5
     f2
-    # 上のスコープには影響を与えない。
+    # Does not affect the scope above.
     ble/test 'status v1' stdout='1:(2)'
     ble/test 'status v2' stdout='1:(3)'
   }
@@ -1714,9 +1714,9 @@ ble/test ble/util/is-running-in-subshell exit=1
   ble/test 'ble/util/has-glob-pattern "a:b"' exit=1
   ble/test 'ble/util/has-glob-pattern "a=b"' exit=1
 
-  # 以下は文脈によって異なる物。Bash-5.0 では var='\[xyz\]' として
-  # echo $var とするとパス名展開の対象となるが、
-  # それ以外ではパス名展開とは解釈されない。
+  # The following differ depending on the context. In Bash-5.0 as var='\[xyz\]'
+  # If you type echo $var, it will be subject to path name expansion, but
+  # Otherwise, it will not be interpreted as pathname expansion.
   ble/test 'ble/util/has-glob-pattern "\[xyz\]"' exit=1
 )
 
@@ -2056,23 +2056,23 @@ fi
   ble/test 'ble/util/c2s 97' ret=a
   ble/test 'ble/util/s2c μ' ret=956
   ble/test 'ble/util/c2s 956' ret=μ
-  ble/test 'ble/util/s2c あ' ret=12354
-  ble/test 'ble/util/c2s 12354' ret=あ
+  ble/test 'ble/util/s2c alpha' ret=12354
+  ble/test 'ble/util/c2s 12354' ret=alpha
 
   ble/test 'ble/util/s2c' ret=0
   ble/test 'ble/util/s2c abc' ret=97
   ble/test 'ble/util/s2c μν' ret=956
-  ble/test 'ble/util/s2c あいう' ret=12354
+  ble/test 'ble/util/s2c aiu' ret=12354
 
   ble/test 'ble/util/c2s.cached 32' ret=' '
   ble/test 'ble/util/c2s.cached 97' ret=a
   ble/test 'ble/util/c2s.cached 956' ret=μ
-  ble/test 'ble/util/c2s.cached 12354' ret=あ
+  ble/test 'ble/util/c2s.cached 12354' ret=alpha
 
   LC_ALL=C
   ble/test 'ble/util/c2s 97' ret=a
   ble/test 'ble/util/c2s 956; [[ $ret != μ ]]'
-  ble/test 'ble/util/c2s 12354; [[ $ret != あ ]]'
+  ble/test 'ble/util/c2s 12354; [[ $ret != alpha ]]'
 )
 
 # ble/util/c2bc
@@ -2094,19 +2094,19 @@ fi
 (
   ble/test 'ble/util/s2chars AaBbCc; ret="${ret[*]}"' ret='65 97 66 98 67 99'
   ble/test 'ble/util/chars2s 65 97 66 98 67 99' ret=AaBbCc
-  ble/test 'ble/util/s2chars あいう; ret="${ret[*]}"' ret='12354 12356 12358'
-  ble/test 'ble/util/chars2s 12354 12356 12358' ret=あいう
+  ble/test 'ble/util/s2chars aiu; ret="${ret[*]}"' ret='12354 12356 12358'
+  ble/test 'ble/util/chars2s 12354 12356 12358' ret=aiu
 
   ble/test 'ble/util/s2chars; ret="${ret[*]}"' ret=
   ble/test 'ble/util/s2chars 0; ret="${ret[*]}"' ret=48
   ble/test 'ble/util/s2chars a; ret="${ret[*]}"' ret=97
   ble/test 'ble/util/s2chars μ; ret="${ret[*]}"' ret=956
-  ble/test 'ble/util/s2chars あ; ret="${ret[*]}"' ret=12354
+  ble/test 'ble/util/s2chars alpha; ret="${ret[*]}"' ret=12354
   ble/test 'ble/util/chars2s' ret=
   ble/test 'ble/util/chars2s 48' ret=0
   ble/test 'ble/util/chars2s 97' ret=a
   ble/test 'ble/util/chars2s 956' ret=μ
-  ble/test 'ble/util/chars2s 12354' ret=あ
+  ble/test 'ble/util/chars2s 12354' ret=alpha
 )
 
 # ToDo: ble/util/s2bytes
@@ -2145,7 +2145,7 @@ fi
   check1 '64'    '@'
   check1 '97'    'a'
   check1 '956'   'μ'
-  check1 '12354' 'あ'
+  check1 '12354' 'alpha'
 
   ble/test ble/util/c2keyseq ret='\C-@'
   ble/test ble/util/chars2keyseq ret=

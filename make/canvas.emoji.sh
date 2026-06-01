@@ -261,9 +261,9 @@ function make/canvas.emoji/sub:measure-blesh {
       bleopt emoji_version=13.1
       bleopt emoji_opts=ri:tpvs:epvs
       _ble_util_c2w=(
-        # これらは絵文字になる可能性のある全角であり半角にはならない筈
+        # These are full-width characters that can become emojis, and should not be half-width characters.
         [0x3030]=1 [0x303D]=1 [0x3297]=1 [0x3299]=1
-        # これらは肌の色を変える拡張文字だが単体で使われた時の幅は多くの端末で2
+        # These are extended characters that change skin color, but when used alone their width is 2 on many devices.
         [0x1F3FB]=0 [0x1F3FC]=0 [0x1F3FD]=0 [0x1F3FE]=0 [0x1F3FF]=0
       )
       ble/unicode/test-emoji-sequence-width "$term" "$scheme"
@@ -278,10 +278,10 @@ function make/canvas.emoji/sub:measure-blesh {
       bleopt grapheme_cluster=extended
       bleopt emoji_opts=ri:zwj
       _ble_util_c2w=(
-        # これらは unqualified だが多くの端末で特別に幅2の様だ
+        # These are unqualified but appear to be specially width 2 on many terminals.
         [0x1F202]=2 [0x1F237]=2
 
-        # これらは肌の色を変える拡張文字だが単体で使われた時の幅は多くの端末で2
+        # These are extended characters that change skin color, but when used alone their width is 2 on many devices.
         [0x1F3FB]=0 [0x1F3FC]=0 [0x1F3FD]=0 [0x1F3FE]=0 [0x1F3FF]=0
       )
       ble/unicode/test-emoji-sequence-width "$term" "$scheme"
@@ -315,7 +315,7 @@ function make/canvas.emoji/sub:measure-blesh {
       _ble_unicode_GraphemeClusterBreak[0x1F3FD]=$_ble_unicode_GraphemeClusterBreak_Pictographic
       _ble_unicode_GraphemeClusterBreak[0x1F3FE]=$_ble_unicode_GraphemeClusterBreak_Pictographic
       _ble_unicode_GraphemeClusterBreak[0x1F3FF]=$_ble_unicode_GraphemeClusterBreak_Pictographic
-      # ↓これらは unqualified だが vte では特別に幅2の様だ
+      # ↓These are unqualified, but in VTE they seem to have a width of 2.
       _ble_util_c2w=([0x1F202]=2 [0x1F237]=2)
       ble/unicode/test-emoji-sequence-width "$term" "$scheme"
     ) ;;
@@ -349,7 +349,7 @@ function make/canvas.emoji/sub:measure-blesh {
       _ble_unicode_GraphemeClusterBreak[0x1F3FE]=$_ble_unicode_GraphemeClusterBreak_Pictographic
       _ble_unicode_GraphemeClusterBreak[0x1F3FF]=$_ble_unicode_GraphemeClusterBreak_Pictographic
       _ble_util_c2w=(
-        # これらは unqualified だが vte では特別に幅2の様だ
+        # These are unqualified but in vte they seem to be specially width 2
         [0x1F202]=2 [0x1F237]=2
       )
       ble/unicode/test-emoji-sequence-width "$term" "$scheme"
@@ -357,7 +357,7 @@ function make/canvas.emoji/sub:measure-blesh {
 
   (mlterm)
     (
-      echo mlterm... # (全然合わない。unqualified も emoji に入っている気がする)
+      echo mlterm... # (It doesn't fit at all. I feel like unqualified is also included in the emoji)
       bleopt char_width_mode=east
       bleopt emoji_width=2
       bleopt emoji_version=11.0
@@ -374,11 +374,11 @@ function make/canvas.emoji/sub:measure-blesh {
         _ble_unicode_GraphemeClusterBreak[code]=$_ble_unicode_GraphemeClusterBreak_Other
       done
       _ble_util_c2w=(
-        # ZWJ が幅1になる
+        # ZWJ becomes width 1
         [0x0200D]=1
-        # これらは unqualified だが多くの端末で特別に幅2の様だ
+        # These are unqualified but appear to be specially width 2 on many terminals.
         [0x1F202]=2 [0x1F237]=2
-        # mlterm は一部の unqualified だけを幅2にしている。
+        # mlterm only makes some unqualified characters width 2.
         [0x26F0]=2 [0x26F1]=2 [0x26F4]=2 [0x26F7]=2 [0x26F8]=2 [0x26F9]=2
         [0x26C8]=2 [0x26CF]=2 [0x26D1]=2 [0x26D3]=2 [0x26E9]=2
         [0x1F170]=2 [0x1F171]=2 [0x1F17E]=2 [0x1F17F]=2
@@ -406,7 +406,7 @@ function make/canvas.emoji/sub:measure-blesh {
         _ble_unicode_GraphemeClusterBreak[code]=$_ble_unicode_GraphemeClusterBreak_Other
       done
       _ble_util_c2w=(
-        # これらは unqualified だが vte では特別に幅2の様だ
+        # These are unqualified but in vte they seem to be specially width 2
         [0x1F202]=2 [0x1F237]=2
       )
       ble/unicode/test-emoji-sequence-width "$term" "$scheme"

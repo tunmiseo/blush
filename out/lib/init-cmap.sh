@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #
-# 以下は ble-decode.sh にて既定で定義される特殊キー
+# The following are special keys defined by default in ble-decode.sh
 #
-# 制御文字
+# control characters
 #
 #   TAB  RET
 #
@@ -19,11 +19,11 @@
 #   DCS  PU1  PU2  STS  CCH  MW   SPA  EPA
 #   SOS  SGCI SCI  CSI  ST   OSC  PM   APC
 #
-# 特殊文字 (内部使用)
+# Special characters (internal use)
 #
 #   @ESC @NUL
 #
-# 特殊キーバインディング
+# special key bindings
 #
 #   __batch_char__
 #   __defchar__
@@ -33,28 +33,28 @@
 #   __attach__
 #   __detach__
 #
-# 修飾キー
+# modifier key
 #
 #   shift alter control meta super hyper
 #
-# 端末の応答を処理した時
+# When processing a terminal response
 #
 #   __ignore__
 #
-# Note: ble-decode.sh における特殊キーの変更に際して、
-# この一覧を更新することでキャッシュの更新が起こるようにしている。
+# Note: When changing special keys in ble-decode.sh,
+# By updating this list, the cache is updated.
 #
-# 2019-04-15 __error__ を追加したので keycode の再生成が必要。
-# 2019-05-04 実験的に mouse, mouse_move を追加した。
-# 2019-05-06 ble-update 関連でバグがあったのを潰したので更新。
-# 2020-01-31 @ESC, @NUL を追加した。
-# 2020-03-12 __line_limit__ を追加
-# 2020-04-13 cmap キャッシュ生成バグ修正に伴う更新。
-# 2020-04-29 cmap キャッシュ生成バグ修正に伴う更新 (2)
-# 2021-07-12 __detach__ 追加
-# 2024-01-21 _ble_decode_csimap_dict 追加に伴う更新
-# 2024-02-07 @ESC, @NUL コード変更に伴う更新
-# 2024-06-05 "ble-decode/.hook => _ble_decode_hook" に伴う更新
+# 2019-04-15 Added __error__, so keycode needs to be regenerated.
+# 2019-05-04 Added mouse and mouse_move experimentally.
+# 2019-05-06 Updated because there was a bug related to ble-update.
+# 2020-01-31 Added @ESC, @NUL.
+# 2020-03-12 Added __line_limit__
+# 2020-04-13 Updated due to cmap cache generation bug fix.
+# 2020-04-29 Update due to cmap cache generation bug fix (2)
+# 2021-07-12 __detach__ added
+# 2024-01-21 Update due to addition of _ble_decode_csimap_dict
+# 2024-02-07 @ESC, @NUL Update due to code change
+# 2024-06-05 Updated with "ble-decode/.hook => _ble_decode_hook"
 # 2025-05-03 Add @prefixO for "up" (ESC O A) vs "M-O" (ESC O) in Bash <= 4.4
 # 2025-05-04 Add a new key "dsr0" for "ESC [ 0 n"
 
@@ -167,8 +167,8 @@ function ble/init:cmap/initialize-kbd {
   ble/decode/kbd/.generate-keycode hyper
   _ble_decode_KCODE_HYPER=$ret
 
-  # Note: 無視するキー。ble-decode-char に於いて
-  #   端末からの通知などを処理した時に使う。
+  # Note: Keys to ignore. In ble-decode-char
+  #   Used when processing notifications etc. from the terminal.
   ble/decode/kbd/.generate-keycode __ignore__
   _ble_decode_KCODE_IGNORE=$ret
 
@@ -176,23 +176,23 @@ function ble/init:cmap/initialize-kbd {
   ble/decode/kbd/.generate-keycode __error__
   _ble_decode_KCODE_ERROR=$ret
 
-  # Note: line_limit による制限超過時のイベント
+  # Note: Event when line_limit exceeds the limit
   ble/decode/kbd/.generate-keycode __line_limit__
   _ble_decode_KCODE_LINE_LIMIT=$ret
 
-  # Note: 暫定的な対応なので後で変更するかもしれない
+  # Note: This is a temporary solution and may be changed later.
   ble/decode/kbd/.generate-keycode mouse
   _ble_decode_KCODE_MOUSE=$ret
   ble/decode/kbd/.generate-keycode mouse_move
   _ble_decode_KCODE_MOUSE_MOVE=$ret
 
-  # Note: 以下は改めてそれぞれのファイルで参照される
-  #   コードを固定する為にここで定義しておく。
+  # Note: The following will be referenced in each file again.
+  #   Define it here to fix the code.
   ble/decode/kbd/.generate-keycode ac_enter
 
-  # Note: 将来的な不整合を防ぐためには新しいキーを追加する時には、必ず一番下に
-  # 追加する様にするべきである。さもないと、既に使われているコードがずれる事に
-  # なる。順番の整理は大きな節目ごとに行うべきである。
+  # Note: To prevent future inconsistencies, always add new keys at the bottom.
+  # You should add it. Otherwise, the code that is already in use will be shifted.
+  # It will be. Organizing the order should be done at each major milestone.
 
   builtin unset -f "$FUNCNAME"
 }
@@ -251,7 +251,7 @@ function ble/init:cmap/initialize-keys {
   # ble-bind --csi '5~' end
   # ble-bind --csi '6~' next
 
-  # 順番を固定
+  # Fixed order
   local ret
   ble/decode/kbd/.generate-keycode insert
   ble/decode/kbd/.generate-keycode home
@@ -272,17 +272,17 @@ function ble/init:cmap/initialize-keys {
     ble-bind --csi '5~' end
     ble-bind --csi '6~' next
   else
-    # Note: openSUSE の /etc/inputrc.keys が home/end と find/select
-    #   を別のキーと見做して誰も使わない keybinding を設定しているので、
-    #   home/end が上書きされてしまう。仕方がないので TERM=xterm の時
-    #   のみ find/select を独立したキーとして取り扱う事にする。これで
-    #   動かなくなる設定も存在するかもしれないが、取り敢えず openSUSE
-    #   inputrc を優先させてみる事にする。
+    # Note: openSUSE /etc/inputrc.keys is home/end and find/select
+    #   Since we set a keybinding that no one uses because it considers it to be another key,
+    #   home/end will be overwritten. There is no other choice, so when TERM=xterm
+    #   Only find/select will be treated as an independent key. Now
+    #   There may be settings that don't work, but for now openSUSE
+    #   I will try giving priority to inputrc.
     #
 
-    # 調べると DEC keyboard では home/end の位置に find/select と印字
-    # されている。幾つかの端末で 1~/4~ が home/end になっているのはこ
-    # れが由来だろう。
+    # When I look it up, the DEC keyboard prints find/select at the home/end position.
+    # has been done. This is why 1~/4~ is home/end on some terminals.
+    # This is probably the origin.
     if [[ $kend == $'\e[F' && ( $TERM == xterm || $TERM == xterm-* || $TERM == kvt ) ]]; then
       ble-bind --csi '1~' find
       ble-bind --csi '4~' select
@@ -327,13 +327,13 @@ function ble/init:cmap/initialize-keys {
 
   # keypad
   #   vt100, xterm, application mode
-  #   ESC ? は vt52 由来
+  #   ESC ? comes from vt52
   #
-  #   Note: kp～ と通常のキーを区別しても binding が大変なだけで
-  #   余り利点もないので取り敢えずこの設定では区別しない。
+  #   Note: Even if you distinguish between kp~ and normal keys, binding will be difficult.
+  #   Since there is not much advantage, I will not make a distinction in this setting for the time being.
   #
-  # Note: ble/init:cmap/bind-keypad-key 第3引数は
-  #   1: SS3 X, 2: ESC ? X, 4: CSI X の和。
+  # Note: ble/init:cmap/bind-keypad-key third argument is
+  #   1: SS3 X, 2: ESC ? X, 4: Sum of CSI X.
   ble/init:cmap/bind-keypad-key 'SP' SP   3 # kpspace
   ble/init:cmap/bind-keypad-key 'A' up    5
   ble/init:cmap/bind-keypad-key 'B' down  5
@@ -342,12 +342,12 @@ function ble/init:cmap/initialize-keys {
   ble/init:cmap/bind-keypad-key 'E' begin 5
   ble/init:cmap/bind-keypad-key 'F' end   5
   ble/init:cmap/bind-keypad-key 'H' home  5
-  ble/init:cmap/bind-keypad-key 'I' TAB   3 # kptab (Note: CSI I は xterm SM(?1004) focus と重複)
+  ble/init:cmap/bind-keypad-key 'I' TAB   3 # kptab (Note: CSI I overlaps with xterm SM(?1004) focus)
   ble/init:cmap/bind-keypad-key 'M' RET   7 # kpent
-  ble/init:cmap/bind-keypad-key 'P' f1    5 # kpf1 # Note: 普通の f1-f4
-  ble/init:cmap/bind-keypad-key 'Q' f2    5 # kpf2 #   に対してこれらの
-  ble/init:cmap/bind-keypad-key 'R' f3    5 # kpf3 #   シーケンスを送る
-  ble/init:cmap/bind-keypad-key 'S' f4    5 # kpf4 #   端末もある。
+  ble/init:cmap/bind-keypad-key 'P' f1    5 # kpf1 # Note: Ordinary f1-f4
+  ble/init:cmap/bind-keypad-key 'Q' f2    5 # These for kpf2 #
+  ble/init:cmap/bind-keypad-key 'R' f3    5 # kpf3 # send sequence
+  ble/init:cmap/bind-keypad-key 'S' f4    5 # There is also a kpf4 # terminal.
   ble/init:cmap/bind-keypad-key 'j' '*'   7 # kpmul
   ble/init:cmap/bind-keypad-key 'k' '+'   7 # kpadd
   ble/init:cmap/bind-keypad-key 'l' ','   7 # kpsep
@@ -366,12 +366,12 @@ function ble/init:cmap/initialize-keys {
   ble/init:cmap/bind-keypad-key 'y' '9'   7 # kp9
   ble/init:cmap/bind-keypad-key 'X' '='   7 # kpeq
 
-  # xterm SM(?1004) Focus In/Out の通知
-  ble/init:cmap/bind-keypad-key 'I' focus 4 # Note: 1 (= SS3) は TAB と重複するので設定しない
+  # xterm SM(?1004) Focus In/Out notification
+  ble/init:cmap/bind-keypad-key 'I' focus 4 # Note: Do not set 1 (= SS3) as it overlaps with TAB.
   ble/init:cmap/bind-keypad-key 'O' blur  5
 
   # rxvt
-  #   Note: "CSI code @", "CSI code ^" は本体側で特別に処理している。
+  #   Note: "CSI code @" and "CSI code ^" are specially processed on the main unit side.
   ble/init:cmap/bind-single-csi 'Z'     S-TAB
   ble/init:cmap/bind-single-ss3 'a'     C-up
   ble/init:cmap/bind-single-csi 'a'     S-up
@@ -381,22 +381,22 @@ function ble/init:cmap/initialize-keys {
   ble/init:cmap/bind-single-csi 'c'     S-right
   ble/init:cmap/bind-single-ss3 'd'     C-left
   ble/init:cmap/bind-single-csi 'd'     S-left
-  ble/init:cmap/bind-single-csi '2 $'   S-insert # ECMA-48 違反
-  ble/init:cmap/bind-single-csi '3 $'   S-delete # ECMA-48 違反
-  ble/init:cmap/bind-single-csi '5 $'   S-prior  # ECMA-48 違反
-  ble/init:cmap/bind-single-csi '6 $'   S-next   # ECMA-48 違反
-  ble/init:cmap/bind-single-csi '7 $'   S-home   # ECMA-48 違反
-  ble/init:cmap/bind-single-csi '8 $'   S-end    # ECMA-48 違反
-  ble/init:cmap/bind-single-csi '2 3 $' S-f11    # ECMA-48 違反
-  ble/init:cmap/bind-single-csi '2 4 $' S-f12    # ECMA-48 違反
-  ble/init:cmap/bind-single-csi '2 5 $' S-f13    # ECMA-48 違反
-  ble/init:cmap/bind-single-csi '2 6 $' S-f14    # ECMA-48 違反
-  ble/init:cmap/bind-single-csi '2 8 $' S-f15    # ECMA-48 違反
-  ble/init:cmap/bind-single-csi '2 9 $' S-f16    # ECMA-48 違反
-  ble/init:cmap/bind-single-csi '3 1 $' S-f17    # ECMA-48 違反
-  ble/init:cmap/bind-single-csi '3 2 $' S-f18    # ECMA-48 違反
-  ble/init:cmap/bind-single-csi '3 3 $' S-f19    # ECMA-48 違反
-  ble/init:cmap/bind-single-csi '3 4 $' S-f20    # ECMA-48 違反
+  ble/init:cmap/bind-single-csi '2 $'   S-insert # ECMA-48 violation
+  ble/init:cmap/bind-single-csi '3 $'   S-delete # ECMA-48 violation
+  ble/init:cmap/bind-single-csi '5 $'   S-prior  # ECMA-48 violation
+  ble/init:cmap/bind-single-csi '6 $'   S-next   # ECMA-48 violation
+  ble/init:cmap/bind-single-csi '7 $'   S-home   # ECMA-48 violation
+  ble/init:cmap/bind-single-csi '8 $'   S-end    # ECMA-48 violation
+  ble/init:cmap/bind-single-csi '2 3 $' S-f11    # ECMA-48 violation
+  ble/init:cmap/bind-single-csi '2 4 $' S-f12    # ECMA-48 violation
+  ble/init:cmap/bind-single-csi '2 5 $' S-f13    # ECMA-48 violation
+  ble/init:cmap/bind-single-csi '2 6 $' S-f14    # ECMA-48 violation
+  ble/init:cmap/bind-single-csi '2 8 $' S-f15    # ECMA-48 violation
+  ble/init:cmap/bind-single-csi '2 9 $' S-f16    # ECMA-48 violation
+  ble/init:cmap/bind-single-csi '3 1 $' S-f17    # ECMA-48 violation
+  ble/init:cmap/bind-single-csi '3 2 $' S-f18    # ECMA-48 violation
+  ble/init:cmap/bind-single-csi '3 3 $' S-f19    # ECMA-48 violation
+  ble/init:cmap/bind-single-csi '3 4 $' S-f20    # ECMA-48 violation
 
   # cygwin specific
   ble/init:cmap/bind-single-csi '[ A' f1
@@ -430,13 +430,13 @@ function ble/init:cmap/initialize-keys {
   ble/init:cmap/bind-single-csi '1 z' find   # from xterm ctlseqs
   ble/init:cmap/bind-single-csi '4 z' select # from xterm ctlseqs
 
-  # 修飾キー 'CAN @ ?'
+  # Modifier key 'CAN @ ?'
   #
-  #   取り敢えず CAN で始まる修飾キーは無効にしておく。何故なら、
-  #   CAN (C-x) で始まるシーケンスをキーに当てはめてしまうと、
-  #   C-x で終わるコマンド (exchange-point-and-mark) が曖昧になってしまう。
-  #   結果として、次に非 @ の文字が来るまで確定しないので実行が遅れる。
-  #   また C-x C-x の後で @h 等を入力したい場合に別の解釈になってしまう。
+  #   For now, disable modifier keys that start with CAN. Because,
+  #   If you apply a sequence starting with CAN (C-x) to a key,
+  #   Commands ending in C-x (exchange-point-and-mark) are ambiguous.
+  #   As a result, execution is delayed because it is not determined until the next non-@ character.
+  #   Also, if you want to input something like @h after C-x C-x, it will be interpreted differently.
   #
   # ble-bind -k "CAN @ S" shift
   # ble-bind -k "CAN @ a" alter
@@ -500,7 +500,7 @@ function ble/init:cmap/initialize {
   ble/edit/info/immediate-show text 'ble.sh: generating "'"$dump"'"...'
   ble/init:cmap/initialize-kbd
   ble/init:cmap/initialize-keys
-  local hash='015701ad744b9fdedb46d589a94ac9af5a8fdb60'
+  local hash='8c5b1b24da756fa6e2fc8e240eece33abfb0290c'
   ble-bind -D | ble/bin/awk -v hash="$hash" '
     {
       sub(/^declare +(-[aAilucnrtxfFgGI]+ +)?/, "");

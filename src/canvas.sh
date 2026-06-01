@@ -1,12 +1,12 @@
 #!/bin/bash
 
 ## @bleopt tab_width
-##   タブの表示幅を指定します。
+##   Specify the display width of the tab.
 ##
-##   bleopt_tab_width= (既定)
-##     空文字列を指定したときは $(tput it) を用います。
+##   bleopt_tab_width= (default)
+##     If you specify an empty string, use $(tput it).
 ##   bleopt_tab_width=NUM
-##     数字を指定したときはその値をタブの幅として用います。
+##     If you specify a number, that value will be used as the tab width.
 bleopt/declare -v tab_width ''
 function bleopt/check:tab_width {
   local old_width=${bleopt_tab_width:-$_ble_term_it}
@@ -39,9 +39,9 @@ function ble/arithmetic/sum {
 #------------------------------------------------------------------------------
 # ble/util/c2w
 
-# ※注意 [ -~] の範囲の文字は全て幅1であるという事を仮定したコードが幾らかある
-#   もしこれらの範囲の文字を幅1以外で表示する端末が有ればそれらのコードを実装し
-#   直す必要がある。その様な変な端末があるとは思えないが。
+# *Note: There are some codes that assume that all characters in the [ -~] range have a width of 1.
+#   If you have a terminal that displays characters in these ranges with a width other than 1, implement those codes.
+#   Needs to be fixed. I can't believe such a strange device exists.
 
 _ble_util_c2w=()
 _ble_util_c2w_cache=()
@@ -50,16 +50,16 @@ function ble/util/c2w/clear-cache {
 }
 
 ## @bleopt char_width_mode
-##   文字の表示幅の計算方法を指定します。
+##   Specifies how the display width of characters is calculated.
 ##     bleopt_char_width_mode=east
-##       Unicode East_Asian_Width=A (Ambiguous) の文字幅を全て 2 とします
+##       Set all character widths of Unicode East_Asian_Width=A (Ambiguous) to 2
 ##     bleopt_char_width_mode=west
-##       Unicode East_Asian_Width=A (Ambiguous) の文字幅を全て 1 とします
+##       Unicode East_Asian_Width=A (Ambiguous) character width is all 1
 ##     bleopt_char_width_mode=auto
-##       east または west を自動判定します。
+##       Automatically determines east or west.
 ##     bleopt_char_width_mode=emacs
-##       emacs で用いられている既定の文字幅の設定です
-##     定義 ble/util/c2w:$bleopt_char_width_mode
+##       This is the default character width setting used in emacs.
+##     Definition ble/util/c2w:$bleopt_char_width_mode
 bleopt/declare -n char_width_mode auto
 function bleopt/check:char_width_mode {
   if ! ble/is-function ble/util/c2w:"$value"; then
@@ -88,7 +88,7 @@ function ble/util/c2w {
   fi
 }
 ## @fn ble/util/c2w-edit ccode
-##   編集画面での表示上の文字幅を返します。
+##   Returns the displayed character width on the editing screen.
 ##   @var[out] ret
 function ble/util/c2w-edit {
   if ble/unicode/GraphemeCluster/ControlRepresentation "$1"; then
@@ -115,10 +115,10 @@ function ble/util/s2w {
 }
 
 ## @fn ble/util/c2s-edit ccode [opts]
-##   編集画面での表現を返します。
+##   Returns the expression on the editing screen.
 ##   @param[opt] opts
 ##     @opt sgr1 sgr0
-##       制御文字の代替表現を囲むのに使用する文字列を指定します。
+##       Specifies the string used to enclose alternative representations of control characters.
 ##
 ##   @var[out] ret
 function ble/util/c2s-edit {
@@ -137,7 +137,7 @@ function ble/util/c2s-edit {
   fi
 }
 
-# ---- 文字種判定 ----
+# ---- Character type determination ----
 
 #%< canvas.c2w.sh
 _ble_unicode_c2w_version=14
@@ -163,20 +163,20 @@ function bleopt/check:char_width_version {
   fi
 }
 
-# wcwdith 例外 (Unicode 特性からは予想できない値を持っている物)
-# この表は make/canvas.c2w.wcwidth.exe compare_eaw の出力より。
+# wcwdith exception (those with values that cannot be predicted from Unicode characteristics)
+# This table is from the output of make/canvas.c2w.wcwidth.exe compare_eaw.
 _ble_unicode_c2w_custom[173]=1                    # U+00ad       Cf A SHY(soft-hyphen)
-let '_ble_unicode_c2w_custom['{1536..1541}']=1'   # U+0600..0605 Cf 1 アラブの数字?
+let '_ble_unicode_c2w_custom['{1536..1541}']=1'   # U+0600..0605 Cf 1 Arab number?
 _ble_unicode_c2w_custom[1757]=1                   # U+06dd       Cf 1 ARABIC END OF AYAH
 _ble_unicode_c2w_custom[1807]=1                   # U+070f       Cf 1 SYRIAC ABBREVIATION MARK
 _ble_unicode_c2w_custom[2274]=1                   # U+08e2       Cf 1 ARABIC DISPUTED END OF AYAH
 _ble_unicode_c2w_custom[69821]=1                  # U+110bd      Cf 1 KAITHI NUMBER SIGN
 _ble_unicode_c2w_custom[69837]=1                  # U+110cd      Cf 1 KAITHI NUMBER SIGN ABOVE
-let '_ble_unicode_c2w_custom['{12872..12879}']=2' # U+3248..324f No A 囲み文字10-80 (8字)
-let '_ble_unicode_c2w_custom['{19904..19967}']=2' # U+4dc0..4dff So 1 易経記号 (6字)
-let '_ble_unicode_c2w_custom['{4448..4607}']=0'   # U+1160..11ff Lo 1 HANGUL JAMO (160字)
-let '_ble_unicode_c2w_custom['{55216..55238}']=0' # U+d7b0..d7c6 Lo 1 HANGUL JAMO EXTENDED-B (1) (23字)
-let '_ble_unicode_c2w_custom['{55243..55291}']=0' # U+d7cb..d7fb Lo 1 HANGUL JAMO EXTENDED-B (2) (49字)
+let '_ble_unicode_c2w_custom['{12872..12879}']=2' # U+3248..324f No A Enclosed characters 10-80 (8 characters)
+let '_ble_unicode_c2w_custom['{19904..19967}']=2' # U+4dc0..4dff So 1 I Ching symbol (6 characters)
+let '_ble_unicode_c2w_custom['{4448..4607}']=0'   # U+1160..11ff Lo 1 HANGUL JAMO (160 characters)
+let '_ble_unicode_c2w_custom['{55216..55238}']=0' # U+d7b0..d7c6 Lo 1 HANGUL JAMO EXTENDED-B (1) (23 characters)
+let '_ble_unicode_c2w_custom['{55243..55291}']=0' # U+d7cb..d7fb Lo 1 HANGUL JAMO EXTENDED-B (2) (49 characters)
 
 function ble/unicode/c2w {
   local c=$1
@@ -209,7 +209,7 @@ function ble/unicode/c2w {
 ## @var _ble_unicode_EmojiStatus_version
 ## @bleopt emoji_version
 ##
-##   ファイル src/canvas.emoji.sh は以下のコマンドで生成する。
+##   Generate the file src/canvas.emoji.sh with the following command.
 ##   $ make/canvas.c2w.generate-table.sh emoji
 ##
 #%< canvas.emoji.sh
@@ -237,9 +237,9 @@ function bleopt/check:emoji_version {
 }
 function bleopt/check:emoji_width { ble/util/c2w/clear-cache; }
 
-# 2021-06-18 unqualified は絵文字に含めない。多くの場合は既定では通常文字で
-# EPVS によって絵文字として表示する様である。component は肌の色(Extend) と髪
-# (Pictographic) の2種類がある。取り敢えず幅2で計算する。
+# 2021-06-18 Unqualified is not included in emojis. Often defaults to regular characters.
+# EPVS seems to display it as a pictogram. component is skin color (Extend) and hair
+# There are two types: (Pictographic). For now, let's calculate with a width of 2.
 _ble_unicode_EmojiStatus_xIsEmoji='ret&&ret!=_ble_unicode_EmojiStatus_Unqualified'
 function bleopt/check:emoji_opts {
   _ble_unicode_EmojiStatus_xIsEmoji='ret'
@@ -312,9 +312,9 @@ function ble/util/c2w:emacs {
   local code=$1
 
   # bash-4.0 bug workaround
-  #   中で使用している変数に日本語などの文字列が入っているとエラーになる。
-  #   その値を参照していなくても、その分岐に入らなくても関係ない。
-  #   なので ret に予め適当な値を設定しておく事にする。
+  #   If the variables used inside contain strings such as Japanese, an error will occur.
+  #   It doesn't matter if you don't refer to that value or take that branch.
+  #   Therefore, set an appropriate value to ret in advance.
   ret=1
   ((code<0xA0)) && return 0
 
@@ -323,13 +323,13 @@ function ble/util/c2w:emacs {
     return 0
   fi
 
-  # Note: ble/unicode/c2w を使うとずれる。考えてみれば emacs は各端末
-  # で同じテーブルを使って実装しているので ble/unicode/c2w 等外部の物
-  # を参照せずに実装するべきなのであった。
+  # Note: If you use ble/unicode/c2w, it will shift. If you think about it, emacs runs on each terminal.
+  # Since it is implemented using the same table, external things such as ble/unicode/c2w etc.
+  # It should have been implemented without reference to .
   #ble/unicode/c2w "$1"
   #((ret==3)) || return 0
 
-  # 実は EastAsianWidth=A だけ考えれば良いので下の条件式は単純化できる筈
+  # Actually, we only need to consider EastAsianWidth=A, so the conditional expression below can be simplified.
   local al=0 ah=0 tIndex=
   ((
     0x3100<=code&&code<0xA4D0||0xAC00<=code&&code<0xD7A4?(
@@ -419,8 +419,8 @@ function ble/util/c2w:auto/test.buff {
   local -a DRAW_BUFF=()
   local ret saved_pos=
 
-  # 現在既に処理中の場合 DSR は省略。char_width_@=auto 等で一括して要
-  # 求した時などに一回だけ実行する為。
+  # If processing is already in progress, DSR is omitted. Required all at once with char_width_@=auto etc.
+  # To be executed only once, such as when requested.
   ((_ble_util_c2w_auto_update_processing)) && return 0
 
   [[ $_ble_attached ]] && { ble/canvas/panel/save-position goto-top-dock; saved_pos=$ret; }
@@ -430,14 +430,14 @@ function ble/util/c2w:auto/test.buff {
   if ble/util/is-unicode-output; then
 
     local -a codes=(
-      # index=0,1 [EastAsianWidth=A 判定]
+      # index=0,1 [EastAsianWidth=A judgment]
       0x25bd 0x25b6
 
-      # index=2..17 [Unicode version 判定] #D1645 #D1668
-      #   判定用の文字コードは "source
-      #   make/canvas.c2w.list-ucsver-detection-codes.sh" を用いて生
-      #   成されたリストから選択した。新しい Unicode version が出たら
-      #   再びこれを実行して判定コードを書く事になる。
+      # index=2..17 [Unicode version determination] #D1645 #D1668
+      #   The character code for judgment is "source
+      #   make/canvas.c2w.list-ucsver-detection-codes.sh"
+      #   selected from the created list. When a new Unicode version comes out
+      #   We will run this again and write the judgment code.
       0x9FBC 0x9FC4  0x31B8 0xD7B0  0x3099
       0x9FCD 0x1F93B 0x312E 0x312F  0x16FE2
       0x32FF 0x31BB  0x9FFD 0x1B132 0x2FFC
@@ -446,7 +446,7 @@ function ble/util/c2w:auto/test.buff {
     _ble_util_c2w_auto_update_processing=${#codes[@]}
     _ble_util_c2w_auto_update_result=()
     if [[ :$opts: == *:first-line:* ]]; then
-      # 画面の右上で判定を行います。
+      # Make a judgment at the top right of the screen.
       local cols=${COLUMNS:-80}
       local x0=$((cols-4)); ((x0<0)) && x0=0
       _ble_util_c2w_auto_update_x0=$x0
@@ -529,7 +529,7 @@ function ble/util/c2w/test.hook {
     fi
   fi
 
-  # 先に char_width_version を確定してから musl の判定でそれを参照する。
+  # Determine char_width_version first and then refer to it in the musl judgment.
   if [[ $bleopt_char_width_mode == auto ]]; then
     IFS=: builtin eval 'ws="${_ble_util_c2w_auto_update_result[*]::2}:${_ble_util_c2w_auto_update_result[*]:5:2}"'
     case $ws in
@@ -560,18 +560,18 @@ function bleopt/check:grapheme_cluster {
 
 #%< canvas.GraphemeClusterBreak.sh
 
-# Note #D2076: 多くの端末 (glibc の wcwidth/wcswidth を参照している端末) で以下
-# の文字は Unicode とは違う振る舞いで実装されている。kitty 及び RLogin では独自
-# に Unicode に従って実装している様だが、取り敢えずは大勢に合わせて
-# GraphemeClusterBreak を補正する。
+# Note #D2076: On many terminals (terminals that refer to glibc's wcwidth/wcswidth), the following
+# characters are implemented with different behavior than Unicode. Unique for kitty and RLogin
+# It seems that it is implemented according to Unicode, but for the time being, I will use it to suit the majority of people.
+# Correct GraphemeClusterBreak.
 _ble_unicode_GraphemeClusterBreak_custom[0x1F3FB]=$_ble_unicode_GraphemeClusterBreak_Pictographic
 _ble_unicode_GraphemeClusterBreak_custom[0x1F3FC]=$_ble_unicode_GraphemeClusterBreak_Pictographic
 _ble_unicode_GraphemeClusterBreak_custom[0x1F3FD]=$_ble_unicode_GraphemeClusterBreak_Pictographic
 _ble_unicode_GraphemeClusterBreak_custom[0x1F3FE]=$_ble_unicode_GraphemeClusterBreak_Pictographic
 _ble_unicode_GraphemeClusterBreak_custom[0x1F3FF]=$_ble_unicode_GraphemeClusterBreak_Pictographic
 
-# Note #D2076: 半角カナの濁点と半濁点は Extended Lm だが、端末上の振る舞いは独
-# 立した文字として振る舞っている (xterm, lxterminal, terminology, kitty)。
+# Note #D2076: Half-width kana dakuten and handakuten are Extended Lm, but the behavior on the terminal is unique.
+# (xterm, lxterminal, terminology, kitty).
 _ble_unicode_GraphemeClusterBreak_custom[0xFF9E]=$_ble_unicode_GraphemeClusterBreak_Other
 _ble_unicode_GraphemeClusterBreak_custom[0xFF9F]=$_ble_unicode_GraphemeClusterBreak_Other
 
@@ -618,17 +618,17 @@ function ble/unicode/GraphemeCluster/s2break/.combine-surrogate {
   fi
 }
 ## @fn ble/unicode/GraphemeCluster/s2break/.wa-bash43bug-uFFFF code
-##   (#D1881) Bash 4.3, 4.4 [sizeof(wchar_t) == 2] で $'\uE000'.. $'\uFFFF' が
-##   壊れたサロゲートになるバグに対する対策。この時、前半サロゲートは不正な値
-##   U+D7F8..D7FF になるが、これはハングル字母などと被る。U+D7F8..D7FF の時は、
-##   次の文字が後半サロゲートの時に限り前半サロゲートとして取り扱う。
+##   (#D1881) $'\uE000'.. $'\uFFFF' in Bash 4.3, 4.4 [sizeof(wchar_t) == 2]
+##   A workaround for a bug that results in broken surrogates. At this time, the first half surrogate is an invalid value
+##   It becomes U+D7F8..D7FF, which overlaps with Hangul alphabet etc. When U+D7F8..D7FF,
+##   It is treated as a first-half surrogate only when the next character is a second-half surrogate.
 ##
 ##   @param[in] code
-##     壊れた前半サロゲータの可能性がある文字コード
+##     Character code that may be a broken first half surrogate
 ##   @var[in,out] ret
-##     調整前後の GraphemeClusterBreak 値
+##     GraphemeClusterBreak value before and after adjustment
 ##   @exit
-##     調整が行われた時に成功です (0)。それ以外の時は失敗 (1) です。
+##     Successful when an adjustment is made (0). Otherwise, it is a failure (1).
 ##
 if ((_ble_unicode_GraphemeCluster_bomlen==2&&40300<=_ble_bash&&_ble_bash<50000)); then
   function ble/unicode/GraphemeCluster/s2break/.wa-bash43bug-uFFFF {
@@ -640,16 +640,16 @@ else
   function ble/unicode/GraphemeCluster/s2break/.wa-bash43bug-uFFFF { ((0)); }
 fi
 ## @fn ble/unicode/GraphemeCluster/s2break/.wa-cygwin-LSG code
-##   (#D1881) Cygwin では UCS-2 に入らないコードポイントの後半サロゲートをs2cで
-##   取ろうとしても 0 になってしまう (Bash 5.0 以降では 4-byte UTF-8 の最後のバ
-##   イト値) ので、後半について code == 0 の場合も前半サロゲートをチェックする。
+##   (#D1881) In Cygwin, the second half surrogate of the code point that does not fit in UCS-2 is used as s2c.
+##   If you try to get it, it will be 0 (since Bash 5.0, the last bit of 4-byte UTF-8
+##   ), so the first half surrogate is checked even if code == 0 for the second half.
 ##
 ##   @param[in] code
-##     UCS-4 の後半サロゲートの可能性がある文字コード
+##     Possible late surrogate character codes for UCS-4
 ##   @var[in,out] ret
-##     調整前後の GraphemeClusterBreak 値
+##     GraphemeClusterBreak value before and after adjustment
 ##   @exit
-##     調整が行われた時に成功です (0)。それ以外の時は失敗 (1) です。
+##     Successful when an adjustment is made (0). Otherwise, it is a failure (1).
 ##
 if ((_ble_unicode_GraphemeCluster_ucs4len==2)); then
   if ((_ble_bash<50000)); then
@@ -671,36 +671,36 @@ fi
 
 ## @fn ble/unicode/GraphemeCluster/s2break-left str index [opts]
 ## @fn ble/unicode/GraphemeCluster/s2break-right str index [opts]
-##   指定した文字列の指定した境界の左右の code point の GraphemeCulsterBreak 値
-##   を求めます。単に bash の文字単位ではなく、サロゲートペアも考慮に入れたコー
-##   ドポイント単位で処理を行います。
+##   GraphemeCulsterBreak values of the code points to the left and right of the specified boundary of the specified string
+##   I'm looking for. A code that takes into account surrogate pairs, not just character units in bash.
+##   Processing is performed in dot point units.
 ##
 ##   @param str
 ##   @param index
 ##   @param[opt] opts
 ##   @var[out] ret
-##     GraphemeCulsterBreak 値を返します。
+##     Returns the GraphemeCulsterBreak value.
 ##   @var[out,opt] shift
-##     opts に shift が指定された時に対象の code point の文字数を返します。
-##     surrogate pair の時に 2 になります。それ以外の時は 1 です。
+##     Returns the number of characters in the target code point when shift is specified in opts.
+##     It becomes 2 when it is a surrogate pair. Otherwise, it is 1.
 ##   @var[out,opt] code
-##     opts に code が指定された時に対象の code point を返します。
+##     Returns the target code point when code is specified in opts.
 ##
-## * Note2 (#D1881): ${s:i-1:2} 等として 2 文字切り出すのは、Cygwin では
-##   ${s:i-1:1} として最初の文字を切り出そうとすると UCS-2 に入らない code
-##   point の文字が破壊されてしまって surrogate 前半すら取り出せなくなる為。少
-##   なくとも wchar_t*2 の分だけ渡せば printf %d '$1 で surrogate 前半の code
-##   point を取り出す事ができる。
+## * Note2 (#D1881): Extracting two characters as ${s:i-1:2} etc. is not possible in Cygwin.
+##   When trying to extract the first character as ${s:i-1:1}, the code does not fit into UCS-2
+##   Because the character of point is destroyed and even the first half of surrogate cannot be taken out. Small
+##   If you pass at least wchar_t*2, printf %d '$1 will print the first half of surrogate code.
+##   You can extract points.
 function ble/unicode/GraphemeCluster/s2break-left {
   ret=0
   local s=$1 N=${#1} i=$2 opts=$3 sh=1
-  ((i>0)) && ble/util/s2c "${s:i-1:2}"; local c=$ret code2=$ret # Note2 (上述)
+  ((i>0)) && ble/util/s2c "${s:i-1:2}"; local c=$ret code2=$ret # Note2 (mentioned above)
   ble/unicode/GraphemeCluster/c2break "$code2"; local break=$ret
 
   # process surrogate pairs
   ((i-1<N)) && ble/unicode/GraphemeCluster/s2break/.wa-cygwin-LSG "$code2"
   if ((i-2>=0&&ret==_ble_unicode_GraphemeClusterBreak_LowSurrogate)); then
-    ble/util/s2c "${s:i-2:2}"; local code1=$ret # Note2 (上述)
+    ble/util/s2c "${s:i-2:2}"; local code1=$ret # Note2 (mentioned above)
     ble/unicode/GraphemeCluster/c2break "$code1"
     ble/unicode/GraphemeCluster/s2break/.wa-bash43bug-uFFFF "$code1"
     if ((ret==_ble_unicode_GraphemeClusterBreak_HighSurrogate)); then
@@ -710,9 +710,9 @@ function ble/unicode/GraphemeCluster/s2break-left {
       sh=2
     fi
   elif ((i<N)) && ble/unicode/GraphemeCluster/s2break/.wa-bash43bug-uFFFF "$code2"; then
-    # 壊れた前半サロゲートの可能性があるので次の文字を確認して break を確定する。
-    # (Note: 壊れたサロゲートペアの場合には UTF-8 4B 表現になる事はないので
-    # Cygwin で code_next==0 になる可能性は考えなくて良い。)
+    # There is a possibility of a broken first half surrogate, so check the next character and confirm the break.
+    # (Note: In the case of a broken surrogate pair, there will be no UTF-8 4B representation.
+    # There is no need to consider the possibility that code_next==0 in Cygwin. )
     ble/util/s2c "${s:i:1}"; local code_next=$ret
     ble/unicode/GraphemeCluster/c2break "$code_next"
     ((ret==_ble_unicode_GraphemeClusterBreak_LowSurrogate)) &&
@@ -726,7 +726,7 @@ function ble/unicode/GraphemeCluster/s2break-left {
 function ble/unicode/GraphemeCluster/s2break-right {
   ret=0
   local s=$1 N=${#1} i=$2 opts=$3 sh=1
-  ble/util/s2c "${s:i:2}"; local c=$ret code1=$ret # Note2 (上述)
+  ble/util/s2c "${s:i:2}"; local c=$ret code1=$ret # Note2 (mentioned above)
   ble/unicode/GraphemeCluster/c2break "$code1"; local break=$ret
 
   # process surrogate pairs
@@ -743,9 +743,9 @@ function ble/unicode/GraphemeCluster/s2break-right {
       sh=2
     fi
   elif ((0<i&&i<N)) && ble/unicode/GraphemeCluster/s2break/.wa-cygwin-LSG "$code1"; then
-    # Note #D1881: Cygwin では UCS-2 に入らない code point の surrogate 後半を
-    # s2c で取ろうとしても 0 になってしまうので code1==0 の時は念入りに調べる。
-    # 前に HighSurrogate がない時は通常文字と同様に取り扱って問題ない。
+    # Note #D1881: In Cygwin, the second half of the surrogate of the code point that does not fit into UCS-2
+    # If you try to get it with s2c, it will be 0, so check carefully when code1==0.
+    # If there is no HighSurrogate in front of it, there is no problem in treating it like a normal character.
     ble/util/s2c "${s:i-1:1}"; local code_prev=$ret
     ble/unicode/GraphemeCluster/c2break "$code_prev"
     ble/unicode/GraphemeCluster/s2break/.wa-bash43bug-uFFFF "$code_prev"
@@ -820,19 +820,19 @@ function ble/unicode/GraphemeCluster/find-previous-boundary/.RI {
 ## @fn ble/unicode/GraphemeCluster/find-previous-boundary/.InCB
 ##   @var[in] text
 ##   @var[in,out] i
-##     現在位置 i を指定します。Indic_Conjunct_Break を読み終わった新しい現在位
-##     置を返します。
+##     Specify the current position i. New current position after reading Indic_Conjunct_Break
+##     Returns the position.
 ##   @var[in] shift
-##     現在位置 i の左にある文字の UTF-8 文字数を指定します。通常は 1 です。未
-##     解決のサロゲートペアがある場合に 2 になります。
+##     Specifies the number of UTF-8 characters to the left of current position i. Usually 1. Not yet
+##     Will be 2 if there is a surrogate pair for resolution.
 ##   @var[in] b1
-##     現在位置 i の左側の GraphemeClusterBreak 値を指定します。
+##     Specifies the GraphemeClusterBreak value to the left of current position i.
 ##   @var[out] ret
-##     境界が見つかった時に境界の位置を返します。
+##     Returns the position of the boundary when it is found.
 ##   @remarks
-##     shift 及び b1 は現在位置 i に於いて
-##     ble/unicode/GraphemeCluster/s2break-left を呼び出した状態である事を前提
-##     とします。
+##     shift and b1 at current position i
+##     Assuming that ble/unicode/GraphemeCluster/s2break-left has been called
+##     Let's say.
 function ble/unicode/GraphemeCluster/find-previous-boundary/.InCB {
   # Grapheme Cluster with InCB is supported by Unicode >= 15.1.0
   if [[ $bleopt_grapheme_cluster != extended ]] || ((_ble_unicode_c2w_version<17)); then
@@ -883,7 +883,7 @@ function ble/unicode/GraphemeCluster/find-previous-boundary {
       (4) ble/unicode/GraphemeCluster/find-previous-boundary/.RI && return 0 ;;
       (6) ble/unicode/GraphemeCluster/find-previous-boundary/.InCB && return 0;;
       (5)
-        # surrogate pair の間にいた時は GraphemeClusterBreak を取得し直す
+        # If you are between surrogate pairs, get GraphemeClusterBreak again
         ((i-=shift))
         ble/unicode/GraphemeCluster/s2break-right "$text" "$i"; b1=$ret ;;
       esac
@@ -974,8 +974,8 @@ function ble/unicode/GraphemeCluster/ControlRepresentation {
 ## @fn ble/unicode/GraphemeCluster/match text i flags
 ##   @param[in] text i
 ##   @param[in] flags
-##     R が含まれている時制御文字を (ASCII 表現ではなく) そのまま cs に格納しま
-##     す。幅は 0 で換算されます。
+##     When R is included, control characters are stored in cs as is (rather than their ASCII representation).
+##     Yes. The width is converted to 0.
 ##   @var[out] c w cs cb extend
 function ble/unicode/GraphemeCluster/match {
   local text=$1 iN=${#1} i=$2 j=$2 flags=$3 ret
@@ -1040,7 +1040,7 @@ function ble/unicode/GraphemeCluster/match {
           ((_ble_unicode_c2w_version>=17&&InCB_state)) ||
             break ;;
     (5)
-      # surrogate pair の間にいた時は GraphemeClusterBreak を取得し直す
+      # If you are between surrogate pairs, get GraphemeClusterBreak again
       ble/unicode/GraphemeCluster/s2break-left "$text" "$((j+shift))" code; c2=$code b2=$ret ;;
     esac
   done
@@ -1049,7 +1049,7 @@ function ble/unicode/GraphemeCluster/match {
   ((extend=j-i-1))
   if [[ ! $corec ]]; then
     if [[ $flags != *R* ]]; then
-      ((c=c0,cb=0,corec=0x25CC)) # 基底が存在しない時は点線円
+      ((c=c0,cb=0,corec=0x25CC)) # Dotted circle when no basis exists
       ble/util/c2s "$corec"
       cs=${text:i:npre}$ret${text:i+npre:j-i-npre}
     else
@@ -1064,12 +1064,12 @@ function ble/unicode/GraphemeCluster/match {
       ble/unicode/GraphemeCluster/.get-ascii-rep "$c"
       w=${#cs}
     else
-      # ToDo: 全ての制御文字が幅0とは限らない。というより色々処理が必要。
+      # ToDo: Not all control characters have zero width. Rather, various processing is required.
       w=0
     fi
 
   else
-    # 幅の計算 (Variation Selector を考慮に入れる)
+    # Width calculation (takes Variation Selector into account)
     if [[ $vs == tpvs && :$bleopt_emoji_opts: == *:tpvs:* ]]; then
       bleopt_emoji_width= ble/util/c2w "$corec"; w=$ret
     elif [[ $vs == epvs && :$bleopt_emoji_opts: == *:epvs:* ]]; then
@@ -1118,7 +1118,7 @@ function ble/canvas/put-ind.draw {
 
   DRAW_BUFF[${#DRAW_BUFF[*]}]=$ret
   [[ $x && $ind != $'\eD' ]] &&
-    ble/canvas/put-hpa.draw "$((x+1))" # tput ind が唯の改行の時がある
+    ble/canvas/put-hpa.draw "$((x+1))" # Sometimes tput ind is the only newline
 }
 function ble/canvas/put-ri.draw {
   local count=${1-1}
@@ -1128,41 +1128,41 @@ function ble/canvas/put-ri.draw {
 ## @fn ble/canvas/put-il.draw [nline] [opts]
 ## @fn ble/canvas/put-dl.draw [nline] [opts]
 ##   @param[in,opt] nline
-##     消去・挿入する行数を指定します。
-##     省略した場合は 1 と解釈されます。
+##     Specify the number of rows to delete/insert.
+##     If omitted, it is interpreted as 1.
 ##   @param[in,opt] opts
 ##     panel
 ##     vfill
 ##     no-lastline
-##       Cygwin console 最終行バグ判定用の情報です。
+##       Cygwin console Information for determining last line bugs.
 function ble/canvas/put-il.draw {
   local value=${1-1}
   ((value>0)) || return 0
   DRAW_BUFF[${#DRAW_BUFF[*]}]=${_ble_term_il//'%d'/$value}
-  DRAW_BUFF[${#DRAW_BUFF[*]}]=$_ble_term_el2 # Note #D1214: 最終行対策 cygwin, linux
+  DRAW_BUFF[${#DRAW_BUFF[*]}]=$_ble_term_el2 # Note #D1214: Last line countermeasure cygwin, linux
 }
 function ble/canvas/put-dl.draw {
   local value=${1-1}
   ((value>0)) || return 0
-  DRAW_BUFF[${#DRAW_BUFF[*]}]=$_ble_term_el2 # Note #D1214: 最終行対策 cygwin, linux
+  DRAW_BUFF[${#DRAW_BUFF[*]}]=$_ble_term_el2 # Note #D1214: Last line countermeasure cygwin, linux
   DRAW_BUFF[${#DRAW_BUFF[*]}]=${_ble_term_dl//'%d'/$value}
 }
-# Cygwin console (pcon) では最終行で IL/DL すると画面全体がクリアされるバグの対策 (#D1482)
+# In Cygwin console (pcon), countermeasure for the bug where the entire screen is cleared when IL/DL is executed on the last line (#D1482)
 if ((_ble_bash>=40000)) && [[ ( $OSTYPE == cygwin || $OSTYPE == msys ) && $TERM == xterm-256color ]]; then
   function ble/canvas/.is-il-workaround-required {
     local value=$1 opts=$2
 
-    # Cygwin console 以外の端末ではそもそも対策不要。
+    # No countermeasures are necessary in the first place for terminals other than Cygwin console.
     [[ ! $_ble_term_DA2R ]] || return 1
 
-    # 複数行挿入・削除する場合は現在位置は最終行ではない筈。
+    # When inserting or deleting multiple lines, the current position should not be the last line.
     ((value==1)) || return 1
 
-    # 対策不要と明示されている場合は対策不要。
+    # If it is clearly stated that no measures are required, no measures are required.
     [[ :$opts: == *:vfill:* || :$opts: == *:no-lastline:* ]] && return 1
 
-    # ble/canvas/panel 内部で移動中の時は opts=panel が指定される。
-    # panel 集合の最終行にいない場合は対策不要。
+    # opts=panel is specified when moving inside ble/canvas/panel.
+    # No countermeasures are required if you are not in the last row of the panel set.
     [[ :$opts: == *:panel:* ]] &&
       ! ble/canvas/panel/is-last-line &&
       return 1
@@ -1181,7 +1181,7 @@ if ((_ble_bash>=40000)) && [[ ( $OSTYPE == cygwin || $OSTYPE == msys ) && $TERM 
       fi
     else
       DRAW_BUFF[${#DRAW_BUFF[*]}]=${_ble_term_il//'%d'/$value}
-      DRAW_BUFF[${#DRAW_BUFF[*]}]=$_ble_term_el2 # Note #D1214: 最終行対策 cygwin, linux
+      DRAW_BUFF[${#DRAW_BUFF[*]}]=$_ble_term_el2 # Note #D1214: Last line countermeasure cygwin, linux
     fi
   }
   function ble/canvas/put-dl.draw {
@@ -1194,7 +1194,7 @@ if ((_ble_bash>=40000)) && [[ ( $OSTYPE == cygwin || $OSTYPE == msys ) && $TERM 
         DRAW_BUFF[${#DRAW_BUFF[*]}]=$'\e[S\e[A\e[M\e[B\e[T'
       fi
     else
-      DRAW_BUFF[${#DRAW_BUFF[*]}]=$_ble_term_el2 # Note #D1214: 最終行対策 cygwin, linux
+      DRAW_BUFF[${#DRAW_BUFF[*]}]=$_ble_term_el2 # Note #D1214: Last line countermeasure cygwin, linux
       DRAW_BUFF[${#DRAW_BUFF[*]}]=${_ble_term_dl//'%d'/$value}
     fi
   }
@@ -1267,8 +1267,8 @@ function ble/canvas/put-move-y.draw {
   ((dy)) || return 1
   if ((dy>0)); then
     if [[ $MC_SID == $$ ]]; then
-      # Note #D1392: mc (midnight commander) の中だと layout が破壊されるので、
-      #   必ずしも CUD で想定した行だけ移動できると限らない。
+      # Note #D1392: The layout is destroyed in mc (midnight commander), so
+      #   It is not always possible to move only the lines expected by CUD.
       ble/canvas/put-ind.draw "$dy" true-ind
     else
       ble/canvas/put-cud.draw "$dy"
@@ -1287,7 +1287,7 @@ function ble/canvas/flush.draw {
 }
 ## @fn ble/canvas/sflush.draw [-v var]
 ##   @param[in] var
-##     出力先の変数名を指定します。
+##     Specify the variable name of the output destination.
 ##   @var[out] !var
 function ble/canvas/sflush.draw {
   local _ble_local_var=ret
@@ -1302,9 +1302,9 @@ function ble/canvas/bflush.draw {
 
 ## @fn ble/canvas/put-clear-lines.draw [old] [new] [opts]
 ##   @param[in,opt] old new
-##     消去前と消去後の行数を指定します。
-##     old を省略した場合は 1 が使われます。
-##     new を省略した場合は old が使われます。
+##     Specify the number of lines before and after erasing.
+##     If old is omitted, 1 is used.
+##     If new is omitted, old is used.
 ##   @param[in,opt] opts
 ##     panel
 ##     vfill
@@ -1343,83 +1343,83 @@ function ble/canvas/put-clear-lines.draw {
 
 ## @fn ble/canvas/trace.draw text [opts]
 ## @fn ble/canvas/trace text [opts]
-##   制御シーケンスを含む文字列を出力すると共にカーソル位置の移動を計算します。
+##   Prints a string containing a control sequence and calculates cursor position movement.
 ##
 ##   @param[in]   text
-##     出力する (制御シーケンスを含む) 文字列を指定します。
+##     Specifies the string (including control sequences) to output.
 ##
 ##   @param[in,opt] opts
-##     コロン区切りのオプションの列を指定します。
+##     Specifies optional columns separated by colons.
 ##
-##     [配置制御]
+##     [Placement control]
 ##
 ##     truncate
-##       LINES COLUMNS で指定される範囲外に出た時、処理を中断します。
+##       Processing is interrupted when it goes outside the range specified by LINES COLUMNS.
 ##
 ##     confine
-##       LINES COLUMNS の範囲外に文字出力・移動を行いません。
-##       制御シーケンスにより範囲内に戻る可能性もあります。
+##       Characters are not output or moved outside the range of LINES COLUMNS.
+##       A control sequence may also bring it back into range.
 ##
 ##     ellipsis
-##       LINES COLUMNS の範囲外に文字を出力しようとした時に、
-##       三点リーダを末尾に上書きします。
+##       When trying to output characters outside the range of LINES COLUMNS,
+##       Overwrite the three-dot leader at the end.
 ##
 ##     clip=X1xY1,X2xY2
 ##     clip=XxY+WxH
 ##       @param[in] X1 Y1 X2 Y2
 ##       @param[in] X Y W H
-##       指定した矩形範囲内の描画内容だけを抽出します。
-##       矩形の左上の点が出力の描画開始点であると想定します。
+##       Extracts only the drawing content within the specified rectangular range.
+##       Assume that the top left point of the rectangle is the starting point for drawing the output.
 ##
 ##     justify
 ##     justify=SEPSPEC
-##       横揃えを設定します。
+##       Set horizontal alignment.
 ##
-##     [範囲計測]
+## [Range measurement]
 ##
 ##     measure-bbox
 ##       @var[out] x1 x2 y1 y2
-##       カーソル移動範囲を x1 x2 y1 y2 に返します。
+##       Returns the cursor movement range x1 x2 y1 y2.
 ##     measure-gbox
 ##       @var[out] gx1 gx2 gy1 gy2
-##       描画範囲を x1 x2 y1 y2 に返します。
+##       Returns the drawing range x1 x2 y1 y2.
 ##     left-char
 ##       @var[in,out] lc lg
-##       bleopt_internal_suppress_bash_output= の時、
-##       出力開始時のカーソル左の文字コードを指定します。
-##       出力終了時のカーソル左の文字コードが分かる場合にそれを返します。
+##       When bleopt_internal_suppress_bash_output=,
+##       Specifies the character code to the left of the cursor when output starts.
+##       Returns the character code to the left of the cursor at the end of output, if available.
 ##
-##     [出力制御機能]
+##     [Output control function]
 ##
 ##     relative
-##       x y を相対位置と考えて移動を行います。
-##       改行などの制御は全て座標に基づいた移動に変換されます。
+##       Move by considering x y as a relative position.
+##       All controls such as line breaks are converted to coordinate-based movements.
 ##     ansi
-##       ANSI制御シーケンスで出力を構築します。
-##       後で trace で再解析を行う場合などに指定できます。
+##       Construct the output with ANSI control sequences.
+##       This can be specified later when re-analyzing with trace.
 ##     g0 face0
-##       背景色・既定属性として用いる属性値または描画設定を指定します。
-##       両方指定された場合は g0 を優先させます。
+##       Specify the attribute value or drawing settings to be used as the background color/default attribute.
+##       If both are specified, g0 takes precedence.
 ##
-##     [その他]
+##     [Others]
 ##
 ##     terminfo
-##       ANSI制御シーケンスではなく現在の端末のシーケンスとして
-##       制御機能SGRを解釈します。
+##       as the current terminal's sequence rather than the ANSI control sequence
+##       Interpret the control function SGR.
 ##
 ##   @var[in,out] DRAW_BUFF[]
-##     ble/canvas/trace.draw の出力先の配列です。
+##     This is the output destination array of ble/canvas/trace.draw.
 ##   @var[out] ret
-##     ble/canvas/trace の結果の格納先の変数です。
+##     This is the variable where the result of ble/canvas/trace is stored.
 ##
 ##   @var[in,out] x y g
-##     出力の開始位置を指定します。出力終了時の位置を返します。
+##     Specifies the starting position of the output. Returns the position at the end of output.
 ##
-##   以下のシーケンスを認識します
+##   Recognizes the following sequences
 ##
-##   - Control Characters (C0 の文字 及び DEL)
-##     BS HT LF VT CR はカーソル位置の変更を行います。
-##     それ以外の文字はカーソル位置の変更は行いません。
+##   - Control Characters (C0 characters and DEL)
+##     BS HT LF VT CR changes the cursor position.
+##     Other characters do not change the cursor position.
 ##
 ##   - CSI Sequence (Control Sequence)
 ##     | CUU   CSI A | CHB   CSI Z |
@@ -1431,31 +1431,31 @@ function ble/canvas/put-clear-lines.draw {
 ##     | CHA   CSI G | SGR   CSI m |
 ##     | CUP   CSI H | SCOSC CSI s |
 ##     | CHT   CSI I | SCORC CSI u |
-##     上記のシーケンスはカーソル位置の計算に含め、
-##     また、端末 (TERM) に応じた出力を実施します。
-##     上記以外のシーケンスはカーソル位置を変更しません。
+##     The above sequence is included in the calculation of the cursor position,
+##     Also, output is performed according to the terminal (TERM).
+##     Sequences other than the above do not change the cursor position.
 ##
 ##   - SOS, DCS, SOS, PM, APC, ESC k ～ ESC \
-##   - ISO-2022 に含まれる 3 byte 以上のシーケンス
-##     これらはそのまま通します。位置計算の考慮には入れません。
+##   - Sequences of 3 bytes or more included in ISO-2022
+##     These will pass as is. It is not taken into account in position calculations.
 ##
 ##   - ESC Sequence
-##     DECSC DECRC IND RI NEL はカーソル位置の変更を行います。
-##     それ以外はカーソル位置の変更は行いません。
+##     DECSC DECRC IND RI NEL changes the cursor position.
+##     Otherwise, the cursor position will not be changed.
 ##
-## 内部実装で用いている変数を整理する
+## Organize variables used in internal implementation
 ##
 ##   @var[local] xinit yinit ginit
-##     初期カーソル状態を格納する。
+##     Stores the initial cursor state.
 ##
 ##   @var x1 x2 y1 y2
-##     これは measure-bbox または justify を指定した時に描画範囲を追跡するのに使っている。
+##     This is used to track the drawing range when measure-bbox or justify is specified.
 ##
 ##   @var[local] cx cy cg
-##     clip 時に DRAW_BUFF 出力済みの内容のカーソル状態を追跡する変数。
-##     clip 時は x y g は仮想的に clip していない時のカーソル状態を追跡している。
+##     A variable that tracks the cursor state of the DRAW_BUFF output content when clipping.
+##     When clipping, x y g virtually tracks the cursor state when not clipping.
 ##   @var[local] cx1 cy1 cx2 cy2
-##     clip 範囲を保持する変数
+##     variable that holds the clip range
 ##
 ##
 
@@ -1478,7 +1478,7 @@ function ble/canvas/trace/.measure-point {
 }
 ## @fn ble/canvas/trace/.goto x1 y1
 ##   @var[in,out] x y
-##   Note: lc lg の面倒は呼び出し元で見る。
+##   Note: The caller takes care of lc lg.
 function ble/canvas/trace/.goto {
   local dstx=$1 dsty=$2
   if [[ ! $flag_clip ]]; then
@@ -1494,8 +1494,8 @@ function ble/canvas/trace/.goto {
 
 function ble/canvas/trace/.implicit-move {
   local w=$1 type=$2
-  # gbox は開始点と終了点を記録する。bbox の開始点は既に記録されている
-  # 前提。終了点及び行折返しが発生した時の極値を此処で記録する。
+  # gbox records the start and end points. The starting point of bbox is already recorded
+  # Premise. The end point and the extreme value when line wrapping occurs are recorded here.
 
   ((w>0)) || return 0
 
@@ -1510,7 +1510,7 @@ function ble/canvas/trace/.implicit-move {
   ((x+=w))
 
   if ((x<=cols)); then
-    # 行内に収まった時
+    # When it fits within the line
     [[ $flag_bbox ]] && ((x>x2)) && x2=$x
     [[ $flag_gbox ]] && ((x>gx2)) && gx2=$x
     if ((x==cols&&!xenl)); then
@@ -1521,11 +1521,11 @@ function ble/canvas/trace/.implicit-move {
       fi
     fi
   else
-    # 端末による折り返し
+    # Wrapping by terminal
     if [[ $type == atomic ]]; then
-      # [Note: 文字が横幅より大きい場合は取り敢えず次の行が一杯になると仮定して
-      # いるが端末による。端末によっては更に次の行にカーソルが移動するのではな
-      # いかとも思われる。]
+      # [Note: If the text is larger than the width, assume that the next line will be full.
+      # Yes, but it depends on the device. Depending on the terminal, the cursor may move to the next line.
+      # It seems like a good idea. ]
       ((y++,x=w<xlimit?w:xlimit))
     else
       ((y+=x/cols,x%=cols,
@@ -1605,19 +1605,19 @@ function ble/canvas/trace/.process-overflow {
 }
 
 #--------------------------------------
-## (trace 内部変数) justify 関連
+## (trace internal variable) justify related
 ##
 ##   @var[local] justify_sep
 ##   @arr[local] justify_fields
 ##   @arr[local] justify_buff
 ##   @arr[local] justify_out
 ##   @var[local] jx0 jy0
-##     各フィールドの開始カーソル位置を保持する。
+##     Holds the starting cursor position for each field.
 ##   @var[local] jx1 jy1 jx2 jy2
-##     measure-bbox も指定されていた時に、
-##     justify 後の描画範囲追跡に用いている。
-##     justify 処理中は x1 y1 x2 y2 は align 前のフィールドの描画範囲追跡に使っている。
-##     関数の一番最後で jx1 jy1 jx2 jy2 で x1 y1 x2 y2 を上書きする。
+##     When measure-bbox is also specified,
+##     Used to track the drawing range after justify.
+##     During justify processing, x1 y1 x2 y2 are used to track the drawing range of the field before align.
+##     Overwrite x1 y1 x2 y2 with jx1 jy1 jx2 jy2 at the end of the function.
 ##
 function ble/canvas/trace/.justify/inc-quote {
   [[ $trace_flags == *J* ]] || return 0
@@ -1638,7 +1638,7 @@ function ble/canvas/trace/.justify/begin-line {
 }
 ## @fn ble/canvas/trace/.justify/next-field [sep]
 ##   @param[in,opt] sep
-##     省略時は最後のフィールドを意味する。
+## If omitted, it means the last field.
 ##   @var[out] jx0 jy0 x1 y1 x2 y2
 ##   @var[in,out] DRAW_BUFF justify_fields
 function ble/canvas/trace/.justify/next-field {
@@ -1663,19 +1663,19 @@ function ble/canvas/trace/.justify/unpack {
   esc=$data
 }
 ## @fn ble/canvas/trace/.justify/end-line
-##   これまでに justify_fields に記録した各フィールドの esc を align しつつ結合
-##   する。
+##   Combine and align the esc of each field recorded in justify_fields so far
+##   I will.
 ##   @var[in,out] justify_fields DRAW_BUFF justify_buff
 function ble/canvas/trace/.justify/end-line {
-  # Note: 行内容がなかった場合でも行の高さだけは記録する
-  # (NEL で新しい行が形成される事に注意)。
+  # Note: Only the height of the row is recorded even if there is no row content.
+  # (Note that NEL forms a new line).
   if [[ $trace_flags == *B* ]]; then
     ((y<jy1&&(jy1=y)))
     ((y>jy2&&(jy2=y)))
   fi
   ((${#justify_fields[@]}||${#DRAW_BUFF[@]})) || return 0
 
-  # 最後のフィールドを justify_fields に移動。
+  # Move last field to justify_fields.
   ble/canvas/trace/.justify/next-field
   [[ $justify_align == *c* ]] &&
     ble/canvas/trace/.justify/next-field
@@ -1688,7 +1688,7 @@ function ble/canvas/trace/.justify/end-line {
     ((width+=xF-xI))
     [[ $esc ]] && has_content=1
 
-    # Note: 最後の要素の次には余白はない。
+    # Note: There is no space after the last element.
     ((i+1==${#justify_fields[@]})) && break
 
     ((width+=wmin))
@@ -1703,9 +1703,9 @@ function ble/canvas/trace/.justify/end-line {
 
   local -a DRAW_BUFF=()
 
-  # fill に使える余白を計算する。
-  # Note: _ble_term_xenl 及び opt_relative の時には本当の端末の右端には接触しな
-  #   いと想定して範囲の右端まで使用する。
+  # Calculate the margin available for fill.
+  # Note: When using _ble_term_xenl and opt_relative, do not touch the right edge of the real terminal.
+  #   Assuming that it is, use up to the right end of the range.
   local xlimit=$cols
   [[ $_ble_term_xenl$opt_relative ]] || ((xlimit--))
   local span=$((xlimit-width))
@@ -1758,7 +1758,7 @@ function ble/canvas/trace/.justify/end-line {
     local wfill=$((wmin+new_spanx-spanx))
     ((vx+=wfill,spanx=new_spanx))
 
-    # fillchar: 取り敢えず現在の実装では空白で fill
+    # fillchar: Fill with blank in the current implementation.
     if [[ $sep == ' ' ]]; then
       ble/string#reserve-prototype "$wfill"
       ble/canvas/put.draw "${_ble_string_prototype::wfill}"
@@ -1773,7 +1773,7 @@ function ble/canvas/trace/.justify/end-line {
 }
 
 #--------------------------------------
-## (trace 内部変数) sc/rc 関連
+## (trace internal variable) sc/rc related
 ##
 ##   @arr[local] trace_decsc
 ##   @arr[local] trace_scosc
@@ -1790,7 +1790,7 @@ function ble/canvas/trace/.decsc {
 function ble/canvas/trace/.decrc {
   [[ ${trace_decsc[5]} ]] && ble/canvas/trace/.justify/dec-quote
   if [[ ! $flag_clip ]]; then
-    ble/canvas/trace/.put-sgr.draw "${trace_decsc[2]}" # g を明示的に復元。
+    ble/canvas/trace/.put-sgr.draw "${trace_decsc[2]}" # Explicitly restore g.
     if [[ :$opts: == *:noscrc:* ]]; then
       ble/canvas/put-move.draw "$((trace_decsc[0]-x))" "$((trace_decsc[1]-y))"
     else
@@ -1815,7 +1815,7 @@ function ble/canvas/trace/.scosc {
 function ble/canvas/trace/.scorc {
   [[ ${trace_scosc[5]} ]] && ble/canvas/trace/.justify/dec-quote
   if [[ ! $flag_clip ]]; then
-    ble/canvas/trace/.put-sgr.draw "$g" # g は変わらない様に。
+    ble/canvas/trace/.put-sgr.draw "$g" # So that g remains unchanged.
     if [[ :$opts: == *:noscrc:* ]]; then
       ble/canvas/put-move.draw "$((trace_scosc[0]-x))" "$((trace_scosc[1]-y))"
     else
@@ -1895,7 +1895,7 @@ function ble/canvas/trace/.process-csi-sequence {
   local seq=$1 seq1=${1:2} rex
   local char=${seq1:${#seq1}-1:1} param=${seq1::${#seq1}-1}
   if [[ ! ${param//[0-9:;]} ]]; then
-    # CSI 数字引数 + 文字
+    # CSI numeric argument + character
     case $char in
     (m) # SGR
       ble/canvas/trace/.SGR "$param" "$seq"
@@ -2002,8 +2002,8 @@ function ble/canvas/trace/.process-csi-sequence {
         ble/canvas/trace/.scorc
       fi
       return 0 ;;
-    # ■その他色々?
-    # ([JPX@MKL]) # 挿入削除→カーソルの位置は不変 lc?
+    # ■Other things?
+    # ([JPX@MKL]) # Insert/delete → Cursor position remains unchanged lc?
     # ([hl]) # SM RM DECSM DECRM
     esac
   fi
@@ -2050,9 +2050,9 @@ function ble/canvas/trace/.process-esc-sequence {
   (E) # NEL
     ble/canvas/trace/.NEL
     return 0 ;;
-  # (H) # HTS 面倒だから無視。
+  # (H) # HTS Ignore it because it's troublesome.
   # ([KL]) PLD PLU
-  #   上付き・下付き文字 (端末における実装は色々)
+  #   Superscript/subscript (implementations on various terminals vary)
   esac
 
   ble/canvas/put.draw "$seq"
@@ -2061,8 +2061,8 @@ function ble/canvas/trace/.process-esc-sequence {
 function ble/canvas/trace/.impl {
   local text=$1 opts=$2
 
-  # cygwin では LC_COLLATE=C にしないと
-  # 正規表現の range expression が期待通りに動かない。
+  # In cygwin, you need to set LC_COLLATE=C.
+  # Regular expression range expression does not work as expected.
   local LC_ALL= LC_COLLATE=C
 
   # constants
@@ -2070,8 +2070,8 @@ function ble/canvas/trace/.impl {
   local it=${bleopt_tab_width:-$_ble_term_it} xenl=$_ble_term_xenl
   ble/string#reserve-prototype "$it"
 
-  # Note: 文字符号化方式によっては対応する文字が存在しない可能性がある。
-  #   その時は st='\u009C' になるはず。2文字以上のとき変換に失敗したと見做す。
+  # Note: Depending on the character encoding method, the corresponding character may not exist.
+  #   At that time, it should be st='\u009C'. If there are 2 or more characters, it is assumed that the conversion has failed.
   local ret rex
   ble/util/c2s 156; local st=$ret #  (ST)
   ((${#st}>=2)) && st=
@@ -2147,7 +2147,7 @@ function ble/canvas/trace/.impl {
   local rex_csi=$'^\e\\[[ -?]*[@-~]' # disable=#D1440 (LC_COLLATE=C is set)
   # OSC, DCS, SOS, PM, APC Sequences + "GNU screen ESC k"
   local rex_osc='^([]PX^_k])([^'$st']|+[^\'$st'])*(\\|'${st:+'|'}$st'|$)'
-  # ISO-2022 関係 (3byte以上の物)
+  # ISO-2022 related (more than 3 bytes)
   local rex_2022=$'^\e[ -/]+[@-~]' # disable=#D1440 (LC_COLLATE=C is set)
   # ESC ?
   local rex_esc=$'^\e[ -~]' # disable=#D1440 (LC_COLLATE=C is set)
@@ -2183,12 +2183,12 @@ function ble/canvas/trace/.impl {
       local jgx1= jgy1= jgx2= jgy2=
   fi
 
-  # flag_clip: justify 処理が入っている時は後で clip を処理する。
+  # flag_clip: If justify processing is included, clip will be processed later.
   local flag_clip=
   [[ $trace_flags == *C* && $trace_flags != *J* ]] && flag_clip=1
 
-  # opt_relative の時には右端に接触しない前提。justify の時には、後の再配置の時
-  # に xenl について処理するので、フィールド内追跡では xenl は気にしなくて良い。
+  # When using opt_relative, it is assumed that it does not touch the right edge. At the time of justify, at the time of later relocation
+  # Since it processes xenl, there is no need to worry about xenl in intra-field tracking.
   local xenl=$_ble_term_xenl
   [[ $opt_relative || $trace_flags == *J* ]] && xenl=1
   local xlimit=$((xenl?cols:cols-1))
@@ -2212,9 +2212,9 @@ function ble/canvas/trace/.impl {
       case $s in
       ($'\e')
         if [[ $tail =~ $rex_osc ]]; then
-          # 各種メッセージ (素通り)
+          # Various messages (pass through)
           s=$BASH_REMATCH
-          [[ ${BASH_REMATCH[3]} ]] || s="$s\\" # 終端の追加
+          [[ ${BASH_REMATCH[3]} ]] || s="$s\\" # Add termination
           ((i+=${#BASH_REMATCH}-1))
           ble/canvas/trace/.put-atomic.draw "$s" 0
         elif [[ $tail =~ $rex_csi ]]; then
@@ -2222,7 +2222,7 @@ function ble/canvas/trace/.impl {
           ((i+=${#BASH_REMATCH}-1))
           ble/canvas/trace/.process-csi-sequence "$BASH_REMATCH"
         elif [[ $tail =~ $rex_2022 ]]; then
-          # ISO-2022 (素通り)
+          # ISO-2022 (pass through)
           ble/canvas/trace/.put-atomic.draw "$BASH_REMATCH" 0
           ((i+=${#BASH_REMATCH}-1))
         elif [[ $tail =~ $rex_esc ]]; then
@@ -2277,10 +2277,10 @@ function ble/canvas/trace/.impl {
           fi
         fi
         ble/canvas/trace/.measure-point ;;
-      # Note: \001 (^A) 及び \002 (^B) は PS1 の処理で \[ \] を意味するそうだ。#D1074
+      # Note: \001 (^A) and \002 (^B) seem to mean \[ \] in PS1 processing. #D1074
       ($'\001') [[ :$opts: == *:prompt:* ]] && ble/canvas/trace/.ps1sc ;;
       ($'\002') [[ :$opts: == *:prompt:* ]] && ble/canvas/trace/.ps1rc ;;
-      # その他の制御文字は  (BEL)  (FF) も含めてゼロ幅と解釈する
+      # Other control characters are (BEL) (FF) also as zero-width
       (*) ble/canvas/put.draw "$s" ;;
       esac
     elif ble/util/isprint+ "$tail"; then
@@ -2330,7 +2330,7 @@ function ble/canvas/trace/.impl {
           if [[ $flag_clip || $opt_relative || $flag_justify ]]; then
             ble/canvas/trace/.NEL
           else
-            # 行に入りきらない場合の調整
+            # Adjustment when the line does not fit
             ble/canvas/trace/.put-ascii.draw "${_ble_string_prototype::cols-x}"
           fi
         fi
@@ -2345,8 +2345,8 @@ function ble/canvas/trace/.impl {
 
   if [[ $trace_flags == *J* ]]; then
     if [[ ! $flag_justify ]]; then
-      # 各種 sc により一時的に justify が無効化されていたとしても、強制的に rc
-      # を出力して閉じる。
+      # Even if justify is temporarily disabled by various sc, rc is forced
+      # Outputs and closes.
       [[ ${trace_scosc[5]} ]] && ble/canvas/trace/.scorc
       [[ ${trace_decsc[5]} ]] && ble/canvas/trace/.decrc
       while [[ ${trace_brack[0]} ]]; do ble/canvas/trace/.ps1rc; done
@@ -2408,8 +2408,8 @@ function ble/canvas/trace {
 # ble/canvas/construct-text
 
 ## @fn ble/canvas/trace-text/.put-atomic nchar text
-##   指定した文字列を out に追加しつつ、現在位置を更新します。
-##   文字列は幅 1 の文字で構成されていると仮定します。
+##   Adds the specified string to out and updates the current position.
+##   Assume that the string consists of characters with a width of 1.
 ##   @var[in,out] x y out
 ##   @var[in] cols lines
 ##
@@ -2426,15 +2426,15 @@ function ble/canvas/trace-text/.put-simple {
   ((nput==nchar)); return "$?"
 }
 ## @fn x y cols out ; ble/canvas/trace-text/.put-atomic ( w char )+ ; x y out
-##   指定した文字を out に追加しつつ、現在位置を更新します。
-##   範囲に収まり切らない時に失敗します。
+##   Adds the specified character to out while updating the current position.
+##   It will fail if it does not fit within the range.
 function ble/canvas/trace-text/.put-atomic {
   local w=$1 c=$2
 
-  # 収まらない時は skip
+  # Skip if it doesn't fit
   ((y*cols+x+w<=cols*lines-!_ble_term_xenl)) || return 1
 
-  # その行に入りきらない文字は次の行へ (幅 w が2以上の文字)
+  # Characters that do not fit on that line are moved to the next line (characters whose width w is 2 or more)
   if ((x<cols&&cols<x+w)); then
     if [[ :$opts: == *:nonewline:* ]]; then
       ble/string#reserve-prototype "$((cols-x))"
@@ -2446,10 +2446,10 @@ function ble/canvas/trace-text/.put-atomic {
     fi
   fi
 
-  # w!=0 のとき行末にいたら次の行へ暗黙移動
+  # When w!=0, if you are at the end of the line, implicitly move to the next line
   ((w&&x==cols&&(y++,x=0)))
 
-  # 改行しても尚行内に収まらない時は ## で代用
+  # If the new line does not fit within the line, use ## instead
   local limit=$((cols-(y+1==lines&&!_ble_term_xenl)))
   if ((x+w>limit)); then
     ble/string#reserve-prototype "$((limit-x))"
@@ -2464,7 +2464,7 @@ function ble/canvas/trace-text/.put-atomic {
   return 0
 }
 ## @fn x y cols out ; ble/canvas/trace-text/.put-nl-if-eol ; x y out
-##   行末にいる場合次の行へ移動します。
+##   If you are at the end of the line, move to the next line.
 function ble/canvas/trace-text/.put-nl-if-eol {
   if ((x==cols&&y+1<lines)); then
     [[ :$opts: == *:nonewline:* ]] && return 0
@@ -2474,22 +2474,22 @@ function ble/canvas/trace-text/.put-nl-if-eol {
 }
 
 ## @fn ble/canvas/trace-text text opts
-##   指定した文字列を表示する為の制御系列に変換します。
+##   Converts the specified string into a control sequence for display.
 ##   @param[in] text
 ##   @param[in] opts
 ##     nonewline
 ##
 ##     external-sgr
 ##       @var[in] sgr0 sgr1
-##       特殊文字の強調に用いる SGR シーケンスを外部から提供します。
-##       sgr0 に通常文字の表示に用いる SGR を、
-##       sgr1 に特殊文字の表示に用いる SGR を指定します。
+##       Externally provides an SGR sequence for highlighting special characters.
+##       Set the SGR used to display normal characters to sgr0.
+##       Specify the SGR used to display special characters in sgr1.
 ##
 ##   @var[in] cols lines
 ##   @var[in,out] x y
 ##   @var[out] ret
 ##   @exit
-##     指定した範囲に文字列が収まった時に成功します。
+##     Succeeds when the string falls within the specified range.
 function ble/canvas/trace-text {
   local LC_ALL= LC_COLLATE=C
 
@@ -2498,7 +2498,7 @@ function ble/canvas/trace-text {
   [[ :$opts: == *:external-sgr:* ]] ||
     local sgr0=$_ble_term_sgr0 sgr1=$_ble_term_rev
   if [[ $1 != $glob ]]; then
-    # G0 だけで構成された文字列は先に単純に処理する
+    # Strings consisting only of G0 are simply processed first.
     ble/canvas/trace-text/.put-simple "${#1}" "$1"
   else
     local glob='[ -~]*' globx='[! -~]*' # disable=#D1440 (LC_COLLATE=C is set)
@@ -2527,7 +2527,7 @@ function ble/canvas/trace-text {
   ble/canvas/trace-text/.put-nl-if-eol
   ret=$out
 
-  # 収まったかどうか
+  # Did it settle down?
   [[ ! $flag_overflow ]]
 }
 # Note: suppress LC_COLLATE errors #D1205 #D1262 #1341 #D1440
@@ -2554,38 +2554,38 @@ _ble_textmap_VARNAMES=(
   _ble_textmap_umin
   _ble_textmap_umax)
 
-## 文字列の配置計算に関する情報
+## Information about string alignment calculations
 ##
-##   前回の配置計算の前提と結果を保持する変数群を以下に説明します。
-##   以下は配置計算の前提になる情報です。
+##   The variables that hold the assumptions and results of the previous placement calculation are explained below.
+##   The following information is the prerequisite for placement calculations.
 ##
 ##   @var _ble_textmap_cols
-##     配置幅を保持します。
+##     Maintain placement width.
 ##   @var _ble_textmap_begx
 ##   @var _ble_textmap_begy
-##     配置の開始位置を保持します。
+##     Holds the starting position of the arrangement.
 ##   @var _ble_textmap_length
-##     配置文字列の長さを保持します。
+##     Holds the length of the alignment string.
 ##
-##   以下は配置計算の結果を保持します。
+##   The following holds the results of the placement calculation.
 ##
 ##   @arr _ble_textmap_pos[]
-##     各文字の表示位置を保持します。
+##     Maintains the display position of each character.
 ##   @arr _ble_textmap_glyph[]
-##     各文字の表現を保持します。
-##     例えば、制御文字は ^C や M-^C などと表されます。
-##     タブは表示開始位置に応じて異なる個数の空白で表現されます。
-##     行送りされた全角文字は前にパディングの空白が付加されます。
+##     Preserves the representation of each character.
+##     For example, control characters are represented as ^C or M-^C.
+##     Tabs are represented by different numbers of blank spaces depending on the starting position.
+##     Leading full-width characters are preceded by padding spaces.
 ##   @arr _ble_textmap_ichg[]
-##     タブや行送りなどによって標準的な表現と異なる文字
-##     のインデックスのリストです。
-##     標準的な表現は ble/highlight/layer:plain/update/.getch で規定されます。
+##     Characters that differ from standard representation due to tabs, leading, etc.
+##     is a list of indexes.
+##     The standard representation is specified in ble/highlight/layer:plain/update/.getch.
 ##   @var _ble_textmap_endx
 ##   @var _ble_textmap_endy
-##     最後の文字の右端の座標を保持します。
+##     Holds the rightmost coordinates of the last character.
 ##
-##   以下は前回の配置計算以降の更新範囲を保持する変数です。
-##   部分更新をするために使用します。
+##   The following variables hold the updated range since the last placement calculation.
+##   Used for partial updates.
 ##
 ##   @var _ble_textmap_dbeg
 ##   @var _ble_textmap_dend
@@ -2626,8 +2626,8 @@ function ble/textmap#update/.wrap {
     cs=$cs${_ble_term_cud//'%d'/1}
     changed=1
   elif ((xenl)); then
-    # Note #D1745: 自動改行は CR で表現する事にする。この CR は実際の
-    # 出力時に LF または空文字列に置換する。
+    # Note #D1745: Automatic line breaks will be expressed as CR. This CR is the actual
+    # Replace with LF or empty string on output.
     cs=$cs$_ble_term_cr
     changed=1
   fi
@@ -2650,12 +2650,12 @@ function ble/textmap#update {
   local text=$1 opts=$2
   local iN=${#text}
 
-  # 初期位置 x y
+  # initial position x y
   local pos0="$x $y"
   _ble_textmap_begx=$x
   _ble_textmap_begy=$y
 
-  # ※現在は COLUMNS で決定しているが将来的には変更可能にする?
+  # *Currently it is determined by COLUMNS, but will it be possible to change it in the future?
   local cols=${COLUMNS-80} xenl=$_ble_term_xenl
   ((COLUMNS&&cols<COLUMNS&&(xenl=1)))
   ble/string#reserve-prototype "$cols"
@@ -2665,17 +2665,17 @@ function ble/textmap#update {
   ble/string#reserve-prototype "$it"
 
   if ((cols!=_ble_textmap_cols)); then
-    # 表示幅が変化したときは全部再計算
+    # Recalculate everything when display width changes
     ((dbeg=0,dend0=_ble_textmap_length,dend=iN))
     _ble_textmap_pos[0]=$pos0
   elif [[ ${_ble_textmap_pos[0]} != "$pos0" ]]; then
-    # 初期位置の変更がある場合は初めから計算し直し
+    # If the initial position changes, recalculate from the beginning.
     ((dbeg<0&&(dend=dend0=0),
       dbeg=0))
     _ble_textmap_pos[0]=$pos0
   else
     if ((dbeg<0)); then
-      # 表示幅も初期位置も内容も変更がない場合はOK
+      # OK if display width, initial position, and content do not change
       local pos
       ble/string#split-words pos "${_ble_textmap_pos[iN]}"
       ((x=pos[0]))
@@ -2684,7 +2684,7 @@ function ble/textmap#update {
       _ble_textmap_endy=$y
       return 0
     elif ((dbeg>0)); then
-      # 途中から計算を再開
+      # Resume calculation from midway
       local ret
       ble/unicode/GraphemeCluster/find-previous-boundary "$text" "$dbeg"; dbeg=$ret
       local pos
@@ -2778,8 +2778,8 @@ function ble/textmap#update {
           if [[ :$opts: == *:relative:* ]]; then
             cs=${_ble_term_cub//'%d'/$cols}${_ble_term_cud//'%d'/1}$cs
           elif ((xenl)); then
-            # Note #D1745: 自動改行は CR で表現する事にする。この CR
-            # は実際の出力時に LF または空文字列に置換する。
+            # Note #D1745: Automatic line breaks will be expressed as CR. This CR
+            # will be replaced with LF or an empty string during actual output.
             cs=$_ble_term_cr$cs
           fi
           local pad=$((cols-x))
@@ -2813,10 +2813,10 @@ function ble/textmap#update {
     done
 
     if ((i>=dend)); then
-      # 後は同じなので計算を省略
+      # The rest is the same, so I'll skip the calculations.
       [[ ${old_pos[i-dend]} == "${_ble_textmap_pos[i]}" ]] && break
 
-      # x 座標が同じならば、以降は最後まで y 座標だけずらす
+      # If the x coordinates are the same, then shift by the y coordinate until the end
       if [[ ${old_pos[i-dend]%%[$IFS]*} == "${_ble_textmap_pos[i]%%[$IFS]*}" ]]; then
         local -a opos npos pos
         opos=(${old_pos[i-dend]})
@@ -2836,13 +2836,13 @@ function ble/textmap#update {
   done
 
   if ((i<iN)); then
-    # 途中で一致して中断した場合は、前の iN 番目の位置を読む
+    # If interrupted by a match in the middle, read the previous iNth position
     local -a pos
     pos=(${_ble_textmap_pos[iN]})
     x=${pos[0]} y=${pos[1]}
   fi
 
-  # 前回までの文字修正位置を shift&add
+  # shift&add the previous character correction position
   local j jN ichg
   for ((j=0,jN=${#old_ichg[@]};j<jN;j++)); do
     if ((ichg=old_ichg[j],
@@ -2863,8 +2863,8 @@ function ble/textmap#is-up-to-date {
   ((_ble_textmap_dbeg==-1))
 }
 ## @fn ble/textmap#assert-up-to-date
-##   編集文字列の文字の配置情報が最新であることを確認します。
-##   以下の変数を参照する場合に事前に呼び出します。
+##   Verify that the character alignment information in the edit string is up to date.
+##   Call beforehand when referencing the following variables.
 ##
 ##   _ble_textmap_pos
 ##   _ble_textmap_length
@@ -2874,14 +2874,14 @@ function ble/textmap#assert-up-to-date {
 }
 
 ## @fn ble/textmap#getxy.out index
-##   index 番目の文字の出力開始位置を取得します。
+##   Gets the output start position of the index th character.
 ##
 ##   @var[out] x y
 ##
-##   行末に収まらない文字の場合は行末のスペースを埋める為に
-##   配列 _ble_textmap_glyph において空白文字が文字本体の前に追加されます。
-##   その場合には、追加される空白文字の前の位置を返すことに注意して下さい。
-##   実用上は境界 index の左側の文字の終端位置と解釈できます。
+##   If the characters do not fit at the end of the line, to fill the space at the end of the line.
+##   A space character is added before the body of the characters in the array _ble_textmap_glyph.
+##   Note that in that case it returns the position before the added whitespace character.
+##   In practical terms, it can be interpreted as the end position of the character to the left of the boundary index.
 ##
 function ble/textmap#getxy.out {
   ble/textmap#assert-up-to-date
@@ -2898,13 +2898,13 @@ function ble/textmap#getxy.out {
 }
 
 ## @fn ble/textmap#getxy.cur index
-##   index 番目の文字の表示開始位置を取得します。
+##   Gets the starting position of the index character.
 ##
 ##   @var[out] x y
 ##
-##   ble/textmap#getxy.out の異なり前置される空白は考えずに、
-##   文字本体が開始する位置を取得します。
-##   実用上は境界 index の右側の文字の開始位置と解釈できます。
+##   Unlike ble/textmap#getxy.out, without considering the leading white space,
+##   Gets the position where the character body starts.
+##   In practical terms, this can be interpreted as the starting position of the character to the right of the boundary index.
 ##
 function ble/textmap#getxy.cur {
   ble/textmap#assert-up-to-date
@@ -2917,7 +2917,7 @@ function ble/textmap#getxy.cur {
   local -a pos
   ble/string#split-words pos "${_ble_textmap_pos[$1]}"
 
-  # 追い出しされたか check
+  # Check if you were kicked out
   if (($1<_ble_textmap_length)); then
     local -a eoc
     ble/string#split-words eoc "${_ble_textmap_pos[$1+1]}"
@@ -2929,7 +2929,7 @@ function ble/textmap#getxy.cur {
 }
 
 ## @fn ble/textmap#get-index-at [-v varname] x y
-##   指定した位置 x y に対応する index を求めます。
+##   Finds the index corresponding to the specified position x y.
 function ble/textmap#get-index-at {
   ble/textmap#assert-up-to-date
   local __ble_var=index
@@ -2944,7 +2944,7 @@ function ble/textmap#get-index-at {
   elif ((__ble_y<_ble_textmap_begy)); then
     (($__ble_var=0))
   else
-    # 2分法
+    # dichotomy
     local __ble_l=0 __ble_u=$((_ble_textmap_length+1))
     local m mx my
     while ((__ble_l+1<__ble_u)); do
@@ -2975,29 +2975,29 @@ function ble/textmap#hit/.getxy.cur {
 }
 
 ## @fn ble/textmap#hit type xh yh [beg [end]]
-##   指定した座標に対応する境界 index を取得します。
-##   指定した座標以前の最も近い境界を求めます。
-##   探索範囲に対応する境界がないときは最初の境界 beg を返します。
+##   Gets the boundary index corresponding to the specified coordinates.
+##   Finds the closest boundary before the specified coordinates.
+##   If there is no boundary corresponding to the search range, returns the first boundary beg.
 ##
 ##   @param[in] type
-##     探索する点の種類を指定します。out または cur を指定します。
-##     out を指定したときは文字終端境界を探索します。
-##     cur を指定したときは文字開始境界(行送りを考慮に入れたもの)を探索します。
+## Specify the type of point to search. Specify out or cur.
+##     When out is specified, the end character boundary is searched.
+##     When cur is specified, the character start boundary (taking into account line leading) is searched.
 ##   @param[in] xh yh
-##     探索する点を指定します。
+##     Specify the point to search.
 ##   @param[in] beg end
-##     探索する index の範囲を指定します。
-##     beg を省略したときは最初の境界位置が使用されます。
-##     end を省略したときは最後の境界位置が使用されます。
+##     Specifies the range of index to search.
+##     If beg is omitted, the first boundary position is used.
+##     If end is omitted, the last boundary position is used.
 ##
 ##   @var[out] index
-##     見つかった境界の番号を返します。
+##     Returns the number of the boundary found.
 ##   @var[out] lx ly
-##     見つかった境界の座標を返します。
+##     Returns the coordinates of the found boundary.
 ##   @var[out] rx ry
-##     指定した座標以後の最も近い境界を返します。
-##     index が探索範囲の最後の境界のとき、または、
-##     lx ly が指定した座標と一致するとき lx ly と同一です。
+##     Returns the closest boundary after the specified coordinates.
+##     when index is the last boundary of the search range, or
+##     Identical to lx ly when lx ly matches the specified coordinates.
 ##
 function ble/textmap#hit {
   ble/textmap#assert-up-to-date
@@ -3014,7 +3014,7 @@ function ble/textmap#hit {
     lx=$x ly=$y
     rx=$x ry=$y
   else
-    # 2分法
+    # dichotomy
     local l=0 u=$((end+1)) m
     while ((l+1<u)); do
       "$getxy" "$((m=(l+u)/2))"
@@ -3032,23 +3032,23 @@ function ble/textmap#hit {
 
 ## @var _ble_canvas_x
 ## @var _ble_canvas_y
-##   現在の (描画の為に動き回る) カーソル位置を保持します。
+##   Holds the current (moving around for drawing) cursor position.
 _ble_canvas_x=0
 _ble_canvas_y=0
 _ble_canvas_excursion=
 
 ## @fn ble/canvas/goto.draw x y opts
-##   現在位置を指定した座標へ移動する制御系列を生成します。
+##   Generates a control sequence that moves the current position to the specified coordinates.
 ##   @param[in] x y
-##     移動先のカーソルの座標を指定します。
-##     プロンプト原点が x=0 y=0 に対応します。
+##     Specify the coordinates of the cursor to move to.
+##     The prompt origin corresponds to x=0 y=0.
 function ble/canvas/goto.draw {
   local x=$1 y=$2 opts=$3
 
-  # Note #D1392: mc (midnight commander) は
-  #   sgr0 単体でもプロンプトと勘違いするので、
-  #   プロンプト更新もカーソル移動も不要の時は、
-  #   sgr0 も含めて何も出力しない。
+  # Note #D1392: mc (midnight commander)
+  #   sgr0 alone is mistaken for a prompt, so
+  #   When you don't need to update the prompt or move the cursor,
+  #   Nothing is output including sgr0.
   [[ :$opts: != *:sgr0:* ]] &&
     ((x==_ble_canvas_x&&y==_ble_canvas_y)) && return 0
 
@@ -3089,27 +3089,27 @@ function ble/canvas/excursion-end.draw {
 # ble/canvas/panel
 
 ## @arr _ble_canvas_panel_class
-##   各パネルを管理する関数接頭辞を保持する。
+##   Holds the function prefix that manages each panel.
 ##
 ## @arr _ble_canvas_panel_height
-##   各パネルの高さを保持する。
-##   現在 panel 0 が textarea で panel 2 が info に対応する。
+##   Preserve the height of each panel.
+##   Currently panel 0 corresponds to textarea and panel 2 corresponds to info.
 ##
-##   開始した瞬間にキー入力をすると画面に echo されてしまうので、
-##   それを削除するために最初の編集文字列の行数を 1 とする。
+##   If you enter a key at the moment it starts, it will be echoed on the screen, so
+##   Set the line number of the first edited string to 1 to delete it.
 ##
 ## @var _ble_canvas_panel_focus
-##   現在 focus のあるパネルの番号を保持する。
-##   端末の現在位置はこのパネルの render が設定した位置に置かれる。
+##   Holds the number of the panel currently in focus.
+##   The current position of the terminal is placed at the position set by render of this panel.
 ##
 ## @var _ble_canvas_panel_vfill
-##   下部に寄せて表示されるパネルの開始番号を保持する。
-##   この変数が空文字列の時は全てのパネルは上部に表示される。
+##   Holds the starting number of the bottom-aligned panel.
+##   When this variable is an empty string, all panels will be displayed at the top.
 _ble_canvas_panel_class=()
 _ble_canvas_panel_height=()
 _ble_canvas_panel_focus=
 _ble_canvas_panel_vfill=
-_ble_canvas_panel_bottom= # 現在下部に居るかどうか
+_ble_canvas_panel_bottom= # Are you currently at the bottom?
 _ble_canvas_panel_tmargin='LINES!=1?1:0' # for visible-bell
 
 ## @fn ble/canvas/panel/layout/.extract-heights
@@ -3125,7 +3125,7 @@ function ble/canvas/panel/layout/.extract-heights {
 }
 
 ## @fn ble/canvas/panel/layout/.determine-heights
-##   最小高さ mins と希望高さ maxs から実際の高さ heights を決定します。
+##   Determine the actual height heights from the minimum height mins and the desired height maxs.
 ##   @var[in] lines
 ##   @arr[in] mins maxs
 ##   @arr[out] heights
@@ -3224,7 +3224,7 @@ function ble/canvas/panel/goto-bottom-dock.draw {
   if [[ ! $_ble_canvas_panel_bottom ]]; then
     _ble_canvas_panel_bottom=1
     ble/canvas/excursion-start.draw
-    ble/canvas/put-cup.draw "$LINES" 0 # 一番下の行に移動
+    ble/canvas/put-cup.draw "$LINES" 0 # move to bottom row
     ble/arithmetic/sum "${_ble_canvas_panel_height[@]}"
     ((_ble_canvas_x=0,_ble_canvas_y=ret-1))
   fi
@@ -3251,8 +3251,8 @@ function ble/canvas/panel/save-position {
     ble/canvas/panel/goto-top-dock.draw
 }
 ## @fn ble/canvas/panel/load-position x:y:bottom
-##   ble/canvas/panel/save-position で記録した情報を元に
-##   元の位置に戻ります。
+##   Based on the information recorded with ble/canvas/panel/save-position
+##   Return to original position.
 function ble/canvas/panel/load-position {
   local -a DRAW_BUFF=()
   ble/canvas/panel/load-position.draw "$@"
@@ -3367,7 +3367,7 @@ function ble/canvas/panel/increase-total-height.draw {
 
 ## @fn ble/canvas/panel#set-height.draw panel height opts
 ##   @param[in] opts
-##     shift ... 範囲の先頭で行を追加・削除します。
+##     shift ... Adds or deletes lines at the beginning of the range.
 function ble/canvas/panel#set-height.draw {
   local index=$1 new_height=$2 opts=$3
   ((new_height<0)) && new_height=0
@@ -3382,7 +3382,7 @@ function ble/canvas/panel#set-height.draw {
       return 1
     fi
   elif ((delta>0)); then
-    # 新しく行を挿入
+    # insert new row
     ble/canvas/panel/increase-total-height.draw "$delta"
     ble/canvas/panel/goto-vfill.draw &&
       ble/canvas/put-dl.draw "$delta" vfill
@@ -3392,10 +3392,10 @@ function ble/canvas/panel#set-height.draw {
     (*:clear:*)
       ble/canvas/panel#goto.draw "$index" 0 0 sgr0
       ble/canvas/put-clear-lines.draw "$old_height" "$new_height" panel ;;
-    (*:shift:*) # 先頭に行挿入
+    (*:shift:*) # Insert row at beginning
       ble/canvas/panel#goto.draw "$index" 0 0 sgr0
       ble/canvas/put-il.draw "$delta" panel ;;
-    (*) # 末尾に行挿入
+    (*) # insert line at end
       ble/canvas/panel#goto.draw "$index" 0 "$old_height" sgr0
       ble/canvas/put-il.draw "$delta" panel ;;
     esac
@@ -3407,10 +3407,10 @@ function ble/canvas/panel#set-height.draw {
     (*:clear:*)
       ble/canvas/panel#goto.draw "$index" 0 0 sgr0
       ble/canvas/put-clear-lines.draw "$old_height" "$new_height" panel ;;
-    (*:shift:*) # 先頭を削除
+    (*:shift:*) # Delete the beginning
       ble/canvas/panel#goto.draw "$index" 0 0 sgr0
       ble/canvas/put-dl.draw "$delta" panel ;;
-    (*) # 末尾を削除
+    (*) # remove the end
       ble/canvas/panel#goto.draw "$index" 0 "$new_height" sgr0
       ble/canvas/put-dl.draw "$delta" panel ;;
     esac
@@ -3495,8 +3495,8 @@ function ble/canvas/panel/render {
   for ((index=0;index<n;index++)); do
     local panel_class=${_ble_canvas_panel_class[index]}
     local panel_height=${_ble_canvas_panel_height[index]}
-    # Note: panel::render の中で高さを更新するので panel_height==0 で
-    # あっても panel::render を呼び出す。
+    # Note: Since the height is updated in panel::render, panel_height==0
+    # Call panel::render even if there is one.
     ble/function#try "$panel_class#panel::render" "$index" 0 "$panel_height"
     if [[ $_ble_canvas_panel_focus ]] && ((index==_ble_canvas_panel_focus)); then
       local ret; ble/canvas/panel/save-position; local pos=$ret
@@ -3506,7 +3506,7 @@ function ble/canvas/panel/render {
   return 0
 }
 ## @fn ble/canvas/panel/ensure-terminal-top-line
-##   visible-bell で使う為
+##   For use with visible-bell
 function ble/canvas/panel/ensure-tmargin.draw {
   local tmargin=$((_ble_canvas_panel_tmargin))
   ((tmargin>LINES)) && tmargin=$LINES
@@ -3528,7 +3528,7 @@ function ble/canvas/panel/ensure-tmargin.draw {
         ble/canvas/put-ri.draw "$tmargin"
         ble/canvas/put-cud.draw "$tmargin"
       else
-        # RI がない時
+        # When there is no RI
         ble/canvas/put-ind.draw "$((top_height-1+tmargin))"
         ble/canvas/put-cuu.draw "$((top_height-1+tmargin))"
         ble/canvas/excursion-start.draw
@@ -3551,7 +3551,7 @@ function ble/canvas/panel/ensure-tmargin.draw {
     ble/canvas/put-ri.draw "$tmargin"
     ble/canvas/put-cud.draw "$tmargin"
   else
-    # RI がない時
+    # When there is no RI
     local total_height=$((top_height+bottom_height))
     ble/canvas/put-ind.draw "$((total_height-1+tmargin))"
     ble/canvas/put-cuu.draw "$((total_height-1+tmargin))"

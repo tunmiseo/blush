@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# 2020-02-07 #D12MSYS2 の CR 対策のため更新の必要あり
+# 2020-02-07 #D12MSYS2 needs to be updated for CR measures
 
 _ble_term_tput=
 function ble/init:term/tput { return 1; }
@@ -10,7 +10,7 @@ if ble/bin#freeze-utility-path tput; then
   if [[ $_ble_term_tput ]]; then
     function ble/init:term/tput {
       local type=$_ble_term_tput
-      if [[ $1 == -c ]]; then # termcap 優先
+      if [[ $1 == -c ]]; then # termcap preferred
         shift
         [[ $type == ic ]] && type=c
       fi
@@ -119,7 +119,7 @@ function ble/init:term/initialize {
   _ble_term_cud=${_ble_term_cud//123/%d}
   _ble_term_cuf=${_ble_term_cuf//123/%d}
   _ble_term_cub=${_ble_term_cub//123/%d}
-  # ※もし 122 だとか 124 だとかになると上記では駄目
+  # *If it becomes 122 or 124, the above will not work.
 
   _ble_term_ri_or_cuu1=${_ble_term_ri:-${_ble_term_cuu//'%d'/1}}
   ble/init:term/register-varname _ble_term_ri_or_cuu1
@@ -169,7 +169,7 @@ function ble/init:term/initialize {
   ble/init:term/define-cap _ble_term_ed  $'\e[J' -c ed:cd
 
   # ICH/DCH/ECH
-  #   Note: 必ずしも対応しているか分からないので terminfo に載っている時のみ使う。
+  #   Note: I don't know if it is necessarily supported, so use it only if it is listed in terminfo.
   ble/init:term/define-cap _ble_term_ich '' ich:IC 123 # CSI @
   ble/init:term/define-cap _ble_term_dch '' dch:DC 123 # CSI P
   ble/init:term/define-cap _ble_term_ech '' ech:ec 123 # CSI X
@@ -181,7 +181,7 @@ function ble/init:term/initialize {
   ble/init:term/define-cap _ble_term_sc $'\e7' sc:sc # \e[s
   ble/init:term/define-cap _ble_term_rc $'\e8' rc:rc # \e[u
   [[ $TERM == minix ]] && _ble_term_sc= _ble_term_rc=
-  # Note: TERM=sun{,-color}: terminfo にはないが \e7 \e8 が使える。
+  # Note: TERM=sun{,-color}: Although not in terminfo, \e7 \e8 can be used.
 
   # Cursor Style
   ble/init:term/define-cap _ble_term_Ss '' Ss:Ss 123 # DECSCUSR
@@ -273,7 +273,7 @@ function ble/init:term/initialize {
   ble/init:term/define-sgr-param _ble_term_sgr_smso "$_ble_term_smso" 7
   ble/init:term/define-sgr-param _ble_term_sgr_rmso "$_ble_term_rmso" 27
 
-  # Note: rev と smso が同じ場合は、rev の reset に rmso を使用する。
+  # Note: If rev and smso are the same, use rmso to reset rev.
   ble/init:term/register-varname _ble_term_sgr_rev_reset
   if [[ $_ble_term_sgr_smso && $_ble_term_sgr_smso == "$_ble_term_sgr_rev" ]]; then
     _ble_term_sgr_rev_reset=$_ble_term_sgr_rmso
@@ -292,10 +292,10 @@ function ble/init:term/initialize {
     local i1=$((i%8)) af= ab=
 
     if [[ $TERM == *-direct ]]; then
-      # Note: direct の時には terminfo 経由では16 色に対応する
-      #   シーケンスを得られない。direct に対応している場合は
-      #   当然 index color にも対応していると期待されるので、
-      #   16 色にはそれを用いる。
+      # Note: When using direct, 16 colors are supported via terminfo.
+      #   I can't get the sequence. If it supports direct
+      #   Naturally, it is expected that it will also support index color, so
+      #   Use it for 16 colors.
       if ((i<8)); then
         af=$'\e[3'$i'm'
         ab=$'\e[4'$i'm'

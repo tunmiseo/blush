@@ -1558,7 +1558,7 @@
 ## New features
 
 - color (`ble-color-setface`): support various spec such as SGR params `#D0860` 82fe96d `#D0861` 257c16d `#D0864` 2eaf2a9
-- syntax: `bleopt filename_ls_colors` に対応 `#D0862` c7ff302 `#D0863` 3c5bacf ec31aab
+- syntax: corresponds to `bleopt filename_ls_colors` `#D0862` c7ff302 `#D0863` 3c5bacf ec31aab
 - vi_omap: support <kbd>v</kbd>, <kbd>V</kbd>, <kbd>C-v</kbd> `#D0865` 54942e0 `#D0866` a9a1638 `#D0867` d3d8ea3 `#D0868` eb848dc
 - main: improve support of `[[ -o posix ]]` `#D0871` 07ae3cc `#D0872` 513c543
 - main: do not load ble.sh when bash is started by `bash -i -c command` `#D0873` fc23a6d
@@ -1593,8 +1593,8 @@
 - syntax (`extract-command`): fix a bug that extraction of nested commands always fails `#D0859` c3270f6
 - complete: fix a bug that the settings `complete -c` does not work `#D0870` 1ca5386 82bb154
 - main: fix a bug that the determination of `_ble_base` fails when loaded as `source ble.sh` without specifying the directory of `ble.sh` 201deae
-- util: `ble/util/assign` が正しい戻り値を返さないバグの修正 bd14982
-- util: `ble/util/assign-array` の入れ子の呼び出しで内容が混ざり合う問題の修正 bd14982
+- util: Fixed a bug where `ble/util/assign` did not return the correct return value bd14982
+- util: Fixed an issue where nested calls to `ble/util/assign-array` caused mixed contents bd14982
 - progcomp: fix a bug that bash-completion does not work properly due to wrong `COMP_POINT` `#D0897` 41b8cbb
 - global: fix leak variables `#D0900` 244f965 `#D0906` b8dcbfe 9892d63
 - progcomp: fix a problem that completion functions can consume stdin `#D0903` 7cfe425
@@ -1609,134 +1609,134 @@
 
 2018-09-24 -- 2018-10-05 (#D0825..#D0857 6ed51e7)
 
-## 新機能
-  - highlight: 変数代入の右辺及び配列要素の着色に対応 `#D0839` 854c3b4
-  - nsearch: (非インクリメンタル)履歴検索に対応 <kbd>C-x {C-,}{p,n}</kbd> `history-{,substring-,n}search-{for,back}ward` `#D0843` e3b7d8b 0d31cd9 253b52e
-  - isearch: 検索前に選択状態でがあれば検索後に復元する `#D0845` 93f3a0f
-  - decode: 貼り付け時など大量の入力があった時に処理の進行状況を表示 `#D0848` c2d6100
-  - decode: 貼り付け時などの高速化の為に一括の文字列挿入に対応 (`batch-insert`) `#D0849` 48eeb03
-  - decode: `bleopt decode_isolated_esc=auto` でキーマップに応じて単独 <kbd>ESC</kbd> の取扱を切り替え `#D0852` 9b20b45 edd481c
-  - complete: `bleopt complete_{auto_complete,menu_filter}=` で自動補完・候補絞り込みの無効化に対応 `#D0852` 4425d12
-  - vi: テキストオブジェクト単語の再実装 (reported by cmplstofB) `#D0855` 9f2a973 ad308ae 3a5c456 6ebcb35
-  - vi: オペレータ `d` の特殊ルールに対応 `#D0855` fa0d3d3
+## New features
+  - highlight: Supports coloring of the right side of variable assignment and array elements `#D0839` 854c3b4
+  - nsearch: Supports (non-incremental) history search <kbd>C-x {C-,}{p,n}</kbd> `history-{,substring-,n}search-{for,back}ward` `#D0843` e3b7d8b 0d31cd9 253b52e
+  - isearch: If selected before search, restore after search `#D0845` 93f3a0f
+  - decode: Display processing progress when there is a large amount of input such as when pasting `#D0848` c2d6100
+  - decode: Supports batch string insertion to speed up pasting (`batch-insert`) `#D0849` 48eeb03
+  - decode: Switch handling of independent <kbd>ESC</kbd> according to keymap with `bleopt decode_isolated_esc=auto` `#D0852` 9b20b45 edd481c
+  - complete: `bleopt complete_{auto_complete,menu_filter}=` supports disabling auto-completion and candidate narrowing down `#D0852` 4425d12
+  - vi: Reimplementation of text object words (reported by cmplstofB) `#D0855` 9f2a973 ad308ae 3a5c456 6ebcb35
+  - vi: Support special rules for operator `d` `#D0855` fa0d3d3
 
-## バグ・問題修正
-  - decode: `ble-bind -d` に於いて `-c` 及び `-x` の引数の引用符が二重になっている問題の修正 `#D0850`
-  - auto-complete: 構文エラーが自動補完により解決される時 <kbd>RET</kbd> でコマンド実行が抑止されない問題の修正 `#D0827` daf360e
-  - highlight: `shopt -s failglob` で配列の指示初期化子がエラー着色される問題の修正 (reported by cmplstofB) `#D0838` d6fe413
-  - complete: プログラム補完に対して曖昧補完が効かない時の対策 `#D0841` 713e95d
-  - isearch: ユーザ入力による割り込みで検索位置の記録に失敗していたバグの修正 `#D0843`
-  - isearch: キャンセル時に位置とマークが正確に復元されない問題の修正 `#D0847`
-  - isearch, dabbrev: 検索処理中にユーザが何か入力するまで現在行が更新されない問題の修正 `#D0847`
-  - decode: 未ロードのキーマップに対して `ble-bind -m -P` `ble-bind -m kmap -f kspecs -` が使えない問題の修正 66e202a
-  - auto-complete: <kbd>C-j</kbd> が単なる "確定" になっていたのを "確定して実行" に修正 `#D0852` 01476a7
-  - edit: <kbd>M-S-f</kbd>, <kbd>M-S-b</kbd> を束縛するべきところ <kbd>M-C-f</kbd>, <kbd>M-C-b</kbd> を束縛している箇所を修正 `#D0852` c68e7d7
-  - color: Bash 3.0 で算術式内の `<()` がプロセス置換と解釈される問題の対策 `#D0853` 520184d
-  - syntax: コメント上の単語が何故か除去されないバグの修正 (reported by cmplstofB) `#D0854` 641583f
-  - vi: Bash 3.1 及び 3.2 で <kbd>C-d</kbd> 受信の為のリダイレクトに失敗する問題の修正 `#D0857` d4b39b3
+## Bug/problem fixes
+  - decode: Fixed the issue of double quotes for `-c` and `-x` arguments in `ble-bind -d` `#D0850`
+  - auto-complete: Fixed an issue where command execution was not suppressed with <kbd>RET</kbd> when syntax errors were resolved by auto-completion `#D0827` daf360e
+  - highlight: Fixed an issue where `shopt -s failglob` caused error coloring of array directive initializers (reported by cmplstofB) `#D0838` d6fe413
+  - complete: Measures when ambiguous completion does not work for program completion `#D0841` 713e95d
+  - isearch: Fixed a bug where recording of search position failed due to interruption by user input `#D0843`
+  - isearch: Fixed an issue where positions and marks were not restored accurately when canceling `#D0847`
+  - isearch, dabbrev: Fixed an issue where the current row was not updated until the user entered something during the search process `#D0847`
+  - decode: Fixed issue where `ble-bind -m -P` `ble-bind -m kmap -f kspecs -` could not be used for unloaded keymaps 66e202a
+  - auto-complete: <kbd>C-j</kbd> changed from just "confirm" to "confirm and run" `#D0852` 01476a7
+  - edit: Where <kbd>M-S-f</kbd>, <kbd>M-S-b</kbd> should be bound Fixed the place where <kbd>M-C-f</kbd>, <kbd>M-C-b</kbd> is bound `#D0852` c68e7d7
+  - color: Countermeasure for the problem that `<()` in an arithmetic expression is interpreted as process substitution in Bash 3.0 `#D0853` 520184d
+  - syntax: Fixed a bug where words in comments were not removed for some reason (reported by cmplstofB) `#D0854` 641583f
+  - vi: Fixed an issue where redirection for receiving <kbd>C-d</kbd> fails in Bash 3.1 and 3.2 `#D0857` d4b39b3
 
-## 動作変更
-  - sabbrev, vi_imap: `sabbrev-expand` を <kbd>C-x '</kbd> ではなく <kbd>C-]</kbd> から束縛 `#D0825` e5969b7
-  - core: `bleopt` に設定名を指定子て設定内容を表示させる時、設定名の存在を確認する `#D0850` 725d09c
-  - isearch: <kbd>C-d</kbd> で現在の選択範囲を削除する様に変更 `#D0826` c3bb69e `#D0852` db28f74
-  - isearch: <kbd>C-m</kbd> (<kbd>RET</kbd>) で確定した時は選択範囲を解除する様に変更 `#D0826` c3bb69e
-  - decode: `ble-bind` のオプションを再構成 `#D0850` f7f1ec8 64ad962
-  - decode: 組み込みコマンド `bind` を上書きして `ble.sh` の動作が阻害されない様に引数をチェックして実行 `#D0850`
+## Behavior change
+  - sabbrev, vi_imap: Bind `sabbrev-expand` from <kbd>C-]</kbd> instead of <kbd>C-x '</kbd> `#D0825` e5969b7
+  - core: When displaying the setting contents by specifying the setting name in `bleopt`, check the existence of the setting name `#D0850` 725d09c
+  - isearch: Changed <kbd>C-d</kbd> to delete current selection `#D0826` c3bb69e `#D0852` db28f74
+  - isearch: Changed to cancel the selection range when confirmed with <kbd>C-m</kbd> (<kbd>RET</kbd>) `#D0826` c3bb69e
+  - decode: Reconfigure `ble-bind` options `#D0850` f7f1ec8 64ad962
+  - decode: Overwrite the built-in command `bind` to check the arguments and run it so that the operation of `ble.sh` is not hindered `#D0850`
   - complete: autoload `ble-sabbrev` (`core-complete.sh`), `ble-syntax:bash/is-complete` (`core-syntax.sh`) `#D0842` df0b769
-  - isearch: 編集関数 `isearch/accept-line` が <kbd>RET</kbd> 以外から束縛されていても <kbd>RET</kbd> を実行する様に変更 `#D0843`
-  - vi, [in]search: mark 名を整理 (`char`/`line`/`block`/`search` に接頭辞 `vi_` 付加し、新しい mark 名を `search` とする) `#D0843`
-  - edit: 関数名変更 `ble/widget/accept-single-line-or/accepts` → `ble-edit/is-single-complete-line` `#D0844`
-  - isearch: 空文字列で検索した時の振る舞いを再考 `#D0847` d05705e
-  - decode: 入力のキー復号の各種調整 `#D0850` dc013ad
-  - dabbrev: <kbd>C-m</kbd>, <kbd>RET</kbd> で展開終了、<kbd>C-j</kbd>, <kbd>C-RET</kbd> でコマンド実行 `#D0852` 01476a7
+  - isearch: Changed the editing function `isearch/accept-line` to execute <kbd>RET</kbd> even if it is bound from something other than <kbd>RET</kbd> `#D0843`
+  - vi, [in]search: Organize mark names (add `vi_` prefix to `char`/`line`/`block`/`search` and make new mark name `search`) `#D0843`
+  - edit: Change function name `ble/widget/accept-single-line-or/accepts` → `ble-edit/is-single-complete-line` `#D0844`
+  - isearch: Reconsider behavior when searching with empty string `#D0847` d05705e
+  - decode: Various adjustments for input key decoding `#D0850` dc013ad
+  - dabbrev: <kbd>C-m</kbd>, <kbd>RET</kbd> to finish expansion, <kbd>C-j</kbd>, <kbd>C-RET</kbd> to execute command `#D0852` 01476a7
 
-## 内部的変更
-  - isearch, dabbrev: `ble/util/fiberchain` による再実装 `#D0843`, `#D0846` 2c695cf bdf8072 95268c1
-  - edit, vi: 選択範囲の種類を表す mark 名を整理 a1a6272
-  - edit: 関数名変更 `ble/widget/accept-single-line-or/accepts` → `ble-edit/is-single-complete-line` `#D0844` 63ec9fe
-  - refactor: ファイルの整理 5e07e7f 1a03da2 673bd1d 55c4224 9ce944c 9a47c57 25487a7 5679ffc b7291a7
-  - refactor: 関数名・変数名の整理 `#D0851` d1b780c 9129c47 4d1181a
+## internal changes
+  - isearch, dabbrev: Reimplemented by `ble/util/fiberchain` `#D0843`, `#D0846` 2c695cf bdf8072 95268c1
+  - edit, vi: Organize mark names that represent selection range types a1a6272
+  - edit: Change function name `ble/widget/accept-single-line-or/accepts` → `ble-edit/is-single-complete-line` `#D0844` 63ec9fe
+  - refactor: Organize files 5e07e7f 1a03da2 673bd1d 55c4224 9ce944c 9a47c57 25487a7 5679ffc b7291a7
+  - refactor: Organize function and variable names `#D0851` d1b780c 9129c47 4d1181a
 
 <!---------------------------------------------------------------------------->
 # 2018-09-23
 
 2018-09-03 -- 2018-09-23 (#D0766..#D0824 8584e82)
 
-### 補完: 新機能
-  - complete: 自動補完において履歴からの検索に対応 `#D0766`, `#D0769` `#D0784` (fix)
-  - complete: 自動補完時の <kbd>M-f</kbd> <kbd>C-f</kbd> 等に対応 `#D0767`
-  - complete: `"$hello"` などの引用符中のパラメータ展開がある場合でも補完に対応 `#D0768`
-  - complete: 配列要素代入の右辺での補完に対応 `#D0773`
-  - complete: ブレース展開の途中での補完に対応 `#D0774`
-  - auto-complete: `ble/widget/auto_complete/accept-and-execute` 対応 `#D0811`
-  - complete: 補完関係の設定をする為の load hook の追加 `#D0812`
-  - complete: 種類を指定した補完に対応 `#D0820` `#D0819` (fix)
-  - complete: 静的略語展開に対応 (`ble-sabbrev key=value` で設定) `#D0820`
-  - complete: 動的略語展開に対応 `#D0820`
+### Complement: New features
+  - complete: Support search from history in auto-completion `#D0766`, `#D0769` `#D0784` (fix)
+  - complete: Supports <kbd>M-f</kbd> <kbd>C-f</kbd> etc. during auto-completion `#D0767`
+  - complete: Support completion even if there is parameter expansion inside quotes such as `"$hello"` `#D0768`
+  - complete: Supports completion on the right side of array element assignment `#D0773`
+  - complete: Support completion during brace expansion `#D0774`
+  - auto-complete: `ble/widget/auto_complete/accept-and-execute` Supported `#D0811`
+  - complete: Added load hook to set complementarity `#D0812`
+  - complete: Supports completion with specified type `#D0820` `#D0819` (fix)
+  - complete: Support static abbrev expansion (set with `ble-sabbrev key=value`) `#D0820`
+  - complete: Supports dynamic abbreviation expansion `#D0820`
 
-## 補完: バグ・問題点修正
-  - complete: 一意確定した直後の補完ですぐにメニュー補完に入るバグの修正 `#D0771`
-  - complete: `function fun [` 直後の補完で `[\[` が挿入される問題の修正 `#D0772`
-  - complete: 曖昧補完で補完を実行しようとすると入力済みの部分が削除されるバグの修正 `#D0775`
-  - complete: 自動補完が起動しなくなっているバグの修正 `#D0776`
-  - complete: プログラム補完関数が `failglob` で失敗するとシェルが終了する問題の対策 (reported by cmplstofB) `#D0781`
-  - complete: `failglob` の時コマンド補完候補に `*` が含まれてしまう問題の修正 (reported by cmplstofB) `#D0783`
-  - complete: 候補一覧にて入力済み範囲の強調が絞り込みにより無効化されるバグの修正 `#D0790`
-  - complete: 自動補完を抜けた後のマーク位置が誤っているバグの修正 `#D0798`
-  - complete: `for a in @` や `do @` の位置の補完でエラーメッセージが表示されるバグの修正 `#D0810`
+## Complement: Bug/problem fixes
+  - complete: Fixed a bug that immediately enters menu completion after completion is unique `#D0771`
+  - complete: Fixed a problem where `[\[` was inserted in the completion immediately after `function fun [` `#D0772`
+  - complete: Fixed a bug where the entered part would be deleted when trying to complete with ambiguous completion `#D0775`
+  - complete: Fixed a bug where auto-completion was not activated `#D0776`
+  - complete: Countermeasure for the issue where the shell exits when the program completion function fails with `failglob` (reported by cmplstofB) `#D0781`
+  - complete: Fixed issue where `*` is included in command completion candidates when `failglob` is used (reported by cmplstofB) `#D0783`
+  - complete: Fixed a bug where the emphasis of the entered range in the candidate list was disabled by filtering `#D0790`
+  - complete: Fixed a bug where the mark position was incorrect after exiting auto-completion `#D0798`
+  - complete: Fixed a bug where an error message was displayed when completing `for a in @` or `do @` position `#D0810`
 
-## 補完: 動作変更
-  - complete: 入力済み部分の評価方法の内部変更 `#D0777`
-  - complete: 自動補完の着色の変更 `#D0780` `#D0792`
-  - complete: プログラム補完で提供するコマンドライン (`COMP_*`) にて、補完開始点に単語の切れ目を入れる様に変更 `#D0793`
-  - auto-complete: <kbd>C-RET</kbd> で補完を確定してコマンド実行 `#D0822`
+## Completion: Behavior change
+  - complete: Internal change in evaluation method of input part `#D0777`
+  - complete: Change coloring of auto-completion `#D0780` `#D0792`
+  - complete: Changed the command line (`COMP_*`) provided by program completion to include a word break at the start point of completion `#D0793`
+  - auto-complete: Confirm completion with <kbd>C-RET</kbd> and execute command `#D0822`
 
-## 他: 新機能
-  - edit: `IGNOREEOF` に対応 `#D0787`
-  - edit: コマンド `exit` にて、ジョブが残っている場合はユーザに尋ねて終了 `#D0789`, `#D0805` (bugfix)
-  - term: 256色対応のない端末での減色の実装 `#D0824`
+## Others: New features
+  - edit: Support `IGNOREEOF` `#D0787`
+  - edit: Command `exit` asks the user if there are any remaining jobs and exits `#D0789`, `#D0805` (bugfix)
+  - term: Implementation of color reduction on terminals that do not support 256 colors `#D0824`
 
-## 他: バグ・問題点修正
-  - isearch: 非同期検索ができなくなっていたバグの修正
-  - color: `ble-color-setface` の遅延初期化順序のバグを修正 (reported by cmplstofB) `#D0779`
-  - decode: CentOS 7 で `LC_ALL=C.UTF-8` に対してエラーメッセージが出る問題の対策 `#D0785`
-  - edit: ジョブがある時の終了 <kbd>C-d</kbd> について `bleopt allow_exit_with_jobs` 対応 (request by cmplstofB) `#D0786`
-  - edit: Bash 3.* で <kbd>C-d</kbd> によるプログラム実行 (`ble-edit/exec:gexec`) が遅延するバグの修正
-  - syntax: Bash 3.2--4.1 の算術式バグによる関数定義の構文解析に失敗する問題の対策 `#D0788`
-  - highlight: `region` レイヤーの着色範囲が改行を跨ぐ場合に既定の着色になるバグの修正 `#D0791`
-  - isearch: 空の検索文字列による一致に <kbd>C-h</kbd> で戻った時に全体が選択されるバグの修正 `#D0794`
-  - decode: `failglob` の時 `ble-bind -d` に失敗する問題の修正 `#D0795`
-  - edit: `command-help` のコマンド名抽出に失敗するバグの修正 (reported by cmplstofB) `#D0799`
-  - syntax: 履歴展開の置換指示子の解析が正確でない問題の修正 (report by cmplstofB) `#D0800`
-  - edit: Bash 3.0 で履歴展開 `:&` が使えない問題の修正 `#D0801`
-  - idle: 負の `sleep` を試みてエラーメッセージが出る問題の修正 `#D0802`
-  - bind: `ble-detach` 時に、Bash 3.0 の <kbd>"</kbd> のバインディングを破壊するバグの修正 `#D0803`
-  - edit: `ble-detach` 直後にコマンドラインに設定される `stty sane` が表示されない問題の対策 `#D0804`
-  - core: Bash-3.0 で補完候補がない場合にエラーメッセージが表示されるバグの修正 `#D0807`
-  - edit: コマンド実行中にウィンドウサイズが変更された時にプロンプトが表示されてしまう問題の解消 `#D0809`
-  - edit: widget 内で `read -e` を使用した時・`read -e` がタイムアウトした時に表示が乱れる問題の解消 `#D0809`
-  - edit: `read -e` でタイムアウトが効かないバグの修正 `#D0809`
-  - term: 16色の端末で色が化けるバグの修正 `#D0823`
+## Others: Bug/problem fixes
+  - isearch: Fixed a bug that prevented asynchronous search
+  - color: Fixed lazy initialization order bug in `ble-color-setface` (reported by cmplstofB) `#D0779`
+  - decode: Countermeasure for error message for `LC_ALL=C.UTF-8` on CentOS 7 `#D0785`
+  - edit: Compatible with `bleopt allow_exit_with_jobs` for exiting when there are jobs <kbd>C-d</kbd> (request by cmplstofB) `#D0786`
+  - edit: Fixed a bug that delayed program execution (`ble-edit/exec:gexec`) with <kbd>C-d</kbd> in Bash 3.*
+  - syntax: Countermeasure for the problem where function definition parsing fails due to an arithmetic expression bug in Bash 3.2--4.1 `#D0788`
+  - highlight: Fixed a bug where the coloring range of the `region` layer would be the default coloring if it crossed line breaks `#D0791`
+  - isearch: Fixed bug where <kbd>C-h</kbd> returned to match with empty search string would select everything `#D0794`
+  - decode: Fixed issue where `ble-bind -d` fails when `failglob` `#D0795`
+  - edit: Fixed a bug that failed to extract the command name of `command-help` (reported by cmplstofB) `#D0799`
+  - syntax: Fixed an issue where the parsing of replacement directives in history expansion was incorrect (report by cmplstofB) `#D0800`
+  - edit: Fixed issue where history expansion `:&` cannot be used in Bash 3.0 `#D0801`
+  - idle: Fixed an issue where an error message appeared when attempting a negative `sleep` `#D0802`
+  - bind: Fixed a bug that broke Bash 3.0's <kbd>"</kbd> binding when `ble-detach` `#D0803`
+  - edit: Solution to the problem that `stty sane` that is set on the command line immediately after `ble-detach` is not displayed `#D0804`
+  - core: Fixed a bug where an error message is displayed when there are no completion candidates in Bash-3.0 `#D0807`
+  - edit: Fixed the issue where the prompt was displayed when the window size was changed during command execution `#D0809`
+  - edit: Fixed an issue where the display was distorted when using `read -e` in a widget or when `read -e` timed out `#D0809`
+  - edit: Fixed bug where timeout did not work with `read -e` `#D0809`
+  - term: Fixed a bug that caused colors to change on 16-color terminals `#D0823`
 
-## 他: 動作変更
-  - edit: `read -e` がキャンセル・タイムアウトによって終了した時に入力文字列を灰色で再表示 `#D0809`
-  - decode: キーマップの既定の初期化を最初の `ble-bind` 時に確認する様に変更 `#D0813`
-  - core: `ble/util/clock` 導入 `#D0814`
-  - edit: `ble-edit/read -e -t timeout` において、タイムアウトをより高精度で処理 (`ble/util/clock`) `#D0814`
-  - color: `face` が定義されていない時のエラーメッセージの表示方法を変更 `#D0815`
-  - edit: コマンド実行時に現在のカーソル位置より下に表示されている端末の内容を上書きする様に変更 `#D0816`
-  - edit: `accept-line` において、ちらつき防止の為、実際のコマンド実行が伴わない時は info の再描画を行わない `#D0816`
-  - edit: `ble/widget/history-expand-line` は <kbd>C-RET</kbd> ではなく <kbd>M-^</kbd> から束縛される様に変更 `#D0820`
-  - edit: `ble/widget/magic-space` で履歴展開が行われなかった時、現在位置で静的略語展開を試みる様に変更 `#D0820`
-  - isearch: <kbd>RET</kbd> でコマンド実行ではなく検索を終了するだけに変更。<kbd>C-RET</kbd> でコマンド実行 `#D0822`
+## Others: Changed behavior
+  - edit: Redisplay input string in gray when `read -e` terminates due to cancellation/timeout `#D0809`
+  - decode: Change default initialization of keymap to be checked at first `ble-bind` `#D0813`
+  - core: `ble/util/clock` introduction `#D0814`
+  - edit: Handle timeouts with more precision in `ble-edit/read -e -t timeout` (`ble/util/clock`) `#D0814`
+  - color: Change the way the error message is displayed when `face` is not defined `#D0815`
+  - edit: Changed to overwrite the contents of the terminal displayed below the current cursor position when executing a command `#D0816`
+  - edit: In `accept-line`, to prevent flickering, info is not redrawn when no actual command execution is involved `#D0816`
+  - edit: `ble/widget/history-expand-line` is now bound from <kbd>M-^</kbd> instead of <kbd>C-RET</kbd> `#D0820`
+  - edit: Changed to try static abbreviation expansion at the current position when history expansion is not performed in `ble/widget/magic-space` `#D0820`
+  - isearch: Changed <kbd>RET</kbd> to only end the search instead of executing the command. Execute command with <kbd>C-RET</kbd> `#D0822`
 
-## 他
-  - Makefile: 依存ファイルを `.PHONY` target として出力 `#D0778`
-  - core: `ble/util/assign` をリエントラントに修正 `#D0782`
-  - 議論 complete: `#D0770` edit: `#D0796` vi: `#D0796`
-  - `blerc` の更新
+## others
+  - Makefile: Output dependent files as `.PHONY` target `#D0778`
+  - core: Fix `ble/util/assign` to be reentrant `#D0782`
+  - Discussion complete: `#D0770` edit: `#D0796` vi: `#D0796`
+  - `blerc` update
 
-## 以下は widget 名変更の一覧
+## Below is a list of widget name changes
   - `menu_complete/accept`              → `menu_complete/exit`
   - `auto_complete/accept`              → `auto_complete/insert`
   - `auto_complete/accept-on-end`       → `auto_complete/insert-on-end`
@@ -1749,332 +1749,332 @@
 
 2018-07-29 - 2018-09-02 (#D0684..#D0765 0c28ed9)
 
-## 補完: 新機能
-  - complete: 曖昧補完 `#D0707` `#D0708` `#D0710` `#D0713` `#D0743` (fix)
-  - complete: Readline 設定 `completion-ignore-case` に対応 `#D0709` `#D0710`
-  - complete: `ble/cmdinfo/complete:$command_name` 対応 `#D0711`
-  - complete: `path:...` などと入力した時の続きの補完に対応 `#D0715`
-  - complete: 引用符内のエスケープなどを適切に処理する `#D0717`
-  - complete: 自動補完に対応 `#D0724`, `#D0728`, `#D0734` & `#D0735` (vim-mode), `#D0766` (history)
-  - complete: カーソルの右側に補完結果の一部が含まれる時にスキップする機能 (`bind set skip-completed-text`) `#D0736`
-  - complete: 引用符の中で補完した時に引用符を閉じる機能 `#D0738`
-  - complete: 算術式内部での変数名の補完に対応 `#D0742`
-  - complete: 候補一覧表示の整列と着色 `#D0746` `#D0747` `#D0762` `#D0765`
-  - complete: menu-completion (メニュー補完) 対応 `#D0749` `#D0757` `#D0764`
-  - complete: menu-filter (候補絞り込み) 対応 `#D0751`
-  - complete: vi_cmap に於ける補完 `#D0761`
+## Complement: New features
+  - complete: Ambiguous completion `#D0707` `#D0708` `#D0710` `#D0713` `#D0743` (fix)
+  - complete: Readline setting `completion-ignore-case` supported `#D0709` `#D0710`
+  - complete: `ble/cmdinfo/complete:$command_name` Supported `#D0711`
+  - complete: Supports continuation completion when entering `path:...` etc. `#D0715`
+  - complete: Properly handle escaping, etc. inside quotes `#D0717`
+  - complete: Supports auto-completion `#D0724`, `#D0728`, `#D0734` & `#D0735` (vim-mode), `#D0766` (history)
+  - complete: Ability to skip when part of the completion result is included to the right of the cursor (`bind set skip-completed-text`) `#D0736`
+  - complete: Ability to close quotes when completing inside quotes `#D0738`
+  - complete: Supports completion of variable names inside arithmetic expressions `#D0742`
+  - complete: Arrange and color candidate list display `#D0746` `#D0747` `#D0762` `#D0765`
+  - complete: menu-completion (menu completion) supported `#D0749` `#D0757` `#D0764`
+  - complete: menu-filter (candidate narrowing down) supported `#D0751`
+  - complete: completion in vi_cmap `#D0761`
 
-## 補完: バグ修正・対策
-  - complete: Cygwin でのコマンド名補完に於いて `.exe` の途中まで入力した時に正しく補完できない問題の修正 `#D0703`
-  - complete: `complete` によって登録されたプログラム補完に対して変数 `COMP_*` が正しく設定されない問題の修正 `#D0711`
-  - complete: `"` や `'` を含むファイル名の補完が正しくできない問題の修正 `#D0712` `#D0714`
-  - complete: 補完中に特殊キーを入力しても中断しない問題の解消 `#D0729`
-  - complete: クォートを認識しないプログラム補完関数に対する対策 `#D0739`
-  - complete: 引数の途中からのプログラム補完の不整合の修正 `#D0742` `#D0744`
-  - complete: パラメータ展開 `${var}` 直後からの補完が正しく実行できる様に修正 `#D0742`
+## Complement: Bug fixes/countermeasures
+  - complete: Fixed an issue where command name completion on Cygwin could not be completed correctly when entering part of `.exe` `#D0703`
+  - complete: Fixed an issue where variables `COMP_*` were not set correctly for program completion registered by `complete` `#D0711`
+  - complete: Fixed an issue where file name completion including `"` and `''` could not be completed correctly `#D0712` `#D0714`
+  - complete: Resolved the problem of not interrupting even if you enter a special key during completion `#D0729`
+  - complete: Measures against program completion functions that do not recognize quotes `#D0739`
+  - complete: Fixed inconsistency in program completion from the middle of the argument `#D0742` `#D0744`
+  - complete: Corrected so that completion immediately after parameter expansion `${var}` can be executed correctly `#D0742`
 
-## 補完: 動作変更
-  - complete: 補完候補生成直前の `shopt -s force_fignore` を参照して候補を制限する様に変更 `#D0704`
-  - complete: `FIGNORE` はエスケープされた挿入文字列に対してではなくて、候補文字列に対して判定する様に変更 `#D0704`
-  - complete: 関数名補完を `/` で区切られた単位で行う `#D0706` `#D0724` (曖昧一致の時は抑制)
-  - complete: パラメータ展開で厳密一致で一意確定の時は他の補完文脈を使うように変更 `#D0740`
-  - complete: パラメータ展開の補完後に挿入する文字を文脈に依存して変更 `#D0741`
-  - complete: パラメータ展開の直後に補完で挿入する際のエスケープを文脈に依存して変更
-  - complete: プログラム補完による生成候補でディレクトリ名を省略 `#D0755`
+## Completion: Behavior change
+  - complete: Changed to limit candidates by referring to `shopt -s force_fignore` immediately before generating completion candidates `#D0704`
+  - complete: `FIGNORE` now evaluates against candidate strings instead of escaped inserted strings `#D0704`
+  - complete: Perform function name completion in units delimited by `/` `#D0706` `#D0724` (Suppressed when ambiguous match)
+  - complete: Changed to use other completion context when exact match and uniqueness is confirmed in parameter expansion `#D0740`
+  - complete: Change the character inserted after parameter expansion completion depending on the context `#D0741`
+  - complete: change the escape when inserting completion immediately after parameter expansion depending on the context
+  - complete: Omit directory name in candidates generated by program completion `#D0755`
 
-## 他: 新機能
-  - edit (`RET`): 文法的に不完全のときに改行を挿入 `#D0684`
-  - core (`ble/util/idle`): 簡易タスクスケジューラの実装 `#D0721`
+## Others: New features
+  - edit (`RET`): Insert line break when grammar is incomplete `#D0684`
+  - core (`ble/util/idle`): Simple task scheduler implementation `#D0721`
   - core: add a function `ble/function#try` `#D0725`
-  - idle: `ble/util/idle` でバックグラウンドジョブ待ち機能を実装 `#D0731` `#D0745` (history bugfix)
-  - base: `--attach=prompt` 対応 `#D0737`
-  - base: 初回初期化時の順序の変更と過程の info による表示
-  - decode: modifyOtherKeys 対応の改善 `#D0752` `#D0756` `#D0758` `#D0759`
-  - core (`ble/util/assing`): 第3引数以降にコマンドに対する引数を指定できるように変更 `#D763`
+  - idle: Implement background job waiting function in `ble/util/idle` `#D0731` `#D0745` (history bugfix)
+  - base: `--attach=prompt` Supports `#D0737`
+  - base: Changing the order during initialization and displaying the process with info
+  - Improved support for decode: modifyOtherKeys `#D0752` `#D0756` `#D0758` `#D0759`
+  - core (`ble/util/assing`): Changed so that arguments for the command can be specified after the 3rd argument `#D763`
 
-## 他: バグ修正・対策
-  - highlight: 単語着色が乱れるバグの修正 `#D0686`
-  - syntax: bash-3.2 以下で `_ble_syntax_attr: bad array subscript` のエラーが出るバグの修正 `#D0687`
-  - prompt: PS1 で \v が空文字列になるバグの修正 `#D0688`
-  - highlight: 上書きモードにおいてコマンドをキャンセルしても `disabled` レイヤーの着色が無視されるバグの修正 `#D0689`
-  - core (ble/term/visible-bell): 横幅の計算を誤っているバグの修正 `#D0690`
-  - decode: "set -o vi/emacs" で編集モードを切り替えた直後に "stty" が変になる問題の修正 `D0691`
-  - core: LANG=C とすると動かなくなる問題の対処 `#D0698` `#D0699` `#D0700`
-  - history: Cygwin で履歴の初期化に時間がかかる問題の対策 `#D0701`
-  - history: bashrc 読み込み直後に謎の待ち時間が発生する問題の対策 `#D0702`
-  - emacs: 貼り付け (bracketed paste) で文字列が二重に挿入されるバグの修正 `#D0720`
-  - main: POSIXLY_CORRECT が設定されている時の対策 `#D0722` `#D0726` `#D0727`
-  - edit: POSIXLY_CORRECT を用いた組み込みコマンド上書き対策 `#D0722`
-  - decode: 連想配列に依る実装のバグを修正し bash-4.0, 4.1 においても連想配列を使用 '#D0730'
-  - decode: `ble-bind -c` でシェルの特殊文字を含むコマンドが正しく実行できないバグの修正
-  - edit: 履歴項目の数が倍増するバグの修正 `#D0732`
-  - vi: キーボードマクロで特殊キーが再生されないバグの修正 `#D0733`
-  - isearch: 現在位置の表示時の 0 除算のバグの修正
-  - vi: `!!` をキャンセルしても操作範囲を示す着色が消えないバグの修正 `#D0760`
+## Others: Bug fixes/countermeasures
+  - highlight: Fixed a bug that caused word coloring to be distorted `#D0686`
+  - syntax: Fixed a bug that caused the error `_ble_syntax_attr: bad array subscript` under bash-3.2 `#D0687`
+  - prompt: Fixed a bug where \v becomes an empty string on PS1 `#D0688`
+  - highlight: Fixed a bug where coloring of `disabled` layers was ignored even if the command was canceled in overwrite mode `#D0689`
+  - core (ble/term/visible-bell): Fixed a bug where the width was calculated incorrectly `#D0690`
+  - decode: Fixed an issue where "stty" becomes strange immediately after switching the editing mode with "set -o vi/emacs" `D0691`
+  - core: Dealing with the problem that it stops working when LANG=C `#D0698` `#D0699` `#D0700`
+  - history: Countermeasure for the problem that history initialization takes a long time in Cygwin `#D0701`
+  - history: Countermeasure for the issue where a mysterious waiting time occurs immediately after loading bashrc `#D0702`
+  - emacs: Fixed a bug where strings were inserted twice during bracketed paste `#D0720`
+  - main: Countermeasures when POSIXLY_CORRECT is set `#D0722` `#D0726` `#D0727`
+  - edit: Measures against overwriting built-in commands using POSIXLY_CORRECT `#D0722`
+  - decode: Fixed a bug in the implementation that relies on associative arrays. Associative arrays are also used in bash-4.0 and 4.1 '#D0730'
+  - decode: Fixed a bug where commands containing shell special characters could not be executed correctly with `ble-bind -c`
+  - edit: Fixed a bug that doubled the number of history items `#D0732`
+  - vi: Fixed a bug where special keys were not played in keyboard macro `#D0733`
+  - isearch: Fixed division by 0 bug when displaying current position
+  - vi: Fixed a bug where the coloring indicating the operation range does not disappear even if you cancel `!!` `#D0760`
 
-## 他
+## others
   - refactor: `#D0725` `#D0750` `#D0753` `#D0754`
-  - bash-bug: Bash に対するバグ報告 `#D0692` `D0695` `D0697`
+  - bash-bug: Bug report for Bash `#D0692` `D0695` `D0697`
 
 <!---------------------------------------------------------------------------->
 # 2018-03-15
 
 2018-03-15 (#D0644..#D0683 7d365d5)
 
-## 新機能
+## New features
   - undo: vi-mode `u` `<C-r>` `U` (`#D0644` `#D0648`); emacs `#D0649`; `#D0662`
-  - vi-mode (nmap/xmap): `f1` で `command-help` 呼び出し
-  - vi-mode (nmap): `C-a` `C-x` 対応 (nmap `#D0650`, xmap `#D0661`)
-  - vi-mode (operator): 各種オペレータ対応 `#D0655` (`gq`, `gw` `#D0652`; `!` `#D0653`; `g@` `#D0654`)
-  - vi-mode (operator): 追加入力のあるオペレータで作用対象を着色 `#D0656`
+  - vi-mode (nmap/xmap): `f1` calls `command-help`
+  - vi-mode (nmap): `C-a` `C-x` supported (nmap `#D0650`, xmap `#D0661`)
+  - vi-mode (operator): Supports various operators `#D0655` (`gq`, `gw` `#D0652`; `!` `#D0653`; `g@` `#D0654`)
+  - vi-mode (operator): Color operands with operators with additional inputs `#D0656`
   - vi-mode (registers): registers `"[0-9%:-]` `#D0666` `#D0668`, `:reg` `#D0665`
-  - vi-mode (smap): 選択モード `#D0672`
-  - emacs: 主要なコマンドで引数に対応 `#D0646`
-  - emacs: 複数行モードの時にモード名を表示。引数も表示。 `#D0683`
+  - vi-mode (smap): selection mode `#D0672`
+  - emacs: Support arguments in main commands `#D0646`
+  - emacs: Display mode name when in multiline mode. Also display arguments. `#D0683`
   - edit: `safe` keymap
-  - edit: 絵文字の文字幅 `bleopt emoji_width=2` `#D0645`
-  - core: 誤った `PATH` に対する対策 `#D0651`
+  - edit: Emoji character width `bleopt emoji_width=2` `#D0645`
+  - core: Measures against incorrect `PATH` `#D0651`
 
-## 動作修正
-  - vi-mode (nmap/xmap/omap `<paste>`): 引数を無視するように変更
-  - vi-mode (map `/` `?` `n` `N`): 検索の一致の仕方を vim と同様のものに変更 `#D0658`
-  - vi-mode (omap): `g~?` で検索して一致した範囲まで大文字・小文字を切り替えるように変更 `#D0659`
-  - vi-mode (map): 最終行付近で `+` `_` `g_` などを呼び出したときの振る舞いを vim と同様のものに変更 `#D0663`
-  - vi-mode (xmap): テキストオブジェクト `[ia]['"]` の xmap での正しい振る舞い `#D0670`
-  - vi-mode (nmap): `Y` で行頭に動かないように変更 `#D0673`
-  - vi-mode (xmap): 矩形範囲抽出の効率化 `#D0677`
-  - core: `ble.sh` ロード時間の改善 `#D0675`, `#D0682`, (遅延読込 `#D0678` `#D0679` `#D0680`, 裏で履歴読込 `#D0681`)
+## Behavior modification
+  - vi-mode (nmap/xmap/omap `<paste>`): Changed to ignore arguments
+  - vi-mode (map `/` `?` `n` `N`): Change the search matching method to be similar to vim `#D0658`
+  - vi-mode (omap): Changed to search with `g~?` and switch case between matching range `#D0659`
+  - vi-mode (map): Change the behavior when calling `+` `_` `g_` etc. near the last line to be similar to vim `#D0663`
+  - vi-mode (xmap): Correct behavior of text object `[ia]['"]` in xmap `#D0670`
+  - vi-mode (nmap): Changed so that `Y` does not move to the beginning of the line `#D0673`
+  - vi-mode (xmap): Improve efficiency of rectangular range extraction `#D0677`
+  - core: `ble.sh` Improved loading time `#D0675`, `#D0682`, (lazy loading `#D0678` `#D0679` `#D0680`, history reading behind the scenes `#D0681`)
 
-## バグ修正
-  - vi-mode (omap): `cw` や `y?` が動かなくなっていたバグの修正
-  - vi-mode: マクロで記録される内容に空白が挿入されるバグの修正 `#D0667` (テスト追加 `#D0669`)
-  - vi-mode: 行指向の貼り付けが動かなくなっていたバグの修正 `#D0674`
-  - complete: コマンド名によって第一引数の補完が正しく実行されないことがあるバグの修正 `#D0664`
-  - syntax: ヒアストリングで $ret を指定するとエラーメッセージが現れたバグの修正 `#D0660`
-  - syntax: bash-3.0 でコマンドの着色が常にエラーになっていたバグの修正 `#D0676`
-  - decode: ble-decode-unkbd があらゆる文字について ESC を返す様になっていたバグの修正 `#D0657`
-  - Makefile: 削除したファイル isearch.sh が要求されるバグの修正
-  - Makefile: 最新の gawk で動かないバグの修正
+## Bug fixes
+  - vi-mode (omap): Fixed a bug where `cw` and `y?` did not work.
+  - vi-mode: Fixed a bug where spaces were inserted in the content recorded by macro `#D0667` (Test added `#D0669`)
+  - vi-mode: Fixed a bug that prevented line-oriented pasting from working `#D0674`
+  - complete: Fixed a bug where completion of the first argument was not executed correctly depending on the command name `#D0664`
+  - syntax: Fixed a bug where an error message appeared when $ret was specified in a here string `#D0660`
+  - syntax: Fixed a bug where command coloring always resulted in an error in bash-3.0 `#D0676`
+  - decode: Fixed a bug where ble-decode-unkbd returned ESC for every character `#D0657`
+  - Makefile: Fixed bug where deleted file isearch.sh was required
+  - Makefile: Fixed a bug that does not work with the latest gawk.
 
 <!---------------------------------------------------------------------------->
 # 2017-12-03
 
-## 新機能
-  - edit, vi-mode: bracketed paste mode に対応 `#D0639`
+## New features
+  - edit, vi-mode: Supports bracketed paste mode `#D0639`
 
-## 動作修正
-  - core: 端末の状態設定・復元とカーソル形状の内部管理 `#D0638`
-    - 外部コマンドを呼び出すときに既定のカーソル形状にする
-    - 外部コマンドから戻ったときにカーソル形状を復元する
-  - syntax (extract-command): より下の構文階層にいてもコマンドを見つけられるように修正 `#D0635`
-    これによりリダイレクトの単語などの上でも `command-help` (nmap `K`, emacs `f1`) が動くように。
-  - syntax (チルダ展開): 変数代入の形式を持つ通常単語内部でのチルダ展開に対応 `#D0636`
-  - syntax: [...] 内部でチルダ展開が起こったとき [...] は意味を失う `#D0637`
-  - vi-mode (cmap `<C-w>`): imap `<C-w>` と同様に vim の動きに変更
+## Behavior modification
+  - core: Internal management of terminal state settings/restoration and cursor shape `#D0638`
+    - Make the cursor shape the default when calling an external command
+    - Restore cursor shape when returning from external command
+  - syntax (extract-command): Fixed so that commands can be found even if they are lower in the syntax hierarchy `#D0635`
+    This allows `command-help` (nmap `K`, emacs `f1`) to work even on redirect words.
+  - syntax (tilde expansion): Supports tilde expansion inside normal words that have the form of variable assignment `#D0636`
+  - syntax: [...] [...] loses meaning when tilde expansion occurs inside `#D0637`
+  - vi-mode (cmap `<C-w>`): Change to vim behavior similar to imap `<C-w>`
 
-## バグ修正
-  - complete: 補完候補がない時に空文字列で確定するバグの修正 `#D0631`
-  - complete, highlight: `failglob` 周りのバグの修正 (3) `#D0633` `#D0634`
-  - vi-mode: `ret` グローバル変数が汚染されていたバグの修正 `#D0632`
-  - highlight: 読み取り専用の変数名を入力するとエラーメッセージが出るバグの修正
-  - decode: `__defchar__` から呼び出された widget が 125 を返したとき
-    `__default__` から呼び出された widget にキー列が渡されないバグの修正
-  - core: set -u にすると全く動かないバグの修正 `#D0642`
-  - edit: ble.sh ロード中に `read -e` が動かないバグの修正 `#D0643`
+## Bug fixes
+  - complete: Fixed a bug where an empty string is confirmed when there are no completion candidates `#D0631`
+  - complete, highlight: Fixed bugs around `failglob` (3) `#D0633` `#D0634`
+  - vi-mode: Fixed bug where `ret` global variable was contaminated `#D0632`
+  - highlight: Fixed a bug where an error message would appear when entering a read-only variable name
+  - decode: when widget called from `__defchar__` returns 125
+    Fixed a bug where key columns were not passed to widgets called from `__default__`
+  - core: Fixed a bug that did not work at all when set -u `#D0642`
+  - edit: Fixed bug where `read -e` does not work while loading ble.sh `#D0643`
 
 <!---------------------------------------------------------------------------->
 # 2017-11-26
 
-## バグ修正
-  - general: failglob で問題が生じるバグの修正 `#D0630`
-  - keymap/vi (nmap q): bash-3.0 で動かなかったバグの修正
-  - keymap/vi (cmap): C-d で終了してしまうバグを修正 `#D0629`
-  - edit (ble/widget/command-help): エイリアスの上でヘルプを実行しようとすると無限ループになるバグを修正
-  - edit (ble/util/type): "-" で始まる名前のコマンドの種類の判定に失敗し着色されなかったバグの修正
-  - complete: 変数代入の右辺やリダイレクト先で補完できないことがあるバグの修正 `#D0627`
-  - complete: 補完する単語にパラメータ展開が含まれるとき ble.sh のローカル変数の値を参照している問題の修正 `#D0628`
+## Bug fixes
+  - general: Fixed a bug that caused problems with failglob `#D0630`
+  - keymap/vi (nmap q): Fixed a bug that did not work on bash-3.0.
+  - keymap/vi (cmap): Fixed a bug that caused exit with C-d `#D0629`
+  - edit (ble/widget/command-help): Fixed a bug that caused an infinite loop when trying to run help on an alias.
+  - edit (ble/util/type): Fixed a bug where the type of commands with names starting with "-" could not be determined and were not colored.
+  - complete: Fixed a bug where completion may not be possible on the right side of variable assignment or redirect destination `#D0627`
+  - complete: Fixed an issue where the value of a local variable in ble.sh was being referenced when the word to be completed contains parameter expansion `#D0628`
 
-## 動作変更
-  - bind/decode: 孤立 ESC の読み取り方法を変更。<C-q><C-[> で単体 <C-[> が入力されるように修正
-  - bind/decode: input_encoding=C の時の孤立 ESC および C-@ の読み取りに対応
-  - complete: 重複して列挙される候補を統合する `#D0606`
-  - complete: 厳密一致するディレクトリ名が何故かコマンド候補に現れる問題の修正 `#D0608`
-  - edit (command-help): 幾つかの組み込みコマンド・予約語について man bash の正しい位置に移動するように修正 `#D0609`
-  - edit (command-help): クォートなどを除去してからコマンドのヘルプを探索するように変更 `#D0610`
-  - core: 条件コマンドの比較で右辺をクォートし忘れていた箇所を修正 `#D0618`
-  - highlight: `shopt -s failglob` の時、失敗する単語にエラー着色をする `#D0630`
+## Behavior change
+  - bind/decode: Change how orphan ESCs are read. Modified <C-q><C-[> to input a single <C-[>
+  - bind/decode: Support reading orphan ESC and C-@ when input_encoding=C
+  - complete: Combine duplicate enumerated candidates `#D0606`
+  - complete: Fixed an issue where exact matching directory names appeared in command candidates for some reason `#D0608`
+  - edit (command-help): Fixed some built-in commands and reserved words to be moved to the correct location in man bash `#D0609`
+  - edit (command-help): Changed to search command help after removing quotes etc. `#D0610`
+  - core: Fixed the part where the right side was forgotten to be quoted when comparing conditional commands `#D0618`
+  - highlight: When using `shopt -s failglob`, color failing words as errors `#D0630`
 
-## 構文解析変更
-  - syntax: `> a.txt; echo` は構文エラーではないことに対応 `#D0591`
-  - syntax: 変数代入・リダイレクトの後では予約語は意味を失いコマンドとして扱われることに対応 `#D0592`
-  - syntax: `time` や `time -p` は構文的に正しいことに対応 `#D0593`
-  - syntax: `echo $(echo > )` などの `>` の引数がない構文エラーにより `$()` が閉じず別の構文エラーを引き起こしていたのを抑制 `#D0601`
-  - syntax: `function hello (())` は bash-4.2 未満では構文エラーとして扱うように変更 `#D0603`
-  - syntax: `time -p -- command` を独立した文脈で解析するように変更 `#D0604`
-    - complete: これにより `time` の引数のコマンド補完ができなかった問題は解消した `#D0605`
-  - syntax: extglob 内部のプロセス置換 `@(<(echo))` に対応 `#D0611`
-  - syntax: `[...]` によるパターンの解析に対応 `#D0612`
-  - syntax: 変数代入の右辺にある不活性になった extglob の入れ子 `@(@())` も不活性にする `#D0613`
-  - syntax: `shopt -u extglob` の時でも `*` や `?` を着色する `#D0616`
-  - syntax: ブレース展開の着色に対応 `#D0622`
-  - syntax: チルダ展開の着色に対応 `#D0626`
-  - syntax: `for var in args...` の `args` におけるリダイレクトの禁止 `#D0623`
-  - highlight: ヒアストリングの場合はパス名展開・ブレース展開を行わない `#D0624`
-  - highlight: リダイレクト先ファイル名が複数語に展開されたらエラー着色 `#D0625`
+## parsing changes
+  - syntax: `> a.txt; echo` is not a syntax error `#D0591`
+  - syntax: After variable assignment/redirection, reserved words lose their meaning and are treated as commands `#D0592`
+  - syntax: `time` and `time -p` are syntactically correct `#D0593`
+  - syntax: Suppress `$()` not closing and causing another syntax error due to a syntax error with no argument for `>` such as `echo $(echo > )` `#D0601`
+  - syntax: `function hello (())` is now treated as a syntax error in versions below bash-4.2 `#D0603`
+  - syntax: Changed to parse `time -p -- command` in an independent context `#D0604`
+    - complete: This solves the problem of not being able to complete the command for the `time` argument `#D0605`
+  - syntax: Supports extglob internal process substitution `@(<(echo))` `#D0611`
+  - syntax: Supports pattern analysis using `[...]` `#D0612`
+  - syntax: Also deactivate nested extglob `@(@())` on the right side of variable assignment `#D0613`
+  - syntax: Color `*` and `?` even when using `shopt -u extglob` `#D0616`
+  - syntax: Supports coloring of brace expansion `#D0622`
+  - syntax: Supports coloring of tilde expansion `#D0626`
+  - syntax: Prohibition of redirection in `args` of `for var in args...` `#D0623`
+  - highlight: Do not perform path name expansion or brace expansion for here strings `#D0624`
+  - highlight: Error coloring `#D0625` when redirect destination file name is expanded to multiple words
 
-## 構文解析修正
-  - syntax: `$({ echo; })` や `$(while false; do :; done)` において `}`, `done` 等の後にコマンドがないと構文エラーになっていたバグの修正 `#D0593`
-  - syntax: `-` で始まる名前のコマンド・関数名が正しく着色されないバグの修正 `#D0595`
-  - syntax: `if :; then :; fi $(echo)` などの構文エラー着色が実行されないバグの修正 `#D0597`
-  - syntax: 先読みによる不整合が起こるバグの修正・先読みの枠組みの整備 `#D0601`
-    - プロセス置換周りで部分更新により不整合が生じるバグを修正
-    - `function hello (())` としておいて `) (` を挿入して `function hello () (())` にすると不整合が生じるバグを修正 `#D0602`
-  - syntax: 途中で `shopt -u extglob` にしても `_ble_syntax_bashc` が更新されないバグの修正 `#D0615`
+## parsing fix
+  - syntax: Fixed a bug where a syntax error would occur if there was no command after `}`, `done`, etc. in `$({ echo; })` or `$(while false; do :; done)` `#D0593`
+  - syntax: Fixed a bug where command/function names starting with `-` were not colored correctly `#D0595`
+  - Fixed a bug where syntax error coloring such as syntax: `if :; then :; fi $(echo)` was not executed `#D0597`
+  - syntax: Fixed a bug that caused inconsistency due to read-ahead and improved the read-ahead framework `#D0601`
+    - Fixed a bug that caused inconsistencies due to partial updates around process replacement.
+    - Fixed a bug that caused inconsistency when inserting `) (` to `function hello (())` and changing it to `function hello () (())` `#D0602`
+  - syntax: Fixed a bug where `_ble_syntax_bashc` is not updated even if you run `shopt -u extglob` `#D0615`
 
 <!---------------------------------------------------------------------------->
 # 2017-11-09
 
-## 新機能
+## New features
   - vi-mode (nmap): `*` `#` `qx...q` `@x`
-  - vi-mode (cmap): 履歴
-  - core: bleopt 変数 `pager` (既定値 `''`) に対応。`ble.sh` の使うページャとして `${bleopt_pager:-${PAGER:-適当に探索}}` を使用する。
-  - vi-mode (nmap `K`): `ble/cmdinfo/help:$cmd`, `ble/cmdinfo/help` に対応。
+  - vi-mode (cmap): history
+  - core: Supports bleopt variable `pager` (default value `''`). Use `${bleopt_pager:-${PAGER:-Search as you like}}` as the pager used by `ble.sh`.
+  - vi-mode (nmap `K`): Supports `ble/cmdinfo/help:$cmd`, `ble/cmdinfo/help`.
 
-## バグ修正
-  - vi-mode (cmap `<C-[>`): コマンドラインモードをキャンセルするキーマップが `bell` で上書きされていたバグの修正
-  - decode: `shopt -s failglob`, `shopt -s nullglob` で `unset` が正しく動かないバグの修正
-  - vi-mode (nmap `K`): `MANOPT=-a` で操作できなくなるバグの修正
+## Bug fixes
+  - vi-mode (cmap `<C-[>`): Fixed a bug where the keymap to cancel command line mode was overwritten with `bell`.
+  - decode: Fixed a bug where `unset` did not work correctly with `shopt -s failglob` and `shopt -s nullglob`.
+  - vi-mode (nmap `K`): Fixed a bug that made operation impossible with `MANOPT=-a`
 
-## 動作変更
-  - edit (`ble/widget/command-help`), vi-mode (nmap `K`): カーソル位置のコマンドの `man` を表示するように変更
-  - base: キャッシュディレクトリ・一時ディレクトリの決定で、それぞれ `XDG_CACHE_HOME`, `XDG_RUNTIME_DIR` を参照するように変更
-  - Makefile: インストール先ディレクトリで、`XDG_DATA_DIR` を参照するように変更
-  - isearch: 実際に必要になるまでコマンド履歴のロードを遅延するように変更
-  - vi-mode (nmap `K`): 組み込みコマンド・キーワードは `man bash` を表示する。
-  - vi-mode (nmap `K`): シェル関数は関数定義を表示する。
+## Behavior change
+  - edit (`ble/widget/command-help`), vi-mode (nmap `K`): Changed to display `man` of the command at the cursor position
+  - base: Changed to refer to `XDG_CACHE_HOME` and `XDG_RUNTIME_DIR` respectively when determining cache directory and temporary directory.
+  - Makefile: Changed the installation directory to refer to `XDG_DATA_DIR`
+  - isearch: Changed to delay loading command history until actually needed
+  - vi-mode (nmap `K`): Built-in command keyword displays `man bash`.
+  - vi-mode (nmap `K`): Shell functions print function definitions.
 
 <!---------------------------------------------------------------------------->
 # 2017-11-05
 
-## 新機能
-  - vi-mode (exclusive motion): `:help exclusive-linewise` 特別規則 (exclusive -> inclusive, exclusive -> linewise) に対応
-  - vi-mode (omap): `C-c` `C-[` で明示的にキャンセル
-  - vi-mode: keymap/vi_test.sh 追加。regression が酷いので vi-mode の動作テストを自動化
-  - complete: bleopt 変数 `complete_stdin_frequency` (既定値 `50`) 追加
+## New features
+  - vi-mode (exclusive motion): `:help exclusive-linewise` Supports special rules (exclusive -> inclusive, exclusive -> linewise)
+  - vi-mode (omap): Cancel explicitly with `C-c` `C-[`
+  - vi-mode: Added keymap/vi_test.sh. Automated vi-mode operation test because regression was severe
+  - complete: Added bleopt variable `complete_stdin_frequency` (default value `50`)
 
-## 動作変更
-  - vi-mode (nmap `e`, `E`): 移動先が最終行の最後の文字の空白のとき、omap なら bell を鳴らさないように変更
-  - vi-mode (omap/xmap `<space>`, `<back>`, `<C-h>`): 改行の数え方を変更
-  - vi-mode (nmap `cw`, `cW`): 単語の最後の文字、および空白の上にいるときの振る舞いの変更
-  - decode (ble-bind): `ble-bind -D` でキーマップの内部状態も出力するように変更
-  - term: `_ble_term_SS` の既定値を空文字列に変更
-  - complete: `shopt -s no_empty_cmd_completion` では補完を (コマンドの補完以外も) 全く行わないように変更
-  - edit (ble/widget/exit): 編集中の文字列が残っているとき、灰色で再描画してから exit するように変更
+## Behavior change
+  - vi-mode (nmap `e`, `E`): Changed so that omap does not sound a bell when the destination is the blank space of the last character of the last line.
+  - vi-mode (omap/xmap `<space>`, `<back>`, `<C-h>`): Change how newlines are counted
+  - vi-mode (nmap `cw`, `cW`): Change behavior when on the last character of a word and on a whitespace
+  - decode (ble-bind): Changed `ble-bind -D` to also output the internal state of the keymap.
+  - term: Change default value of `_ble_term_SS` to empty string
+  - complete: `shopt -s no_empty_cmd_completion` no longer performs completion (other than command completion)
+  - edit (ble/widget/exit): When the string being edited remains, it will be redrawn in gray and then exit.
 
 <!---------------------------------------------------------------------------->
 # 2017-11-03
 
-## 破壊的変更
-  - vi-mode (widget): 名称変更 blw/widget/vi-insert/* → ble/widget/vi_imap/*
-  - vi-mode (bleopt 変数): 名称変更 bleopt keymap_vi_normal_mode_name → keymap_vi_nmap_name
-  - vi-mode (imap): vi-insert/magic-space 廃止。代わりに magic-space を直接用いる。
+## breaking changes
+  - vi-mode (widget): Rename blw/widget/vi-insert/* → ble/widget/vi_imap/*
+  - vi-mode (bleopt variable): rename bleopt keymap_vi_normal_mode_name → keymap_vi_nmap_name
+  - vi-mode (imap): vi-insert/magic-space deprecated. Use magic-space directly instead.
 
-## 新機能
+## New features
   - vi-mode (xmap): `o` `O`
-  - vi-mode (nmap): `.` 取り敢えず完成?
+  - vi-mode (nmap): `.` Completed for now?
   - vi-mode (xmap/nmap): `gv`
 
-## バグ修正
-  - vi-mode (mark `` `x `` `'x`): オペレータが呼び出されないバグの修正
-  - vi-mode (txtobj `[ia]w`): 英数字と _ の連続ではなく英字と _ だけの連続を単語としていたバグの修正
-  - vi-mode (imap): `{count}i...<C-[>` において `<C-q>x` `<C-v>x` が正しく繰り返されなかったバグの修正
-  - vi-mode (imap): `{count}i...<C-c>` において繰り返しが有効になっていたバグの修正
-  - vi-mode (nmap `{N}%`): 目的の行に移動しなくなっていたバグの修正
-  - vi-mode (nmap `_`): `d_` 及び `d1_` が linewise になっていないバグの修正
-  - vi-mode (xmap `I` `A`): 動かなくなっていたバグの修正
-  - vi-mode (xmap `I` `A`): 実行後のカーソル位置がずれていたバグの修正
-  - vi-mode (xmap `I` `A` `c` `s` `C`): 矩形挿入の後の編集範囲 `` `[`] `` から1行目が抜けているバグの修正
-  - vi-mode (xmap `?`): 検索 `?` が operator `g?` になっているバグの修正
-  - vi-mode (xmap `/` `?` `n` `N`): ビジュアルモードの選択範囲が検索の一致範囲で上書きされるバグの修正
-  - vi-mode (xmap `/` `?` `n` `N`): 現在の履歴項目の中で一致しない時、別の履歴項目にビジュアルモードのまま移動するバグの修正
-  - lib/vim-surround (nmap `cs` `cS`): nmap `.` 対応時に引数とレジスタが効かなくなっていたバグの修正
-  - lib/vim-surround (xmap `S`): `v` によるビジュアルモードで改行が前後に挿入されていたバグの修正
+## Bug fixes
+  - vi-mode (mark `` `x `` `'x`): Fixed bug where operator was not called
+  - vi-mode (txtobj `[ia]w`): Fixed a bug where a sequence of only alphabetic characters and _ was considered a word instead of a sequence of alphanumeric characters and _.
+  - vi-mode (imap): Fixed a bug where `<C-q>x` `<C-v>x` was not repeated correctly in `{count}i...<C-[>`
+  - vi-mode (imap): Fixed bug where repetition was enabled in `{count}i...<C-c>`
+  - vi-mode (nmap `{N}%`): Fixed a bug that prevented moving to the desired line.
+  - vi-mode (nmap `_`): Fixed a bug where `d_` and `d1_` were not set to linewise.
+  - vi-mode (xmap `I` `A`): Fixed a bug that prevented it from working.
+  - vi-mode (xmap `I` `A`): Fixed a bug where the cursor position was shifted after execution
+  - vi-mode (xmap `I` `A` `c` `s` `C`): Fixed a bug where the first line was missing from the edit range `` `[`] `` after inserting a rectangle.
+  - vi-mode (xmap `?`): Fixed bug where search `?` became operator `g?`
+  - vi-mode (xmap `/` `?` `n` `N`): Fixed a bug where the visual mode selection range was overwritten by the search match range.
+  - vi-mode (xmap `/` `?` `n` `N`): Fixed a bug that moved to another history item in visual mode when there was no match in the current history item.
+  - lib/vim-surround (nmap `cs` `cS`): Fixed a bug where arguments and registers were not valid when supporting nmap `.`
+  - lib/vim-surround (xmap `S`): Fixed a bug where newlines were inserted before and after in visual mode with `v`
 
-## 動作変更
-  - vi-mode (imap `<C-w>`): vim の単語区切り (`w`) による削除に変更
-  - vi-mode (nmap `[rRfFtT]x`): `<C-[>` でキャンセルするように変更
-  - vi-mode (nmap `w` `b` `e` `ge`): 非英数字 ASCII の連続と、Unicode 文字の連続 をそれぞれ別の単語と扱うように変更
-  - vi-mode (xmap `c` `s` `C`): `I`, `A` と同様の矩形挿入に対応
+## Behavior change
+  - vi-mode (imap `<C-w>`): Changed to deletion using vim word separator (`w`)
+  - vi-mode (nmap `[rRfFtT]x`): Changed to cancel with `<C-[>`
+  - vi-mode (nmap `w` `b` `e` `ge`): Changed to treat consecutive non-alphanumeric ASCII characters and consecutive Unicode characters as separate words.
+  - vi-mode (xmap `c` `s` `C`): Supports rectangle insertion similar to `I`, `A`
 
 <!---------------------------------------------------------------------------->
 # 2017-10-30
 
-## 破壊的変更
-  - vi-mode: キーマップの名称変更 vi_command -> vi_nmap, vi_insert -> vi_imap
-  - vi-mode: 一部の widget の名称変更
+## breaking changes
+  - vi-mode: Rename keymap vi_command -> vi_nmap, vi_insert -> vi_imap
+  - vi-mode: Rename some widgets
     - ble/widget/{no,}marked -> ble/widget/@{no,}marked
-    - ble/widget/vi-command/* (一部) -> ble/widget/vi_nmap/*
-  - vi-mode: ble/widget/vi-insert/@norepeat 廃止。別の方法 (_ble_keymap_vi_imap_white_list) を用いる。
+    - ble/widget/vi-command/* (part) -> ble/widget/vi_nmap/*
+  - vi-mode: ble/widget/vi-insert/@norepeat Deprecated. Use another method (_ble_keymap_vi_imap_white_list).
 
-## 新しい機能
-  - vi-mode (nmap): . は実装途中 (現状 nmap/omap におけるオペレータ経由の変更のみ記録)
-  - vi-mode (mode): bleopt 変数 `term_vi_[inoxc]map`
-  - decode: 孤立 ESC のタイムアウトに対応
-  - edit: shopt -s histverify, shopt -s histreedit に対応 #D0548
+## New features
+  - vi-mode (nmap): . is under implementation (currently only changes made via the operator in nmap/omap are recorded)
+  - vi-mode (mode): bleopt variable `term_vi_[inoxc]map`
+  - decode: support orphan ESC timeout
+  - edit: Supports shopt -s histverify, shopt -s histreedit #D0548
 
-## バグ修正
-  - vi-mode (xmap): `p`, `P` が正しく動作しないバグを修正
-  - vi-mode (imap): 挿入モードに入るときに指定した引数 (繰り返し回数) が常にキャンセルされていたバグの修正
-  - vi-mode (txtobj; nmap `gg`, `G`): レジスター指定が消失していたバグの修正
-  - lib/vim-surround (nmap ds): 引数が内部使用のオペレータ `y`, `d` に正しく渡っていなかったバグの修正
-  - prompt: `PROMPT_COMMAND` で設定された `PS1` が永続化されていなかったバグの修正
-  - decode: bind -x で曖昧な登録があって bash_execute_unix_command エラーになっていた問題の修正 #D0545
-  - decode: `vi.sh`, `emacs.sh` において `default.sh` が多重に呼び出されていた無駄の修正 #D0546
-  - core: bash-3.0 において ble/util/assign が壊れていたバグの修正
+## Bug fixes
+  - vi-mode (xmap): Fixed a bug where `p`, `P` did not work correctly.
+  - vi-mode (imap): Fixed a bug where the specified argument (repeat count) was always canceled when entering insert mode
+  - vi-mode (txtobj; nmap `gg`, `G`): Fixed a bug where register specifications were lost.
+  - lib/vim-surround (nmap ds): Fixed a bug where arguments were not passed correctly to internally used operators `y`, `d`.
+  - prompt: Fixed a bug where `PS1` set by `PROMPT_COMMAND` was not persisted.
+  - decode: Fixed an issue where bash_execute_unix_command error occurred due to ambiguous registration in bind -x #D0545
+  - decode: Fixed unnecessary calls to `default.sh` in `vi.sh` and `emacs.sh` #D0546
+  - core: Fixed a bug where ble/util/assign was broken in bash-3.0.
 
-## 動作変更
+## Behavior change
   - vi-mode (nmap `x`, `<delete>`, `s`, `X`, `C`, `D`): support registers
-  - source ble.sh において無事にロードされたときに終了ステータス 0 を返すことを保証
-  - widget marked, nomarked を @marked, @nomarked に改名。元の widget は非推奨 (削除予定)
-  - ble.sh: Linux 以外でも (`readlink -f` が動かないときも) シンボリックリンクを通したロードに対応 #D0544
+  - Guaranteed to return exit status 0 when successfully loaded in source ble.sh
+  - Rename widget marked, nomarked to @marked, @nomarked. Original widget is deprecated (scheduled for removal)
+  - ble.sh: Support loading through symbolic links even on non-Linux (even when `readlink -f` does not work) #D0544
 
 <!---------------------------------------------------------------------------->
 # 2017-10-22
 
-## 新機能
+## New features
   - vi-mode (mark): `mx` <code>`x</code> <code>'x</code> (`x` = <code>[][<>`'a-zA-Z"^.]</code>)
-  - vi-mode (nmap): `gi` `<C-d>` (空文字列のとき exit) `"x` (registers)
+  - vi-mode (nmap): `gi` `<C-d>` (exit when empty string) `"x` (registers)
   - vi-mode (xmap): `I` `A` `p` `P` `J` `gJ` `aw` `iw`
   - lib/vim-surround.sh: nmap `yS` `ySS` `ySs` `cS`, xmap `S` `gS`
-  - タブ・インデントの制御
-    - bleopt tab_width= (タブの表示幅)
-    - bleopt indent_offset=4 (`>` や `<` のインデントの幅)
-    - bleopt indent_tabs=1 (`>` や `<` のインデントにタブを用いるかどうか)
-    - 既定のインデントの幅は 8 から 4 に変更
+  - Control tab indentation
+    - bleopt tab_width= (tab display width)
+    - bleopt indent_offset=4 (indent width for `>` and `<`)
+    - bleopt indent_tabs=1 (Whether to use tabs to indent `>` and `<`)
+    - Default indent width changed from 8 to 4
 
-## バグ修正
-  - vi-mode: 挿入モードに繰り返し回数を指定したとき `ESC ?` も一緒に繰り返されていたバグの修正
-  - vi-mode: オペレータ `g?` が動かなくなっていたのを修正
-  - vi-mode (nmap `/` `?`): 検索対象の入力中に `C-c` してもキャンセルされないバグの修正
-  - vi-mode (xmap `r` (visual char/line)): 全体を置換したものが選択範囲に挿入されていたバグの修正
-  - vi-mode (xmap `$`): 行末で `$` をしたときに表示が更新されないバグの修正
-  - vi-mode (motion `0`): オペレータを認識していなかったバグを修正
-  - isearch: 一度一致したら同じものに一致し続けるバグを前回の `/` `?` `n` `N` 対応の際に埋め込んでいたので修正
-  - complete: `complete -F something -D` で登録されている補完関数が正しく実行されていなかったのを修正
-  - prompt: PROMPT_COMMAND によって設定された PS1 を拾っていなかったバグを修正
-  - textarea: 端末の下部で複数行編集時に `C-z` (`fz`) すると描画高さを正しく確保できていないバグの修正
+## Bug fixes
+  - vi-mode: Fixed a bug where `ESC ?` was also repeated when a repeat count was specified in insert mode.
+  - vi-mode: Fixed operator `g?` not working.
+  - vi-mode (nmap `/` `?`): Fixed a bug where `C-c` was not canceled while inputting the search target.
+  - vi-mode (xmap `r` (visual char/line)): Fixed a bug where the whole replacement was inserted into the selection range.
+  - vi-mode (xmap `$`): Fixed a bug where the display was not updated when `$` was used at the end of a line.
+  - vi-mode (motion `0`): Fixed a bug where the operator was not recognized.
+  - isearch: Fixed a bug that once matched, it continues to match the same thing, which was embedded in the previous `/` `?` `n` `N` support.
+  - complete: Fixed completion function registered with `complete -F something -D` not being executed correctly.
+  - prompt: Fixed a bug where it was not picking up PS1 set by PROMPT_COMMAND
+  - textarea: Fixed a bug where drawing height could not be secured correctly when using `C-z` (`fz`) when editing multiple lines at the bottom of the terminal.
 
-## 動作変更
-  - vi-mode (operator `<` `>`): Visual block での正しい振る舞い
-  - vi-mode (nmap `:` `/` `?`): 文字列入力中に空文字列で DEL or C-h することでキャンセルできるように修正
-  - vi-mode (nmap `J`, `gJ`): 引数に対応
-  - vi-mode (nmap `p`): 最後の行で挿入するときに余分な行が入らないように修正
-  - vi-mode (xmap `Y` `D` `R`): 記録するビジュアルモードの種類を修正
-  - lib/vim-surround.sh: タグ名入力中に '>' で確定するように修正
-  - widget (.SHELL_COMMAND): 実行しないコマンドに色がついているのはややこしいのでグレーアウトする様に変更
+## Behavior change
+  - vi-mode (operator `<` `>`): Correct behavior in Visual block
+  - vi-mode (nmap `:` `/` `?`): Corrected so that it can be canceled by DEL or C-h with an empty string while inputting a string.
+  - vi-mode (nmap `J`, `gJ`): supports arguments
+  - vi-mode (nmap `p`): Fixed not to insert extra line when inserting at the last line.
+  - vi-mode (xmap `Y` `D` `R`): Fixed the type of visual mode to record.
+  - lib/vim-surround.sh: Fixed to confirm with '>' while entering tag name
+  - widget (.SHELL_COMMAND): It is confusing that the commands that are not executed are colored, so I changed it so that it is grayed out.
 
-## 他の変更
-  - magic-space: 空白を挿入してから履歴展開していた順番を逆転
+## other changes
+  - magic-space: insert a space and then reverse the history expansion order
 
 ----
 
@@ -2361,9 +2361,9 @@
   - \fix, clear _ble_line_{beg,end}{x,y} on newline
   - ble-edit.sh: add a function ble-edit/draw/put.ind
   - ble-edit.sh: add a function ble/widget/.insert-newline
-  - (ble/widget/redraw-line): \clean, 無駄な _ble_line_cur 初期化を削除。ble-edit/render/invalidate を呼び出すだけで充分。
-  - (ble-edit/exec/.adjust-eol): \clean, 無駄な _ble_line_x=0 _ble_line_y=0 を消去。元からそうなっている前提である。
-  - (ble-edit/exec/.adjust-eol): \fix, 直接 stderr に出力していたのを ble/util/buffer に出す様に変更。
+  - (ble/widget/redraw-line): \clean, Remove unnecessary _ble_line_cur initialization. Just calling ble-edit/render/invalidate is sufficient.
+  - (ble-edit/exec/.adjust-eol): \clean, Delete useless _ble_line_x=0 _ble_line_y=0. This is an assumption that has been made from the beginning.
+  - (ble-edit/exec/.adjust-eol): \fix, Changed from directly outputting to stderr to outputting to ble/util/buffer.
 * (ble-syntax:bash): support `} }', etc.
 * (ble-syntax:bash): :new: support `for ((;;)) { ... }'
 * (ble-syntax:bash): support `((echo)>/dev/null)' and `$((echo)>/dev/null)'
@@ -2446,11 +2446,11 @@
 * complete: enable completion of variable names in "..." and ${...}.
 * complete.sh: insert '=' after the completion of variable name of assignment.
   - (ble/widget/complete):
-    completion-context にて source の引数をコロン区切で指定できるように拡張する。
+    Expand completion-context so that arguments of source can be specified separated by colons.
   - ble-complete/source/variable:
-    引数に応じて確定時に挿入する接尾辞を選択する様に変更する。
+    Change so that the suffix to be inserted at confirmation is selected according to the argument.
   - ble-syntax.sh (ble-syntax/completion-context):
-    文脈に応じて variable 候補源に引数 '=' を指定して、補完確定時に何を挿入するべきか指定する。
+    Depending on the context, specify the argument '=' in the variable candidate source to specify what should be inserted when the completion is confirmed.
 * complete.sh: fixes and clean up; a new fn ble/string#split.
   - ble-core.sh: a new function ble/string#split to replace "GLOBIGNORE=* IFS=... eval 'arr=(...)'".
   - complete.sh: (ble-complete/.fignore/filter): fixed a bug that local variable pat was leaked.
@@ -2479,7 +2479,7 @@
 ## 2016-07-06
 * ble-edit.sh (_ble_edit_history_edit): changed to hold the whole editted history data.
 * ble-syntax: glob patterns are not active in variable assignments.
-* ble-edit.sh: 修正: ジョブ状態の変更を標準出力に確実に出力
+* ble-edit.sh: Fixed: Ensure job state changes are printed to standard output.
   - fixed a bug that job state changes are not output when PS1 contains '\j'.
   - fixed a bug that the changes are not output immediately.
 * minor fixes in visible-bell and check-stderr.
@@ -2488,34 +2488,34 @@
 
 * (ble/util/joblist): use ble/util/joblist for internal usage of jobs.
   - ble-core.sh (ble/util/joblist): bugfix:
-    誤って _ble_util_joblist_jobs を _ble_util_joblist_list として使用している箇所が 4 箇所。
+    There are four places where _ble_util_joblist_jobs is incorrectly used as _ble_util_joblist_list.
   - ble-core.sh (ble/util/joblist): bugfix:
-    - (直前のジョブ) や - (一つ前のジョブ) の変化も変化として検知していた。
-    - これはジョブ状態の本質的な変化とは言いがたいので無視する。
+    - Changes in (previous job) and - (previous job) were also detected as changes.
+    - This cannot be said to be an essential change in the job status, so it will be ignored.
   - ble-core.sh (ble/util/joblist): bugfix: add ble/util/joblist.clear
-    bash 自身によってジョブ状態の変化が報告された後に、
-    二重に状態変化が報告される場合があるので、その様な場合にはキャッシュを消去する。
-  - ble-edit.sh の各 jobs を呼び出すところで、ble/util/joblist を代わりに呼び出す。
-  - ble-syntax.sh, ble-color.sh で jobs を使用してジョブの存在確認している箇所では、
-    先に ble/util/joblist を呼び出してジョブの状態変更を確認してから目的の jobs 呼び出しを行う。
+    After a job state change is reported by bash itself,
+    A state change may be reported twice, so in such a case, clear the cache.
+  - Where each jobs in ble-edit.sh is called, call ble/util/joblist instead.
+  - Where jobs are used in ble-syntax.sh and ble-color.sh to check the existence of jobs,
+    First call ble/util/joblist to check the job status change, then make the desired jobs call.
 * ble-core.sh: add a new function ble/util/joblist.
 
 ## 2016-07-05
 * ble-core: add option bleopt_stackdump_enabled
-  - bleopt_stackdump_enabled が非零の値に設定されている時にだけ
-    stackdump を出力する様にする。既定では 0 (出力しない) とする。
+  - Only when bleopt_stackdump_enabled is set to a non-zero value
+    Make stackdump output. The default is 0 (no output).
 
 ## 2016-07-04
 * ble-decode.sh (ble-decode-attach): fixed a bug that makes C-{u,v,w,?} ineffective after the second ble-attach.
-  - 2回目以降の ble-attach でも ble-decode-bind/uvw が動作する様に
-    ble-decode-attach で source "～.bind" した直後に _ble_decode_bind__uvwflag をクリアする。
+  - ble-decode-bind/uvw now works on ble-attach from the second time onwards.
+    Clear _ble_decode_bind__uvwflag immediately after source "~.bind" with ble-decode-attach.
 
 ## 2016-06-27
 * ble-core.sh ($_ble_base/cache): move to _ble_base_cache="$_ble_base/cache.d/$UID" for user separation.
 * ble-core.sh ($_ble_base_tmp): change to use /tmp/blesh/$UID if it is available.
-  - 今迄は ble.sh と同じディレクトリに一時ファイルを配置していた。
-    しかし、ble_util_assign.tmp などのファイルは速度を考えれば tmpfs (RAM上) に配置したい。
-    従って、一時ファイルは /tmp の上に配置するように変更する。
+  - Until now, temporary files were placed in the same directory as ble.sh.
+    However, considering speed, I would like to place files such as ble_util_assign.tmp in tmpfs (on RAM).
+    Therefore, change the temporary files to be placed above /tmp.
 * ble-core.sh: add ble/util/sleep to provide subsecond sleep.
 
 ## 2016-06-25
@@ -2529,19 +2529,19 @@
 
 ## 2016-06-19
 * ble-edit/isearch: ble/widget/isearch/prev cancel a task in que, ble/widget/isearch/accept is not effective while a search.
-  - ble/widget/isearch/prev: 現在実行中のタスク (_ble_edit_isearch_que) がある場合には一つずつキャンセルする。
-  - ble/widget/isearch/accept: 現在実行中のタスクがある場合には bell を鳴らすだけで動作をスキップする。
-  - ble-edit/isearch/.goto-match: 一致があった場合には is-stdin-ready でも強制的に描画を実行する。
+  - ble/widget/isearch/prev: If there are currently running tasks (_ble_edit_isearch_que), cancel them one by one.
+  - ble/widget/isearch/accept: If there is a task currently running, just ring the bell and skip the operation.
+  - ble-edit/isearch/.goto-match: If there is a match, force drawing even with is-stdin-ready.
 * ble-edit/isearch: check is-stdin-ready on history search to suspend.
 
 ## 2016-05-21
 * update README.md for v0.1.5
 * ble-edit.sh: bugfix, incorrect _ble_edit_ind caused by the inconsistensy of history/isearch targets.
-  - _ble_edit_history を履歴検索して _ble_edit_history_edit をロードしていた事による _ble_edit_ind 不整合
-    これにより、dirty-range の不整合が生じエラーが発生していた。長年の謎のバグがこれで潰れたと思われる。
+  - _ble_edit_ind inconsistency due to history search of _ble_edit_history and loading of _ble_edit_history_edit
+    This caused a dirty-range inconsistency and an error. It seems that a long-standing mysterious bug has been squashed.
 
 ## 2016-04-07
-* ble-syntax.sh (ble-syntax/parse/shift.impl2): bugfix 制御構造の欠陥による shift 漏れ。
+* ble-syntax.sh (ble-syntax/parse/shift.impl2): bugfix shift omission due to defect in control structure.
 
 ## 2016-01-24
 * ble-syntax.sh: \debug add debug codes for dirty-range bug
@@ -2553,13 +2553,13 @@
 
 ## 2015-12-26
 * (ble-color/faces): preserve orders of addhook-onload, and ble-color-{def,set}face.
-  - ble-color/faces 初期化前に呼び出した ble-color/faces/addhook-onload,
-    ble-color-defface, ble-color-setface を独立に記録していた為、
-    実際に呼び出された順序と異なる順序で処理が実行されてしまっていた。
-    記録を一つの配列 _ble_faces_lazy_loader にまとめ、順序が保存される様にした。
+  - ble-color/faces/addhook-onload, called before ble-color/faces initialization
+    Because ble-color-defface and ble-color-setface were recorded independently,
+    Processes were executed in a different order than they were actually called.
+    The records are combined into one array _ble_faces_lazy_loader so that the order is preserved.
 
 ## 2015-12-25
-* (ble-color) \change ble-color-{def,set}face の処理も遅延する。
+* (ble-color) \change ble-color-{def,set}face processing is also delayed.
 * functions/getopt.sh: \add description.
 
 ## 2015-12-24
@@ -2570,43 +2570,43 @@
   * (ble-syntax:bash): \new, support `a=([key]=value)` and `a+=([key]+=delta)`.
 * (ble-syntax:bash): \new context CTX_CASE.
 * (ble-syntax:bash): \new CTX_COND{X,I}; \change unexpected '(' is treated as extglob '@(' instead of sub-shell '(';
-  * ble-syntax.sh: `CTX_VAL{X,I}` から `CTX_COND{X,I}` を分離。
-  * ble-syntax.sh: コマンド中に現れる '(' を extglob の括弧として取り扱う事にする。
-    今迄は暫定的に sub-shell として取り扱っていたが、
-    エラーが多く出てうるさいのでエラーの少ない extglob 括弧として取り扱う事にする。
+  * ble-syntax.sh: Separate `CTX_COND{X,I}` from `CTX_VAL{X,I}`.
+  * ble-syntax.sh: '(' appearing in the command will be treated as extglob parentheses.
+    Until now, it was provisionally treated as a sub-shell, but
+    Since many errors occur and are noisy, we will treat them as extglob parentheses, which have fewer errors.
 * ble-edit.sh: \bugfix histexpand condition [[ -o histexpand ]] inverted.
-  * \bugfix 履歴展開が効かなくなっていた。
-    条件判定の誤りだった: [[ -o histexpand ]] → [[ ! -o histexpand ]]
-  * \bugfix 履歴展開に失敗した時に : が実行される。
-    履歴展開が失敗すると history -p は標準出力に何も出力しないためであった。
-    失敗した時は echo "$BASH_COMMAND" により手動で出力する。
+  * \bugfix History expansion no longer worked.
+    There was an error in the condition judgment: [[ -o histexpand ]] → [[ ! -o histexpand ]]
+  * \bugfix : is executed when history expansion fails.
+    This is because history -p does not output anything to standard output if history expansion fails.
+    If it fails, output it manually by echo "$BASH_COMMAND".
 * (ble-syntax:bash): \support shopt -s extglob; \bugfix error on {delimiter after redirect,'<' redirect};
-  * extglob 対応: `CTX_GLOB`, `ATTR_GLOB`, `ctx-glob`, `check-glob` 追加。
-  * \bugfix redirect 直後に redirect/delimiter があった時に解析データ書き込み違反。
-  * \cleanup: 共通の正規表現の整理:
+  * extglob support: `CTX_GLOB`, `ATTR_GLOB`, `ctx-glob`, `check-glob` added.
+  * \bugfix Analysis data writing violation occurs when there is redirect/delimiter immediately after redirect.
+  * \cleanup: Clean up common regular expressions:
     `$_ble_syntax_bash_rex_spaces`,
     `$_ble_syntax_bash_rex_IFSs`,
     `$_ble_syntax_bash_rex_delimiters`.
-  * \bugfix `$_ble_syntax_bash_rex_redirect`: < が抜けていた。
+  * \bugfix `$_ble_syntax_bash_rex_redirect`: < was missing.
 
 ## 2015-12-23
 * (ble-syntax:bash): special treatment of arguments of `declare`.
-  * (ble-syntax:bash): declare, typeset, local, export, alias コマンドの引数を文法的に特別に扱う。特に配列構文 =() を許容する。
-    その為に新しい文脈値 `CTX_ARGVX`, `CTX_ARGVI` を追加する。
-  * (ble-syntax:bash): `CTX_ARGVI` に対する補完候補は変数名。等号 '=' 以降の部分についてはファイル名の補完候補を列挙する。
-  * (ble-syntax:bash): 通常の代入構文における配列構文の動作を変更。
-    今迄は a=(1 2 3)echo などとすると a=(1 2 3) を配列代入と解釈し echo の部分をコマンドと解釈する様にしていた。
-    その為に配列構文の nest-pop 時にすぐに単語を抜けて cxt==CTX_CMDXV になる様に構成していた。
-    しかし、実際の bash の動作を確認してみると、a=(1 2 3)echo は a='(1 2 3)echo' の様に、全体が代入文の右辺と解釈される様である。
-    実際の bash の動作に合わせて、nest-pop 時に特別な動作を特にしない様に変更した。
+  * (ble-syntax:bash): Treat arguments of declare, typeset, local, export, and alias commands in a special way syntactically. In particular, it allows the array syntax =().
+    For that purpose, add new context values ​​`CTX_ARGVX`, `CTX_ARGVI`.
+  * (ble-syntax:bash): Completion candidates for `CTX_ARGVI` are variable names. The part after the equal sign '=' lists the file name completion candidates.
+  * (ble-syntax:bash): Changed behavior of array syntax in normal assignment syntax.
+    Up until now, when a=(1 2 3)echo etc., a=(1 2 3) was interpreted as an array assignment and the echo part was interpreted as a command.
+    For this reason, I configured it so that when I nest-pop the array syntax, the word is immediately removed and becomes cxt==CTX_CMDXV.
+    However, when we check the actual behavior of bash, it appears that a=(1 2 3)echo is interpreted as the right-hand side of an assignment statement, like a='(1 2 3)echo'.
+    Changed so that there is no special behavior during nest-pop to match the actual behavior of bash.
 
 ## 2015-12-21
-* (ble-syntax:bash): 算術式終了条件修正、bash-3.0 で += 無効; (completion-context): a+= 直後の補完候補生成。
-  * ble-syntax.sh (ble-syntax:bash): 算術式の終了条件を修正する。
-    $((...)) ((...)) の中では '(', ')' を数えて終了判定を行う。
-    $[...]、${arr[...]} arr[...]= の中では '[', ']' を数えて終了判定を行う。
-    ${var:...:...} では '}' が来たらすぐに終了する。
-  * ble-syntax.sh (completion-context): a+= の直後でも補完候補生成を行う。
+* (ble-syntax:bash): Fixed arithmetic expression termination condition, += invalid in bash-3.0; (completion-context): Generate completion candidate immediately after a+=.
+  * ble-syntax.sh (ble-syntax:bash): Modify the termination condition of arithmetic expressions.
+    $((...)) ((...)) counts '(', ')' to determine the end.
+    $[...], ${arr[...]} In arr[...]=, '[', ']' are counted to determine the end.
+    ${var:...:...} exits immediately when '}' is encountered.
+  * ble-syntax.sh (completion-context): Generates completion candidates even immediately after a+=.
   * ble-syntax.sh (ble-syntax:bash): disable += under bash-3.1.
 * ble-edit.sh: bugfix failure of catch C-d in bash-3.0.
 
@@ -2616,10 +2616,10 @@
   - ble-syntax.sh (ble-highlight-layer:syntax): color filenames of block device, character device, pipe, and socket.
   - ble-syntax.sh (ble-highlight-layer:syntax): redirection: check permissions.
 * (ble-syntax:bash): bugfix, tree-structure corruption on edit of array subscripts in array-element assignment.
-  - ble-syntax.sh: 配列添字の書き換え時に解析木の破壊が起こる。
-    配列添字の終了 ']=' において nest-pop を先頭位置で行っていた。
-    これが為に、過去の解析結果を書き換えている事になっていた為に、
-    shift の際に設置した情報が消滅したりしていた。
+  - ble-syntax.sh: Parse tree corruption occurs when rewriting array index.
+    At the end of array index ']=', nest-pop was performed at the beginning position.
+    Because of this, past analysis results were being rewritten,
+    Information installed during shift was disappearing.
 * ble-edit.sh: add support `set +o history`; ble-syntax.sh: check file existence on '<' redirection.
   - ble-edit.sh: add support `set +o history`
   - ble-syntax.sh (ble-highlight-layer:syntax): check filename of `<` redirections.
@@ -2627,12 +2627,12 @@
     definition of `local rex_redirect` -> global `_ble_syntax_bash_rex_redirect`.
     rename `_BLE_SYNTAX_CSPACE` -> `_ble_syntax_bash_cspace`.
   - ble-edit.sh: refact, rename functions `.ble-edit[./]history[./]*` -> `ble-edit/history/*`.
-* complete: 候補生成箇所の追加・修正、コマンド補完候補としてサブディレクトリも列挙
-  - ble-syntax.sh (complete): bugfix, 単語の間の空白で complete を実行しようとしても候補が生成されなかった。
+* complete: Add/modify candidate generation locations, list subdirectories as command completion candidates
+  - ble-syntax.sh (complete): bugfix, no candidates were generated when trying to run complete on spaces between words.
   - ble-syntax.sh (complete): generate filenames after `VAR='.
   - ble-syntax.sh (complete): generate filenames just after the redirection.
-  - complete.sh: コマンドの補完候補として現在のディレクトリのサブディレクトリも列挙する様に修正する。
-    サブディレクトリにある実行属性のファイルを実行したい場合がある為である。
+  - complete.sh: Modify to list subdirectories of the current directory as command completion candidates.
+    This is because there may be cases where you want to execute a file with an executable attribute located in a subdirectory.
 
 ## 2015-12-19
 * complete.sh: support `FIGNORE`, `shopt -s force_fignore`.
@@ -2683,29 +2683,29 @@
 * Refactoring ble-decode.sh.
   * ble-core.sh: .ble-term.{visible,audible}-bell -> ble-term/{visible,audible}-bell.
   * ble-decode.sh: .ble-stty.* -> ble-stty/*.
-  * ble-decode.sh: .ble-decode-* -> 適切な名称に変更。
+  * ble-decode.sh: .ble-decode-* -> Changed to appropriate name.
 * Refactoring and clean up.
   * ble-edit.sh, etc: 'ble-edit+' -> 'ble/widget/.
-  * 'ble-edit.sh: ble-edit/exec 関数名整理。
-  * ble-decode.sh: ble-decode-byte 関数名整理、ble-edit 依存性分離。
-  * README-ja_JP.md: 日本語説明修正。
-  * README.md: 英語修正。
-  * ble-syntax.sh: コードコメント @fn -> 関数 に統一。
+  * 'ble-edit.sh: Organized ble-edit/exec function names.
+  * ble-decode.sh: ble-decode-byte function name organization, ble-edit dependency separation.
+  * README-ja_JP.md: Corrected Japanese explanation.
+  * README.md: English correction.
+  * ble-syntax.sh: Unified code comment @fn -> function.
 
 ## 2015-12-06
 * ble-core.sh: Add function ble/util/cat to replace /bin/cat.
-  - ble-core.sh: 関数 ble/util/cat。command cat の単純な呼出と同じ機能を builtin read で実装。
-  - ble-decode.sh (ble-bind --help): 外部コマンドの cat を呼び出していたが、bash の組込コマンドで実現できるので置き換え。
-  - README.md: gmake/make について説明を追加。
+  - ble-core.sh: Function ble/util/cat. Implements the same functionality as a simple call to command cat with builtin read.
+  - ble-decode.sh (ble-bind --help): The external command cat was called, but it can be implemented with bash's built-in command, so it has been replaced.
+  - README.md: Added explanation about gmake/make.
 * Update README-ja_JP.md
 * ble-bind: New option `-L, --list-functions`, ble-color.sh bugfix initialization of faces:region,disabled,overwrite_mode.
-  - ble-color.sh: bugfix, 色初期化 (region disabled overwrite_mode) 遅延ロードに登録していなかった。
+  - ble-color.sh: bugfix, color initialization (region disabled overwrite_mode) was not registered for lazy loading.
   - ble-decode.sh (ble-bind): New option `-L, --list-functions` to list edit functions.
 
 ## 2015-12-03
 * Changed default value of bleopt_char_width_mode from `emacs` to `east`.
 * Update README-ja_JP.md.
-* Add README-ja_JP.md. 日本語の説明。
+* Add README-ja_JP.md. Japanese explanation.
 * optimization: lazy init of faces (ble-{syntax,color}.sh), removal of temporary files (ble-core.sh).
   * ble-syntax.sh, ble-core.sh: lazy initialization of `_ble_faces_*`.
   * minor: modify messgese: initialization message, the header of the script ble.sh.
@@ -2714,68 +2714,68 @@
 * Support here string, shopt -q progcomp; Bugfix ble-syntax/parse/nest-equals.
   * ble-syntax.sh: support here string.
   * ble.htm: comment out outdated descriptions.
-  * ble-syntax.sh (ble-syntax/parse/nest-equals): bugfix, 前回の bugfix で onest[3]<0 の場合を考えていなかった。
-  * complete.sh: shopt -q progcomp によるプログラム補完の有効・無効の切り替え。
+  * ble-syntax.sh (ble-syntax/parse/nest-equals): bugfix, The case of onest[3]<0 was not considered in the previous bugfix.
+  * complete.sh: Enable/disable program completion using shopt -q progcomp.
 * update version numbers.
 * ble-syntax.sh (ble-syntax/parse/nest-equals): fatal bugfix, misjudge on nest equality test causing nest structure corruption.
-  * Note: _ble_syntax_nest の要素に含まれている nest 開始位置は相対位置で記録されているにも拘わらず、絶対位置の変数に直接代入していた事が原因であった。
-  * 他 ble-syntax.sh, ble-color.sh: compatibility fix., fgrep to command grep -F.
+  * Note: The cause was that although the nest start position included in the _ble_syntax_nest element was recorded as a relative position, it was directly assigned to an absolute position variable.
+  * Others ble-syntax.sh, ble-color.sh: compatibility fix., fgrep to command grep -F.
 * README.md: correct download links.
 * `*.sh`: Add `command` for external command execution.
 * (ble-edit/stderr for bash-3.0): Add ignoreeof-message.txt for C-d message i18n.
-* `*.sh`: New marker `__ENCODING__` for 文字コード依存部分
+* `*.sh`: New marker `__ENCODING__` for character code dependent part
 
 ## 2015-11-30
 * complete.sh (ble-complete/source/argument): minor bugfix, default behavior using comp_opts exported by func .../.compgen.
-  * 他 ble.pp: check chmod.
+  * Others ble.pp: check chmod.
 * Makefile: a phony target `dist`.
-* memo.txt: todo 整理.
+* memo.txt: Organize todo.
 * complete.sh: bugfix, completion doesn't work on an argument without complete -D spec.
 * ble-edit.sh (ble-edit+isearch/next): bugfix, didn't match locally on self-insert of forward isearch.
 * ble-decode.sh (generate-source-to-unbind-default): bugfix, need of LANG=C.
-  * LANG=C を設定しないと bind -sp の出力に変なバイトが含まれている為に解釈に失敗する。
-    (utf-8 の様な ASCII 文字を含まない様な文字コード体系の場合にはこれで問題ないが。
-    memo.txt に Note(2015-11-30) として追加する。)
+  * If you do not set LANG=C, the output of bind -sp will contain strange bytes and will fail to be interpreted.
+    (This is not a problem if the character encoding system does not include ASCII characters, such as UTF-8.
+    Add to memo.txt as Note(2015-11-30). )
 * Update README.md
 * ble-edit.sh: remove dependency on GNU awk.
-  * ble.pp: 念の為 gawk に戻す事ができる様に use_gawk (PP変数) を用意する。
+  * ble.pp: Just in case, prepare use_gawk (PP variable) so that you can revert to gawk.
   * ble.pp (ble/.check-environment): check awk.
   * ble-core.sh (ble/util/array-reverse):(awk scripts):
-    + uninitialized variable `decl` を初期化する。
-    + locale dependent な /[a-z]/ の類を POSIX 括弧 (/[[:alpha:]]/, /[[:alnum:]]/) に置き換え。
+    + uninitialized Initialize variable `decl`.
+    + Replace locale dependent /[a-z]/ type with POSIX brackets (/[[:alpha:]]/, /[[:alnum:]]/).
   * ble-edit.sh (.ble-edit/history/generate-source-to-load-history):(awk scripts): uninitialized variable `n`.
   * ble-decode.sh (.ble-decode-bind/generate-source-to-unbind-default):(awk scripts):
-    + 引数名と大域変数が被らない様にする。
-    + gawk 特有の機能 (/\y/, match 第三引数) を使わない。
-    + bugfix, gsub の対象の変数が指定されていない箇所があった。
-  * それぞれ gawk --lint 及び nawk でも動作を確認した。
+    + Make sure that argument names and global variables do not overlap.
+    + Do not use gawk-specific features (/\y/, match third argument).
+    + There were places where variables targeted by bugfix and gsub were not specified.
+  * I also confirmed the operation with gawk --lint and nawk respectively.
 
 ## 2015-11-29
-* ble-edit/isearch: 現在のコマンド内も検索対象に。
-  * 旧来の履歴項目検索機能を改名:
+* ble-edit/isearch: Search within the current command.
+  * The old history item search function has been renamed:
     - ble-edit+isearch/forward -> ble-edit+isearch/history-forward,
     - ble-edit+isearch/backward -> ble-edit+isearch/history-backward,
     - ble-edit+isearch/self-insert -> ble-edit+isearch/history-self-insert.
-  * 検索履歴 (_ble_edit_isearch_arr) に一致範囲も記録する様に変更
-  * 現在の位置からコマンド内を検索する関数を追加・旧関数を置換:
+  * Changed to record matching range in search history (_ble_edit_isearch_arr)
+  * Added function to search in command from current position/replaced old function:
     - ble-edit+isearch/forward,
     - ble-edit+isearch/backward,
     - ble-edit+isearch/self-insert.
-* ble-edit.sh (+isearch/next): 一致範囲を囲む。
+* ble-edit.sh (+isearch/next): Enclose matching range.
   * ble-edit.sh (+isearch/next), set region to matched range.
   * ble-edit.sh: pattern matching using [[ text == pattern ]] instead of case statement.
   * ble-color.sh (ble-syntax-layer:region/update): bugfix, PREV_UMIN/PREV_UMAX out of range due to the shift failure of omin/omax.
 * ble-core.sh: full support for bleopt_input_encoding=C
   * ble-core.sh: Add functions: ble-text-b2c+C, and ble-text-c2b+C.
   * ble-core.sh (.ble-text.c2bc): rename .ble-text.c2bc -> ble-text-c2bc.
-  * .gitignore: 古い物を整理。/wiki 追加。
+  * .gitignore: Organize old things. /wiki added.
 
 ## 2015-11-28
 * Update README.md
 * ble-decode.sh, ble-edit.sh: support `bind -xf`.
   * ble-core.sh: Add functions ble/string#common-{prefix,suffix}.
   * ble-decode.sh, ble-edit.sh: support `bind -xf COMMAND`.
-  * ble-edit.sh:714: ^M が直接埋め込まれていると GitHub が改行位置を勘違いする様なので $'\r' に修正する。
+  * ble-edit.sh:714: If ^M is directly embedded, GitHub seems to misunderstand the line break position, so change it to $'\r'.
   * complete.sh: embedded sed scripts, POSIX compliance.
 * ble-color.sh: Add a function ble-color-show.
 * README.md: Add animation gif.
@@ -2787,9 +2787,9 @@
 * Update README.md
 
 ## 2015-11-24
-* ble-edit.sh (+magic-space): bugfix, 現在のカーソル位置よりも前の部分に対して履歴展開する。
+* ble-edit.sh (+magic-space): bugfix, expand history to the part before the current cursor position.
 * complete.sh: behavior of source/argument, compopt -o/+o, bugfix.
-  - complete.sh (ble-complete/source/argument): complete -o ..., compopt -o option +o option の読み取り。
+  - complete.sh (ble-complete/source/argument): complete -o ..., compopt -o option +o reading option.
   - complete.sh (ble-complete/util/escape-regexchars): bugfix.
   - complete.sh: Add action/plain, action/argument, action/argument-nospace.
   - complete.sh: Add source/dir.
@@ -2806,24 +2806,24 @@
 
 ## 2015-11-23
 * ble-edit.sh (ble-decode): show the message to run "stty sane" after "ble-detach".
-* ble-syntax (ble-syntax:bash/extract-command): bugfix, 出力用の変数が local 指定になっていたのを削除。
-  - 他: complete.sh: compgen -F prog -C cmd の際に compgen が警告を出すので compgen 2>/dev/null とする。
-* complete.sh: complete -p による補完の基本実装。
+* ble-syntax (ble-syntax:bash/extract-command): bugfix, removed the output variable being specified as local.
+  - Others: complete.sh: compgen -F prog -C Compgen will issue a warning when you run cmd, so set it to compgen 2>/dev/null.
+* complete.sh: Basic implementation of complete -p completion.
   * ble-core.sh: Create function ble/util/array-reverse.
-  * ble-decode.sh (.ble-decode-keys, .ble-decode-key/invoke-command): bash-3.0 workaround, local -a keys=(), local -a KEYS=() を2行に分ける。
-  * ble-syntax.sh: complete 用の整備。
-    * 関数追加 ble-syntax/tree-enumerate-break: "((tprev=-1))" は意図が分かりにくいので。
-    * 関数追加 ble-syntax:bash/extract-command:
-    * ble-syntax/tree-enumerate: シェル変数 iN の既定値を _ble_syntax_text の末端に。
-    * ble-syntax/completion-context: CTX_VALI, CTX_VALX に対応。
-    * ble-syntax/completion-context: 一部の補完文脈を file から argument に変更。
-  * complete.sh: complete -p 設定に基づく補完。
-    * ble-complete/source/argument: 追加
+  * ble-decode.sh (.ble-decode-keys, .ble-decode-key/invoke-command): bash-3.0 workaround, local -a keys=(), split local -a KEYS=() into two lines.
+  * ble-syntax.sh: Maintenance for complete.
+    * Added function ble-syntax/tree-enumerate-break: The intent of "((tprev=-1))" is difficult to understand.
+    * Add function ble-syntax:bash/extract-command:
+    * ble-syntax/tree-enumerate: Default value of shell variable iN to end of _ble_syntax_text.
+    * ble-syntax/completion-context: Supports CTX_VALI, CTX_VALX.
+    * ble-syntax/completion-context: Changed some completion contexts from file to argument.
+  * complete.sh: completion based on complete -p setting.
+    * ble-complete/source/argument: add
 
 ## 2015-11-22
-* ble-syntax.sh: bash 文法関連の関数名整理。
-  * ble-decode.sh (ble-bind): error message に . を追加。古いコメントを削除。
-  * ble-syntax.sh (ble-syntax/parse/{check,ctx}-*): bash 文法特有の関数の名称を整理。
+* ble-syntax.sh: Organize bash grammar-related function names.
+  * ble-decode.sh (ble-bind): Add . to error message. Delete old comment.
+  * ble-syntax.sh (ble-syntax/parse/{check,ctx}-*): Organized the names of functions specific to bash grammar.
 
 ## 2015-11-21
 * cmap/cmap+*.sh: Update for current ble-decode.sh.
@@ -2832,12 +2832,12 @@
 ## 2015-11-19
 * Support of PROMPT_COMMAND, and function bleopt.
   * ble-edit.sh: easy support of PROMT_COMMAND.
-  * ble-core.sh: bleopt 関数追加。
+  * ble-core.sh: Added bleopt function.
   * ble-decode.sh (.ble-decode-initialize-cmap): POSIX sed BRE does not support the quantifiers: \+, \?.
-* ble-syntax.sh: 履歴展開をより正確に。
-  * histchars に応じた履歴展開の解析
-  * extglob が設定されている時は !( は履歴展開と解釈しない
-  * 文字列 "～" 中の履歴展開は " の直前で終わる
+* ble-syntax.sh: More accurate history expansion.
+  * Parsing history expansion according to histchars
+  * When extglob is set, !( is not interpreted as history expansion.
+  * History expansion in the string "~" ends just before "
 * ble-core.sh: workaround for bash-3.0 regex in _ble_base_tmp.wipe.
 
 ## 2015-11-17
@@ -2848,11 +2848,11 @@
 * ble-core.sh (_ble_base_tmp.wipe): bugfix, correct iteration of old tmp files.
 
 ## 2015-11-08
-* complete.sh: ユーザ入力があった時の候補列挙の中断に対応 (bash-4.0 以降); ble-syntax.sh: コメント判定の修正。
-  * ble-core.sh (ble/util/is-stdin-ready): 関数追加。標準入力に未処理の文字が残っているかどうかを判定。ユーザの入力が待ち状態になっているかどうかを判定する為の物。
-  * ble-syntax.sh (ble-syntax/parse/check-comment): コマンドライン解析時 shopt -u interactive_comments の時にはコメントは無効とする。
-  * ble-syntax.sh (ble-syntax/parse/check-comment): bugfix コメント開始判定(単語頭)。単語開始の判定が単語頭ではなく「単語頭または単語内部の解析開始点の位置」という事になっていた。
-  * complete.sh (ble-complete/source/command/gen, ble-edit+complete): コマンド候補の列挙・一致判定には時間が掛かるので ble/util/is-stdin-ready を用いて中断の判定を実行する。
+* complete.sh: Support for interrupting candidate enumeration when there is user input (bash-4.0 or later); ble-syntax.sh: Fixed comment judgment.
+  * ble-core.sh (ble/util/is-stdin-ready): Added functions. Determine whether there are any unprocessed characters left in standard input. This is used to determine whether user input is pending.
+  * ble-syntax.sh (ble-syntax/parse/check-comment): Comments are disabled when using shopt -u interactive_comments when parsing the command line.
+  * ble-syntax.sh (ble-syntax/parse/check-comment): bugfix Comment start judgment (beginning of word). The start of a word was determined not by the beginning of the word, but by the beginning of the word or the position of the analysis start point inside the word.
+  * complete.sh (ble-complete/source/command/gen, ble-edit+complete): Since it takes time to enumerate and match command candidates, use ble/util/is-stdin-ready to determine whether to interrupt.
 
 ## 2015-11-07
 * Update README.md
@@ -2870,9 +2870,9 @@
 
 ## 2015-08-25
 * m, bugfixes.
-  * PS1 の '!' の処理、
-  * PS1 の \w の処理、
-  * (bash-3.0) history '!1' &>/dev/null によるチェックでエラーメッセージが漏れていた。
+  * PS1's '!' handling,
+  * PS1's \w processing,
+  * (bash-3.0) An error message was missing when checking history '!1' &>/dev/null.
 * bugfix, specify explicit collation order for regs and globs.
   * Character ranges in regular expressions and glob patterns are dependent on collation order.
   * To obtain the desired results for ascii characters, `local LC_COLLATE=C' should be explicitly specified.
@@ -2881,7 +2881,7 @@
 * ble-edit.sh (.ble-edit.history-add): bugfix, handling of HISTCONTROL.
 
 ## 2015-08-19
-* bin/ble-edit.sh: bugfix for bash-3.0, history -s が正しく動作しないので修正。
+* bin/ble-edit.sh: bugfix for bash-3.0, history -s did not work correctly.
 
 ## 2015-08-18
 * bugfix and cleanups.
@@ -2890,45 +2890,45 @@
   * ble-edit.sh (hist_expanded.initialize): renamed to `ble-edit/hist_expanded.initialize'.
 
 ## 2015-08-16
-* 消滅単語に対する色解除の対策(暫定)。
-  * ble-syntax.sh (ble-syntax/parse): 消滅単語の範囲集計。
-  * ble-syntax.sh: 範囲更新・並進の整理。関数 ble/util/[uw]range#{update,shift} の追加。
-* 表示系統 bug fixes.
-  * ble-edit.sh (ble-edit/dirty-range/update): bugfix, endA0 の読み出しに誤り、変数名 delta/del に誤り。
-  * ble-syntax.sh (ble-highlight-layer:syntax/update-attribute-table): bugfix in umin/umax update, umax の更新に使う変数名を誤っていた。
-* 組込コマンド上書き対策。ble-syntax shift bufgix for bash-4.2 算術式。
-  * ble-syntax.sh (bash-4.2): bugfix, ble-syntax/parse/shift.{tree1,nest} の算術式で bash-4.2 をクラッシュされる形式の物が見付かった。
-  * ble-core.sh: ble/util/set 関数を追加。
-  * ble-edit.sh: builtin 上書きを防ぐ為に unset -f builtin を実行 (builtin, unset 両方上書きされると駄目だが)。
-  * ble-edit.sh: return/break/continue も上書きを禁止する。
-  * ble-*.sh: test の代わりに [[ ]] を使用。
-* 貼付時の再描画抑制 (read -t 0 による判定)。\x80-\x9F を M-^? で表示。
-  * ble-edit.sh: 編集文字列内の \x80-\x9F の表示を M-^? に。表示が乱れていた。
-  * ble-edit.sh (ble-decode-byte:bind): 次の文字が来ている時に再描画を抑制。
-  * ble-edit.sh: exec/gexec 周りの関数名を整理。
-  * ble-edit.sh: 関数削除 .ble-edit-isearch.create-visible-text
+* Measures to remove color from disappearing words (tentative).
+  * ble-syntax.sh (ble-syntax/parse): Range aggregation of extinct words.
+  * ble-syntax.sh: Organize range updates and translations. Added function ble/util/[uw]range#{update,shift}.
+* Display system bug fixes.
+  * ble-edit.sh (ble-edit/dirty-range/update): bugfix, error in reading endA0, error in variable name delta/del.
+  * ble-syntax.sh (ble-highlight-layer:syntax/update-attribute-table): bugfix in umin/umax update, The variable name used for updating umax was incorrect.
+* Measures against overwriting built-in commands. ble-syntax shift bufgix for bash-4.2 arithmetic expressions.
+  * ble-syntax.sh (bash-4.2): bugfix, an arithmetic expression in ble-syntax/parse/shift.{tree1,nest} was found to crash bash-4.2.
+  * ble-core.sh: Added ble/util/set function.
+  * ble-edit.sh: Execute unset -f builtin to prevent builtin overwriting (it won't work if both builtin and unset are overwritten).
+  * ble-edit.sh: Return/break/continue also prohibits overwriting.
+  * ble-*.sh: Use [[ ]] instead of test.
+* Suppress redrawing when pasting (determined by read -t 0). Display \x80-\x9F as M-^?
+  * ble-edit.sh: Display \x80-\x9F in the edit string as M-^?. The display was distorted.
+  * ble-edit.sh (ble-decode-byte:bind): Suppress redrawing when the next character comes.
+  * ble-edit.sh: Organized function names around exec/gexec.
+  * ble-edit.sh: Delete function .ble-edit-isearch.create-visible-text
 
 ## 2015-08-14
-* 構文 function ... に対応、履歴展開 bugfix.
-  * ble/src: .srcoption 追加。
-  * ble-syntax.sh: defface 関数の色の変更。
-  * ble-syntax.sh: 構文 `function ...` に対応。
-  * ble-syntax.sh: `function ...`, `hoge ()` の直後に来るコマンドを compound-commands に制限。
-  * ble-edit.sh: bugfix, set +H の時も履歴展開が有効になっていた。history -p は set +H と関係なく展開を行う。
-  * ble-edit.sh: bugfix, 関数 echo を定義するとコマンドがそれ以上実行できなくなる。echo/printf を builtin を介して呼び出す様に変更。
+* Supports syntax function ..., history expansion bugfix.
+  * ble/src: Added .srcoption.
+  * ble-syntax.sh: Change color of defface function.
+  * ble-syntax.sh: Supports syntax `function ...`.
+  * ble-syntax.sh: Restrict commands that come immediately after `function ...`, `hoge ()` to compound-commands.
+  * ble-edit.sh: bugfix, history expansion was enabled even when set +H. history -p performs expansion regardless of set +H.
+  * ble-edit.sh: bugfix, defining the function echo prevents commands from being executed any further. Changed echo/printf to be called via builtin.
 * ble/util/assign cleanup, ble/util/type add, .ble-line-prompt/update bugfix.
-  * ble-core.sh (ble/util/assign): cleanup, ble/util/sprintf, ble/util/type, ble/util/isfunction でも仕様,
-  * ble-core.sh: ble/util/type 追加。$(type -t) はこれを用いて処理する様に変更,
-  * ble-edit.sh (.ble-line-prompt/update): bugfix, 地の文の '$' や '`' が escape されてしまい展開されない.
-* ble-edit.sh: プロンプト更新最適化。
-* ble-core.sh (ble/util/assign): $(...) 高速化用関数。
-* shift 高速化、入れ子構造を考慮に入れた単語着色に対応。
-  * ble-syntax.sh (ble-syntax/parse/shift): 入れ子構造を考慮に入れた shift,
-  * ble-syntax.sh (_ble_syntax_tree): 単語毎の着色情報をデータ配列内に保持するように変更,
-  * ble-syntax.sh (ble-highlight-layer:syntax/update-word-table): 入れ子構造を考慮に入れた着色.
+  * ble-core.sh (ble/util/assign): also specified in cleanup, ble/util/sprintf, ble/util/type, ble/util/isfunction,
+  * ble-core.sh: Added ble/util/type. Change $(type -t) to process using this,
+  * ble-edit.sh (.ble-line-prompt/update): bugfix, '$' and '`' in local sentences are escaped and not expanded.
+* ble-edit.sh: Prompt update optimization.
+* ble-core.sh (ble/util/assign): $(...) Speed-up function.
+* shift Speed-up and word coloring that takes into account nested structure.
+  * ble-syntax.sh (ble-syntax/parse/shift): shift taking into account nested structure,
+  * ble-syntax.sh (_ble_syntax_tree): Changed to hold coloring information for each word in the data array,
+  * ble-syntax.sh (ble-highlight-layer:syntax/update-word-table): Coloring taking into account nested structure.
 * leak variables: g cs
-* cleanup, leak variables 処置.
-* ble-syntax.sh: 終端していない節も列挙対象に含める。他整理。
+* cleanup, leak variables treatment.
+* ble-syntax.sh: Include unterminated clauses in the enumeration. Organize others.
   * ble-syntax.sh (ble-syntax/print-status): prints unterminated nodes.
   * ble-syntax.sh: add new functions ble-syntax/tree-enumerate, ble-syntax/tree-enumerate-children.
   * ble-syntax.sh: rename shell variable: _ble_syntax_word -> _ble_syntax_tree.
@@ -2936,19 +2936,19 @@
 
 ## 2015-08-13
 * ble-syntax.sh: clenup, print-status/dump-tree.
-* ble-syntax.sh (_ble_syntax_stat): 解析状態に tchild, tprev (兄・子へのoffset情報) を追加。
-* ble-syntax.sh (_ble_syntax_word): 形式変更。兄・子へのoffset情報はその場で計算する暫定方式。
+* ble-syntax.sh (_ble_syntax_stat): Added tchild, tprev (offset information to older brother/child) to analysis state.
+* ble-syntax.sh (_ble_syntax_word): Format change. This is a provisional method that calculates offset information for older brothers and children on the spot.
 
 ## 2015-08-12
-* memo.txt: _ble_syntax_word 形式変更の計画, ble-syntax.sh: clean up
+* memo.txt: _ble_syntax_word format change plan, ble-syntax.sh: clean up
 
 ## 2015-08-11
-* ble-syntax.sh (`_ble_syntax_nest[]`): 形式変更 → "ctx wlen wtype nlen type"
-* ble-syntax.sh (`_ble_syntax_stat[]`): 形式の変更 → "ctx wlen wtype nlen"
-* ble-syntax.sh (`_ble_syntax_word[i]`): 要素の形式を wtype wbegin から wtype wlen に変更
-* ble-edit.sh (.ble-line-info.draw): 制御文字も入れられる様に,
+* ble-syntax.sh (`_ble_syntax_nest[]`): Format change → "ctx wlen wtype nlen type"
+* ble-syntax.sh (`_ble_syntax_stat[]`): Change format → "ctx wlen wtype nlen"
+* ble-syntax.sh (`_ble_syntax_word[i]`): Change element format from wtype wbegin to wtype wlen.
+* ble-edit.sh (.ble-line-info.draw): Control characters can also be inserted,
 * ble-syntax.sh (ble-syntax/print-status): Added,
-* ble.pp: 二重起動対策,
+* ble.pp: Double boot countermeasures,
 * ble-edit.sh: history load.
 
 ## 2015-08-08
@@ -2961,50 +2961,50 @@
 * modified complete.sh
 
 ## 2015-03-22
-* ble-decode.sh: bugfix, bash-4.1 でも ESC [ を翻訳しないと駄目
-* ble-decode.sh: bugfix, bash-4.1 でも ESC * に登録しないと駄目
-* ble-core.sh, etc.: 一時ファイルを tmp/$UID に置く事にする。
+* ble-decode.sh: bugfix, even in bash-4.1 ESC [ needs to be translated
+* ble-decode.sh: bugfix, even bash-4.1 needs to be registered with ESC *
+* ble-core.sh, etc.: Temporary files will be placed in tmp/$UID.
 
 ## 2015-03-12
-* ble-syntax.sh (ble-syntax/parse): stat の設定されていない箇所に word があり、shift されていなかった。
+* ble-syntax.sh (ble-syntax/parse): There was word in a place where stat was not set, and it was not shifted.
 
 ## 2015-03-08
-* ble-edit.sh (ble-edit/draw/trace): bugfix, LC_COLLATE を設定して正規表現を使用する様に修正。
-* bashbug related bugfix: 幾つかの bugfix, 全て bash のバグが関係していた…。
-  - `<bug>` bash-4.1 以下でカーソルの表示位置がずれている。
-  - `<bug>` bash-4.2, 4.0, 3.2, 不完全な編集内容に対してエラーが出る
-  - `<bug>` bash-4.0, 4.1 でプロンプトが表示されない
-  - `<bug>` bash-4.1 以下でプロンプトの色が着かない
-* ble-decode.sh (.ble-decode-char): control/alter/meta/shift/super/hyper prefix が、
-  その場で自身に適用されて出力されていた。
-* ble-core.sh (ble/util/declare-print-definitions): 連想配列に対応
-* ble-decode.sh, 他: オプション名 ble_opt を bleopt に統一
-* ble-decode.sh: .ble-decode-char 再実装
-  - 修飾機能を send-modified-key (旧 sendkey-mod) に合流
-  - C-x @ S 等、ESC 以外の修飾にも対応
-  - .ble-decode-char/csi/* による CSI sequence の解釈
-  - 新実装に対応する様に cmap/default.sh を書き直し
+* ble-edit.sh (ble-edit/draw/trace): bugfix, fixed to use regular expression by setting LC_COLLATE.
+* bashbug related bugfixes: Several bugfixes, all related to bash bugs...
+  - `<bug>` The cursor display position is shifted in bash-4.1 and below.
+  - `<bug>` bash-4.2, 4.0, 3.2, error occurs for incomplete editing content
+  - `<bug>` Prompt is not displayed in bash-4.0, 4.1
+  - `<bug>` Prompt color is not colored under bash-4.1
+* ble-decode.sh (.ble-decode-char): control/alter/meta/shift/super/hyper prefix is
+  It was applied to itself and output on the spot.
+* ble-core.sh (ble/util/declare-print-definitions): Supports associative arrays
+* ble-decode.sh, etc.: Unified option name ble_opt to bleopt
+* ble-decode.sh: .ble-decode-char reimplementation
+  - Merge modification functionality into send-modified-key (formerly sendkey-mod)
+  - Supports modifications other than ESC such as C-x @ S
+  - Interpretation of CSI sequence with .ble-decode-char/csi/*
+  - Rewrite cmap/default.sh to correspond to new implementation
 
 ## 2015-03-06
-* ble-decode.sh (stty): -icanon の設定。
-* ble-edit.sh (PS1): bugfix, job count, 時刻その他の更新。
+* ble-decode.sh (stty): -icanon settings.
+* ble-edit.sh (PS1): Bugfix, job count, time and other updates.
 * ble-edit.sh (.ble-line-text/update/postion)
-  - bugfix: ascii printable characters の行末で \n を付加した時 ichg に登録していなかった。
-  - bugfix: _ble_util_string_prototype の長さ指定に 0 を指定していた
-  - bugfix, 行末付近での tab の取り扱い
-  - 制御文字も追い出しの対象に。
-  - xenl の時、行末で必ず \n を追加する (追い出しの場合なども含め)。
-  - 追い出しがあった場合にそれを記録する。
-* ble-edit.sh (.ble-line-text/getxy.cur): カーソル位置を取得する為の getxy を新規作成。
-* ble-edit.sh (ble-edit/draw/trace): 描画属性
-  - term.sh: 描画属性について terminfo から読み取る様に。
-  - ble-color.sh: 描画属性の点滅、不可視、イタリック、打ち消し線に対応。
-  - ble-color.sh: sgr 構築で term.sh の結果を利用する様に変更。
-  - ble-edit.sh (.ble-line-prompt): ble-color-g2sgr で端末に依存しない PS1 を書ける様に変更。
-* ble-decode.sh (ble-decode-kbd): bugfix, 複数キーがある場合に正しく処理できていなかった
-* overwrite-mode に対応
-* ble-syntax.sh, ble-color.sh: layer:syntax による色付けを face を介した物に変更。
-* ble-decode.sh, ble-edit.sh: 条件コマンドの統一。test や [ 等を [[ に統一。
+  - bugfix: When adding \n at the end of a line of ascii printable characters, it was not registered in ichg.
+  - bugfix: 0 was specified for length specification of _ble_util_string_prototype
+  - bugfix, handling of tab near end of line
+  - Control characters are also subject to eviction.
+  - When using xenl, always add \n at the end of the line (including when expelling).
+  - Record any evictions.
+* ble-edit.sh (.ble-line-text/getxy.cur): Create a new getxy to get the cursor position.
+* ble-edit.sh (ble-edit/draw/trace): Drawing attributes
+  - term.sh: Read drawing attributes from terminfo.
+  - ble-color.sh: Supports blinking, invisible, italic, and strikethrough drawing attributes.
+  - ble-color.sh: Changed to use the result of term.sh in sgr construction.
+  - ble-edit.sh (.ble-line-prompt): Changed so that ble-color-g2sgr can write terminal-independent PS1.
+* ble-decode.sh (ble-decode-kbd): bugfix, it was not handled correctly when there were multiple keys.
+* Supports overwrite-mode
+* ble-syntax.sh, ble-color.sh: Changed coloring using layer:syntax to using face.
+* ble-decode.sh, ble-edit.sh: Unification of conditional commands. Unify test, [, etc. to [[.
 
 ----
 
@@ -3013,239 +3013,239 @@
 
 ## 2015-03-03
 
-  * ble-edit.sh, ble-edit.color: discard-line の際に着色
-  * ble-edit.sh, ble-core.sh, etc: echo を builtin echo に。
-  * ble-edit.sh: bugfix, 複数行で上に行けない
-  * ble-edit.sh: bugfix, 複数行なのに空行の accept-line でのずれ量が1行になっている
-  * プロンプト再実装
-    - ble-edit.sh (ble-edit/draw/trace): escape sequences が含まれている文字列の位置追跡。
-    - ble-edit.sh (.ble-line-prompt/update): プロンプトの構築を再実装。$() がある場合なども正しい計算。
-  * ble-complete.sh (source/command): shopt -s autocd の時にディレクトリ名も候補として列挙。
-  * ble-complete.sh: 補完候補の選択の方法を変更。より近くの開始点の物を優先。
+  * ble-edit.sh, ble-edit.color: Color when discard-line
+  * ble-edit.sh, ble-core.sh, etc: Change echo to builtin echo.
+  * ble-edit.sh: bugfix, can't go up in multiple lines
+  * ble-edit.sh: bugfix, the gap in accept-line of empty line is one line even though there are multiple lines.
+  * Prompt reimplementation
+    - ble-edit.sh (ble-edit/draw/trace): Tracing the position of strings containing escape sequences.
+    - ble-edit.sh (.ble-line-prompt/update): Reimplemented prompt construction. Correct calculation even when $() is present.
+  * ble-complete.sh (source/command): Enumerate directory names as candidates when running shopt -s autocd.
+  * ble-complete.sh: Changed the method of selecting completion candidates. Prioritize those with closer starting points.
 
 ## 2015-03-01
 
-  * ble-edit.sh: .ble-edit-draw.goto-xy, .ble-edit-draw.put 廃止
-  * complete.sh: 関数名に / が入っていると compgen -c で列挙されないので、別に列挙する。
+  * ble-edit.sh: .ble-edit-draw.goto-xy, .ble-edit-draw.put deprecated
+  * complete.sh: If the function name contains /, it will not be enumerated by compgen -c, so enumerate it separately.
 
 ## 2015-02-28
 
-  * 初期化の最適化
-    - ble-decode.sh: ble-decode-kbd 書き直し、ble-bind 書き直し
-    - ble-getopt.sh: 多少最適化
-    - ble-decode.sh: bash-4.3 でも ESC [ を utf-8 2-byte code で受信する様に変更。
-    - ble-decode.sh (.ble-decode-bind/generate-source-to-unbind-default): awk 呼出を一回に統合。
-    - ble-decode.sh (.ble-decode-key.bind/unbind): [[ ]] による書き換え、bugfix。
-    - ble-decode.sh, bind.sh: bind -x を生成する為のコードを bind.sh に分離。
-    - ble-edit.sh, keymap.emacs.sh: keymap 初期化部分の分離、キャッシュ化。
-    - ble-edit.sh: history 遅延ロード対応
-  * ble-core.sh, ble-color.sh: .ble-shopt-extglob-push/pop/pop-all 廃止
-  * ble-edit.sh: bugfix, .ble-line-info.clear で位置がずれる
+  * Initialization optimization
+    - ble-decode.sh: ble-decode-kbd rewrite, ble-bind rewrite
+    - ble-getopt.sh: slightly optimized
+    - ble-decode.sh: Changed to receive ESC [ as UTF-8 2-byte code even in bash-4.3.
+    - ble-decode.sh (.ble-decode-bind/generate-source-to-unbind-default): Consolidate awk calls into one.
+    - ble-decode.sh (.ble-decode-key.bind/unbind): Rewritten with [[ ]], bugfix.
+    - ble-decode.sh, bind.sh: Separate the code for generating bind -x into bind.sh.
+    - ble-edit.sh, keymap.emacs.sh: Separate and cache keymap initialization part.
+    - ble-edit.sh: history lazy loading supported
+  * ble-core.sh, ble-color.sh: .ble-shopt-extglob-push/pop/pop-all deprecated
+  * ble-edit.sh: bugfix, position shifted with .ble-line-info.clear
   * ble-edit.sh: ble-edit/draw/put.il, ble-edit/draw/put.dl
-  * ble-color.sh (ble-highlight-layer/update/shift): 長さが変わらない場合でも shift する。
-  * ble.pp (include ble-getopt.sh): 現在使っている所がないので取り敢えず外す。
-  * ble-syntax.sh (completion-context): 簡単なパラメータ展開に対する対応。
+  * ble-color.sh (ble-highlight-layer/update/shift): Shift even if the length does not change.
+  * ble.pp (include ble-getopt.sh): I'm not currently using it, so I'll remove it for now.
+  * ble-syntax.sh (completion-context): Support for simple parameter expansion.
 
 ## 2015-02-27
 
-  * [bug] TAB 等の変更文字があった場合に文字列が表示されなくなる
-  * bash-3.0, 3.1 対応
-    "[bug] bash-3.1 日本語の色付け・描画が変だ"
-    - ble-edit.sh, 他: @bash-3.1 bashbug workaround, ${param//%d/x} などは効かないので %d を '' で囲む。
-    - ble-syntax.sh, 他: @bash-3.1 bashbug workaround, x${#arr[n]} はバイト数を返す様なので一旦通常変数に入れて ${#var} とする。
-    - *.sh: @bash-3.0: += 演算子の置き換え、配列宣言の修正。
-    - term.sh: @bash-3.0: bashbug workaround, declare -p で出力すると誤った物になる。
-  * ble-edit.sh (.ble-line-text/update/slice): bugfix, 変更文字がある時にもう存在しないローカル変数を参照していた。
+  * [bug] String is no longer displayed when there are changed characters such as TAB
+  * bash-3.0, 3.1 compatible
+    "[bug]bash-3.1 Japanese coloring/drawing is weird"
+    - ble-edit.sh, etc.: @bash-3.1 bashbug workaround, ${param//%d/x} doesn't work, so surround %d with ''.
+    - ble-syntax.sh, etc.: @bash-3.1 bashbug workaround, x${#arr[n]} seems to return the number of bytes, so put it in a normal variable and call it ${#var}.
+    - *.sh: @bash-3.0: += operator replacement, array declaration fix.
+    - term.sh: @bash-3.0: bashbug workaround, output with declare -p is incorrect.
+  * ble-edit.sh (.ble-line-text/update/slice): bugfix, when there was a change character, it referenced a local variable that no longer existed.
   * ble-core.sh: ble-load, ble-autoload
-  * complete.sh:, ble-syntax.sh, ble-edit.sh: 文脈依存補完の実装
+  * complete.sh:, ble-syntax.sh, ble-edit.sh: Implementation of context-sensitive completion
 
 ## 2015-02-26
 
-  * ble-syntax.sh: a+=( a=( に対応
+  * ble-syntax.sh: a+=( corresponds to a=(
 
 ## 2015-02-25
 
-  * ble/term.sh: TERM 依存の部分を分離。キャッシュ化。完全移行ではないが徐々に。
+  * ble/term.sh: Separate TERM dependent parts. Caching. It's not a complete transition, but it's gradual.
   * ble-decode.sh:
-    - [bug] $_ble_base/cache の代わりに $_ble_bash/cache を作成していた
-    - [bug] accept-single-line-or-newline が二回目以降常に accept
+    - [bug] Created $_ble_bash/cache instead of $_ble_base/cache
+    - [bug] accept-single-line-or-newline always accepts from second time onwards
   * ble-edit.sh:
-    - [bug] 複数行の編集時に履歴移動をすると表示が乱れる
-    - printf %()T を用いた実装の導入、PS1 \D{...} に対応
-    - [bug] 表示の属性の更新がうまく行かない事がある。
-    - [bug] 編集文字列の行数が変わった時に info.draw の内容がずれる
-  * カーソル移動
-    - ble-edit: 複数行編集と項目内でのカーソル移動に対応
-    - ble-edit.sh: 複数行コマンドの履歴に対応。
-  * ble-syntax.sh: ble-syntax-highlight+syntax を ble-highlight-layer:syntax に書き換え
+    - [bug] Display is distorted when moving history when editing multiple lines
+    - Implementation using printf %()T, compatible with PS1 \D{...}
+    - [bug] Updating display attributes may not work properly.
+    - [bug] The contents of info.draw shift when the number of lines in the edit string changes
+  * Move cursor
+    - ble-edit: Supports multi-line editing and cursor movement within fields
+    - ble-edit.sh: Supports multi-line command history.
+  * ble-syntax.sh: Rewrite ble-syntax-highlight+syntax to ble-highlight-layer:syntax
   * ble-syntax.sh:
-    - 関数定義 func() の形式に対応、
-    - 条件式 [[ ... ]] と配列初期化子内の文脈に対応。
-    - コメントに対応。
-    - $[...] の形式に対応 (何故か bash の説明には一切載っていないが使える)。
-    - [bug] invalid nest " $()" の先頭に for を挿入した時
+    - Corresponds to the function definition func() format,
+    - Supports conditional expressions [[ ... ]] and context within array initializers.
+    - Responds to comments.
+    - Supports the $[...] format (for some reason it is not mentioned in the bash explanation, but it can be used).
+    - [bug] When inserting for at the beginning of invalid nest " $()"
 
 ## 2015-02-24
 
-  * ble-edit.sh 出力の部分更新に対応 (描画ちらつき対策)
-  * ble-syntax.sh: _ble_syntax_word, _ble_syntax_stat の形式の変更
-  * ble-syntax.sh: 今迄行っていた dirty-range 拡大の方法を止めて、単に stat の削除を行う。
-  * ble-syntax.sh: 及び上記の変更に伴う数々の bugfix
-    - [bug] 文字削除時 invalid nest の assertion に引っかかる。
-    - [bug] 編集内容が零文字になった瞬間に改行が起こって表示が消える。
-    - [bug] 改行しても先頭がコマンドになっていない
-    - [bug] _ble_region_highlight_table で空欄になっている箇所がある。
-    - [bug] 単語の属性適用が後ろに続く単語にも続いている。
-    - [bug] _ble_syntax_attr の中に "BLE_ATTR_ERR" の文字列が混入している。
-    - 残っている dirty 拡大と _ble_syntax_word[] の廃止された形式に対する処理の
-      コメントアウトされた部分を削除。dirty 拡大の変更に伴う効率化の確認と、
-      shift が遅いという事の ToDo 項目の追加。
-  * ble-decode.sh: [bug] $_ble_base/cache の代わりに $_ble_bash/cache を作成していた
-  * ble-edit.sh: ble-edit+delete-backward-xword の類の動作を変更。
+  * Supports partial update of ble-edit.sh output (measures against drawing flickering)
+  * ble-syntax.sh: Change the format of _ble_syntax_word, _ble_syntax_stat
+  * ble-syntax.sh: Stop the dirty-range expansion method that has been used so far and simply delete stat.
+  * ble-syntax.sh: and numerous bugfixes associated with the above changes.
+    - [bug] An invalid nest assertion occurs when deleting characters.
+    - [bug] The moment the edited content reaches zero characters, a line break occurs and the display disappears.
+    - [bug] Even if there is a line break, the beginning is not a command
+    - [bug] Some fields are blank in _ble_region_highlight_table.
+    - [bug] Word attributes continue to apply to subsequent words.
+    - [bug] The string "BLE_ATTR_ERR" is mixed in _ble_syntax_attr.
+    - Handling remaining dirty extensions and obsolete forms of _ble_syntax_word[]
+      Delete the commented out part. Confirming efficiency due to dirty expansion changes,
+      Addition of ToDo item due to slow shift.
+  * ble-decode.sh: [bug] Created $_ble_bash/cache instead of $_ble_base/cache
+  * ble-edit.sh: Changed the behavior of ble-edit+delete-backward-xword.
 
 ## 2015-02-23
 
   * ble-core.sh: ble-stackdump, ble-assert
-  * [bug] update-positions で dend-dbeg が負になると警告が出る
-  * [bug] info.draw で特殊文字が改行に跨っている時の座標計算
+  * [bug] Warning when dend-dbeg becomes negative in update-positions
+  * [bug] Calculating coordinates when special characters span line breaks in info.draw
 
 ## 2015-02-22
 
-  * ble-edit.sh: [bug] .ble-line-info.draw を使った時行がずれる
-  * ble-syntax.sh: [bug] for や do に色が着かない?
-  * レイヤー化
-    - ble-color.sh: レイヤーの仕組み、レイヤ region, adapter, plain + RandomColor
-    - ble-edit.sh: レイヤーに対応した表示文字列構築関数。古い構築関数の削除。出力関数の変更。
-    - ble-syntax.sh: 多少の変更。
+  * ble-edit.sh: [bug] Lines are shifted when using .ble-line-info.draw
+  * ble-syntax.sh: [bug] For and do are not colored?
+  * Layering
+    - ble-color.sh: How layers work, layers region, adapter, plain + RandomColor
+    - ble-edit.sh: Display string construction function that supports layers. Removal of old construction functions. Change of output function.
+    - ble-syntax.sh: Minor changes.
 
 ## 2015-02-21
 
-  * 描画の高速化
-    - ble-syntax.sh: 属性値の変更範囲に応じて適用を行い、変更範囲を LAYER_MIN, LAYER_MAX に返す様に。
-    - ble-edit.sh: 表示用の文字列の構築部分を書き直して部分更新に対応。
-    - ble-syntax.sh: 内容に変化のあった word の範囲も記録する様に変更。
-    - ble-syntax.sh (parse): _ble_syntax_attr_umin (属性値の変更範囲),
-      _ble_syntax_word_umin (word の変更範囲) の累積に対応する為に、これらについても shift を実行する。
+  * Faster drawing
+    - ble-syntax.sh: Apply according to the change range of attribute value and return the change range to LAYER_MIN, LAYER_MAX.
+    - ble-edit.sh: Rewritten the construction part of the display string to support partial updates.
+    - ble-syntax.sh: Changed to record the range of words whose contents have changed.
+    - ble-syntax.sh (parse): _ble_syntax_attr_umin (change range of attribute value),
+      To accommodate the accumulation of _ble_syntax_word_umin (word change range), shift is also executed for these.
 
 ## 2015-02-20
 
-  * ble-decode.sh: bind 周り
-    - bash-4.3 C-@ を utf-8 2-byte code で受信する様に変更
-    - bash-3.1 ESC [ を utf-8 2-byte code で受信する様に変更
-    - bugfix, \C-\\ \C-_ \C-^ \C-] に bind できなくなっていた。
-    - bind の version 分岐について整理。
-    - 既存の bind を ESC に関係なく bind -r する。
-  * ble-decode.sh: .ble-decode-key 部分一致探索の処理の再実装。変な動作だった。
-  * ble-decode.sh: bugfix, 8bit 文字を正しく bind できていない。c2s で8bit文字が符号化されていた。
-  * ble-syntax.sh: 履歴展開は $- に H がある時のみ有効に。
-  * ble-syntax.sh: bugfix, bash-4.2 のバグの work around。配列を参照する算術式の書き換え。
-  * ble-core.sh: c2s を bash の機能だけで実装できたので fallback を replace。
-  * ble-core.sh: bash-4.0 で .ble-text.s2c を連想配列でメモ化
-  * ble-edit.sh: bugfix, bash-4.0 で ret に予め特定の値が入っていると c2w に失敗する。
-  * ble-edit.sh: bugfix, bind -x 直前のプロンプトの取り扱いは bash-4.0 では bash-3 系と同じ。
-  * ble-edit.sh (.ble-line-text.construct 周り): lc lg を後で計算する様に変更。一区切り。一旦 commit する。
+  * ble-decode.sh: around bind
+    - bash-4.3 Changed to receive C-@ as UTF-8 2-byte code
+    - bash-3.1 ESC [ changed to receive as UTF-8 2-byte code
+    - bugfix, it was no longer possible to bind to \C-\\ \C-_ \C-^ \C-].
+    - Organized version branch of bind.
+    - Bind -r an existing bind regardless of ESC.
+  * ble-decode.sh: Reimplementation of .ble-decode-key partial match search process. It was a strange move.
+  * ble-decode.sh: bugfix, 8bit characters cannot be bound correctly. 8bit characters were encoded with c2s.
+  * ble-syntax.sh: History expansion is enabled only when $- has H.
+  * ble-syntax.sh: bugfix, work around bugs in bash-4.2. Rewriting arithmetic expressions that refer to arrays.
+  * ble-core.sh: I was able to implement c2s using only bash functions, so I replaced fallback.
+  * ble-core.sh: Memoize .ble-text.s2c with associative array in bash-4.0
+  * ble-edit.sh: bugfix, c2w fails if ret has a specific value in advance in bash-4.0.
+  * ble-edit.sh: bugfix, bind -x The handling of the prompt immediately before is the same in bash-4.0 as in the bash-3 series.
+  * ble-edit.sh (around .ble-line-text.construct): Changed lc lg to be calculated later. One break. Commit once.
 
 ## 2015-02-19
-  * ble-syntax.sh: 履歴展開に対応。
-  * ble-decode.sh: bugfix, bind -X から bind -x を生成するコード。
-    bind -X の出力する形式は再利用不可能な形式でエスケープされているのでこれを変換。
-  * ble.pp, etc: noattach 引数に対応。ble-attach/ble-detach 関数の定義。detach の bugfix。
-  * ble-edit.sh: bug, bleopt_suppress_bash_output= にした時にプロンプトが二重になる
+  * ble-syntax.sh: Supports history expansion.
+  * ble-decode.sh: bugfix, code to generate bind -x from bind -X.
+    The format output by bind -X is escaped in a format that cannot be reused, so convert it.
+  * ble.pp, etc: Supports noattach argument. Definition of ble-attach/ble-detach functions. Detach bugfix.
+  * ble-edit.sh: bug, double prompt when setting bleopt_suppress_bash_output=
 
 ## 2015-02-18
 
-  * ble.pp, ...: ディレクトリの構成を変更
-  * ble-syntax.sh: 文法の対応
-    - プロセス置換を単語として扱う様に変更
-    - リダイレクトの後の引数に対応
-    - リダイレクトの前の fd 部分に対応
-  * bash-3.1 対応
-    - ble-edit.sh: bash-3.1 で C-d を捕捉できる様に(結構無理のある方法だが)。
-    - ble-edit.sh, ble-decode.sh: bugfix, bash-3 でカーソルキーの類が動かない。履歴が読み込まれていない。
-    - ble-edis.sh: bash-3.1, bleopt_suppress_bash_output=1 の方が安定して動いているのでこちらで行く。
-    - ble-edit.sh: bash-3.1, カーソルキーが効かない。例によって ESC [ ... に関係するコマンドで
-      keymap が見付からないエラーになっている。これは ESC [ を CSI (utf-8) に変換してから読み取る事にした。
-    - ble-syntax.sh: bash-3.2.48 のバグの work-around, (()) 内で配列要素を参照すると制御が無条件に其処に跳ぶ。
+  * ble.pp, ...: Change directory structure
+  * ble-syntax.sh: Grammar support
+    - Changed to treat process substitution as a word.
+    - Supports arguments after redirection
+    - Corresponds to fd part before redirection
+  * bash-3.1 compatible
+    - ble-edit.sh: Now you can capture C-d in bash-3.1 (although it's a rather difficult method).
+    - ble-edit.sh, ble-decode.sh: bugfix, cursor keys do not work in bash-3. History not loaded.
+    - ble-edis.sh: bash-3.1, bleopt_suppress_bash_output=1 works more stably, so I'll go with this.
+    - ble-edit.sh: bash-3.1, cursor keys don't work. As usual, commands related to ESC [ ...
+      I am getting an error that keymap cannot be found. I decided to read this after converting ESC [ to CSI (utf-8).
+    - ble-syntax.sh: A workaround for a bug in bash-3.2.48, when an array element is referenced in (()), control jumps there unconditionally.
 
 ## 2015-02-17
-  * ble-edit.sh (ble-edit/dirty-range): 範囲更新の仕組みを追加。
-      _ble_edit_dirty はプロンプト再描画の判定も兼ねているので取り敢えず残す。
-  * ble-edit.sh: 変数リーク (グローバル変数の汚染) の修正。line i
-  * ble-syntax.sh (ctx-command/check-word-end): 単語終了判定の処理タイミングを変更。
-  * ble-syntax.sh: context の追加。CTX_CMDXF CTX_CMDX1 CTX_CMDXV CTX_ARGX0
-    より正確な文脈判定・エラー検知。
-  * ble-syntax.sh: 他にも多くの修正がある。未だ修正が続きそうなので一旦 commit する。
+  * ble-edit.sh (ble-edit/dirty-range): Added range update mechanism.
+      _ble_edit_dirty also serves as a prompt redraw judgment, so we will leave it here for now.
+  * ble-edit.sh: Fixed variable leak (global variable pollution). line i
+  * ble-syntax.sh (ctx-command/check-word-end): Changed the processing timing for determining the end of a word.
+  * ble-syntax.sh: Add context. CTX_CMDXF CTX_CMDX1 CTX_CMDXV CTX_ARGX0
+    More accurate context judgment and error detection.
+  * ble-syntax.sh: Many other fixes. It looks like there are still changes to be made, so I'll commit it now.
 
-  * ble-edit.sh (accept-line): bug, - で始まるコマンドを実行できない。
-  * ble-color.sh: [bug] bg=black を設定しても反映されない。
-    "未設定" と "黒" を区別する様に修正。
-  * ble-syntax (ble-syntax-highlight+syntax): 入れ子エラーの色の範囲
-  * ble-syntax: m, ;& は ;; ;;& 等と同じ取り扱い
-  * ble-syntax, etc: bash-3 正規表現対策。bash-3/4 の正規表現の違いに依存しない書き方に変更。
+  * ble-edit.sh (accept-line): bug, commands starting with - cannot be executed.
+  * ble-color.sh: [bug] Setting bg=black does not take effect.
+    Corrected to distinguish between "unset" and "black".
+  * ble-syntax (ble-syntax-highlight+syntax): nested error color range
+  * ble-syntax: m, ;& is treated the same as ;; ;;& etc.
+  * ble-syntax, etc: bash-3 regular expression countermeasures. Changed to a writing style that does not depend on differences in bash-3/4 regular expressions.
 
 ## 2015-02-16
-  * ble-syntax.sh: bugfix, incremental に更新した時に word の長さが更新されない。
-    _ble_syntax_word への格納の際に失敗していた。
+  * ble-syntax.sh: bugfix, word length is not updated when updating to incremental.
+    It was failing when storing to _ble_syntax_word.
 
 ## 2015-02-15
-  * ble-synatax.sh: bash の文法に従った incremental な解析と色付け。
+  * ble-synatax.sh: Incremental parsing and coloring according to bash syntax.
 
 ## 2015-02-14
-  * ble-edit.sh (.ble-line-info.draw): 表示が遅いので修正。
-    ASCII 文字は特別扱いする様に改良。劇的に速くなった。
+  * ble-edit.sh (.ble-line-info.draw): Fixed the slow display.
+    Improved so that ASCII characters are treated specially. It became dramatically faster.
 
 ## 2015-02-13
-  * ble-edit.sh (keymap emacs): 既定の keymap に emacs の名を付与。
-  * ble-edit.sh (accept-line.exec): bugfix, C-c で再帰呼び出しのループから抜けられない。
-    trap DEBUG を用いて再帰呼び出しから抜けられる様に exec 周りを整理・実装し直し。
-  * ble-edit.sh: オプション名の変更、各オプションの整理・説明の追加。
-  * ble-edit.sh (.ble-edit/gexec): グローバルな文脈でコマンドを実行する仕組み。
-    再帰呼出に対する C-c にも対応。bleopt_exec_type で実行の方法を切り替えられる様に。
-    exec が従来の方法で gexec がこの新しい方法。
+  * ble-edit.sh (keymap emacs): Give emacs name to default keymap.
+  * ble-edit.sh (accept-line.exec): bugfix, unable to exit from recursive call loop in C-c.
+    Organize and reimplement around exec so that you can escape from recursive calls using trap DEBUG.
+  * ble-edit.sh: Change option names, organize each option, and add explanations.
+  * ble-edit.sh (.ble-edit/gexec): A mechanism to execute commands in a global context.
+    Also supports C-c for recursive calls. You can now switch the execution method with bleopt_exec_type.
+    exec is the old way and gexec is this new way.
 
 ## 2015-02-12
-  * ble-decode.sh: bugfix, exit 後に stty が壊れているのを修正
-    これに伴って ble の detach 機能の実装も行った。
-  * ble-decode.sh: bugfix, bash-4.3 で三文字以上のシーケンスが悉く聞かない。
-    keymap が見付からないエラーになってしまうので全てのシーケンスについて bind -x する事にした。
-  * ble-core.sh: bugfix, builtin printf \U.... の使えない環境で command printf fallback が働かない。
-    printf のパスを修正。また ASCII に対しては printf は使わない様に変更。
+  * ble-decode.sh: bugfix, fixed stty broken after exit
+    Along with this, we also implemented ble's detach function.
+  * ble-decode.sh: bugfix, bash-4.3 doesn't listen to sequences of three or more characters.
+    Since I was getting an error that the keymap could not be found, I decided to bind -x for all sequences.
+  * ble-core.sh: bugfix, command printf fallback does not work in environments where builtin printf \U.... cannot be used.
+    Fixed printf path. Also changed to not use printf for ASCII.
   * ble-color.sh (ble-syntax-highlight+default):
-    追加・修正。また選択範囲の反転を ble-syntax-highlight+region として実装し、それを呼び出す形に。
-  * ble.pp: 起動時に interactive モードかどうかのチェックを行う様に。
+    Additions and corrections. Also, implement inversion of the selection range as ble-syntax-highlight+region and call it.
+  * ble.pp: Check whether it is in interactive mode at startup.
 
 ## 2015-02-11
-  * ble-edit.sh (_ble_edit_io_*): ちらつきを抑える為に stdout/stderr を切り替える事にした。
-    ちらつくのは bash の既定の出力によって ble の表示がクリアされ、bash の表示したい物が表示されるから。
-    これに対抗して ble は bash の出力の直後に上書き再描画して何とか表示していた。
-    bash の既定の出力を抑える為に、exec で出力先を切り替える事にした。
-    bash の出力はファイルに書き込まれる様にし向ける。出力先ファイルを逐次確認して、
-    エラーが出力されていれば visible-bell で表示する事にした。
-    `bleopt_suppress_bash_output=1` の時にこの新しい方法を実験的に用いる。
-    `bleopt_suppress_bash_output=` の時は従来のちらつく方法。
+  * ble-edit.sh (_ble_edit_io_*): Decided to switch stdout/stderr to suppress flickering.
+    The reason it flickers is because bash's default output clears the ble display and displays what bash wants to display.
+    In response to this, ble overwrites and redraws immediately after bash's output and manages to display it.
+    In order to suppress the default output of bash, I decided to switch the output destination using exec.
+    Directs bash output to be written to a file. Check the output file one by one,
+    If an error is output, I decided to display it with visible-bell.
+    Experimentally use this new method when `bleopt_suppress_bash_output=1`.
+    When `bleopt_suppress_bash_output=`, the traditional flickering method.
 
 ## 2015-02-10
-  * ble-edit.sh (accept-line.exec): bash-4.3 で内部からグローバル変数を定義できる様に
-    declare 及び typeset を上書きして -g オプションを指定する様に変更。
-    また、これに関係する注意点を ble.htm に記述。
-  * ble-edit.sh (history): ロードに時間が掛かるので最適化。
-  * 全般: bugfix, 文字列分割で GLOBIGNORE='*' を設定していないとパス名展開されて危険
-  * ble-color.sh (ble-syntax-highlight+default): より良い色づけ。
-  * ble-edit.sh (accept-line.exec): ble-bind -cf で bind されたコマンドの実行コンテキストを変更。
-    accept-line で実行されるのと同じコンテキストで実行する。
-  * ble-edit.sh (keymap default): C-z M-z を fg に bind。
+  * ble-edit.sh (accept-line.exec): Now you can define global variables from inside in bash-4.3
+    Changed to override declare and typeset and specify -g option.
+    Also, notes related to this are written in ble.htm.
+  * ble-edit.sh (history): Optimized because it takes time to load.
+  * General: bugfix, pathname expansion is dangerous if GLOBIGNORE='*' is not set in string splitting
+  * ble-color.sh (ble-syntax-highlight+default): Better coloring.
+  * ble-edit.sh (accept-line.exec): Change execution context of command bound with ble-bind -cf.
+    Executes in the same context as accept-line.
+  * ble-edit.sh (keymap default): Bind C-z M-z to fg.
 
 ## 2015-02-09
   * git repos
-  * ble-edit: bugfix, locate-xword マクロが展開されていなかった
-  * ble-decode: bash-4.3 に対応する為に色々変更
-    - bind 指定の場合分けを整理
-    - bugfix, ESC ?, ESC [ ? に対して全て bind
-    - bugfix, 場合によって全く bind -r できていない
-      →"bind -sp | fgrep" が "バイナリ" という結果になる事がある様だ。
-        fgrep に -a を指定する。
-    - bugfix, 日本語が入力できない。8bit 文字が認識されない。
-      →8bit 文字はエスケープシーケンスで bind に指定する様に変更。
+  * ble-edit: bugfix, locate-xword macro was not expanded
+  * ble-decode: Various changes to support bash-4.3
+    - Sort out cases of bind specification
+    - all bind for bugfix, ESC ?, ESC [ ?
+    - bugfix, in some cases bind -r doesn't work at all
+      →It seems that "bind -sp | fgrep" sometimes results in "binary".
+        Specify -a for fgrep.
+    - bugfix, Japanese cannot be input. 8bit characters are not recognized.
+      →Change 8bit characters to be specified in bind using an escape sequence.
 
 ## 2013-06-12
   * ble-edit: history-beginning, history-end, accept-and-next
@@ -3270,11 +3270,11 @@
     delete-forward-cword, delete-backward-cword, delete-cword, delete-region-or-cword
 
   * ble-edit:
-    以下の編集関数を廃止:
+    The following editing functions have been deprecated:
       delete-region-or-uword, kill-region-or-uword, copy-region-or-uword,
       delete-region-or-sword, kill-region-or-sword, copy-region-or-sword,
       delete-region-or-cword, kill-region-or-cword, copy-region-or-cword.
-    代わりに以下の編集関数を用いる:
+    Use the following editing functions instead:
       delete-region-or type, kill-region-or type, copy-region-or type.
 
 ## 2013-06-09
@@ -3288,9 +3288,9 @@
   * ble-edit: forward-sword, backward-sword, forward-cword, backward-cword
 
 ## 2013-06-06
-  * ble-edit-bind: 全ての文字・キーが入力可能に。
-  * complete: 候補一覧の表示 (簡易版)
-  * ble-color.sh: 色付け機能を highlight.sh から移植
+  * ble-edit-bind: All characters/keys can be input.
+  * complete: Display candidate list (simple version)
+  * ble-color.sh: Ported coloring functionality from highlight.sh
 
 ## 2013-06-05
   * ble-edit: history-isearch-backward, history-isearch-forward,
@@ -3299,8 +3299,8 @@
     isearch/exit, isearch/cancel, isearch/default,
     isearch/prev, isearch/accept
   * ble-edit: yank
-  * ble-bind -d で今迄に bind した物を表示できる様に。
-  * ble-edit: complete, 取り敢えずファイル名補完だけ
+  * You can now display what has been bound so far with ble-bind -d.
+  * ble-edit: complete, just file name completion for now
   * ble-edit: command-help
 
 ## 2013-06-04
@@ -3317,45 +3317,45 @@
     delete-forward-backward-char
   * ble-edit: forward-char, backward-char, end-of-line, beginning-of-line
   * ble-edit: quoted-insert
-  * ble.sh: 取り敢えず簡単に文字列を入力できる程度までは完成
+  * ble.sh: Completed to the point where you can easily input strings
 
 ## 2013-06-02
   * ble-getopt.sh: bugfixes
-  * ble-getopt.sh: 無事に完了した場合に OPTARGS を unset する様に変更
+  * ble-getopt.sh: Changed to unset OPTARGS upon successful completion.
   * ble-decode-kbd, ble-decode-unkbd
 
 ## 2013-05-31
   * ble-getopt.sh: created
-  * ble-decode: 大枠が完成
+  * ble-decode: The outline is complete
 
 ## 2013-05-30
-  * highlight.sh: 取り敢えず簡単な色付け
+  * highlight.sh: Simple coloring
   * ble.sh:
 
-    -- 経緯 --
-    highlight.sh の方針だと bash が表示する編集中の内容を消す事が出来ないし、
-    カーソルの位置も bash が表示する物の場所を指している。
-    色を付けて表示した物は、補助的に bash が表示する物の下に並べて表示する
-    ぐらいしか方法がない。
+    -- background --
+    With the policy of highlight.sh, it is not possible to erase the content being edited that is displayed by bash,
+    The cursor position also points to what bash is displaying.
+    Items displayed in color are displayed below the items displayed by bash.
+    There's only one way.
 
-    また readline 関数をスクリプトから呼び出す事が出来ないので、
-    結局、色付けを更新したいタイミングで READLINE_LINE や READLINE_POINT の動作を
-    スクリプトの側で全て模倣して再現しなければならない。
-    READLINE_LINE, READLINE_POINT の bash の仕様が変な所為で、日本語など
-    のマルチバイトで正しく処理する為に、色々と汚い事をしなければならない。
+    Also, since the readline function cannot be called from a script,
+    In the end, I changed the behavior of READLINE_LINE and READLINE_POINT when I wanted to update the coloring.
+    Everything has to be imitated and reproduced on the script side.
+    The bash specifications for READLINE_LINE and READLINE_POINT are strange, so Japanese etc.
+    You have to do a lot of dirty things to get it working properly with multibyte.
 
-    以上の事から、文字列の編集などの操作からスクリプトの実行まで
-    全部自分で好きな様に実装して bash readline の機能を全て上書きする事にした。
-    その為に、スクリプトを新しく書き直す。zle を真似て ble (bash line editor)
-    と名付ける。
+    From the above, from operations such as editing strings to executing scripts,
+    I decided to implement everything myself and overwrite all the bash readline functions.
+    To do this, we will have to rewrite the script. ble (bash line editor) imitating zle
+    Name it.
 
-    -- 方針としては --
-    a. read -n 1 を用いて 1 文字ずつ標準入力から文字を取り出してそれを処理していく
-    b. bash の bind で全ての文字に ble のバイト受信関数を繋げて、
-       バイト列を受信しながら処理する。
+    -- As a policy --
+    a. Use read -n 1 to extract characters from standard input one by one and process them.
+    b. Connect ble's byte receiving function to all characters with bash's bind,
+       Process bytes as they are received.
 
-    highlight.sh の延長線上で b. の方針にしたが、
-    もしかすると a. の方針も可能かも知れない。
+    As an extension of highlight.sh, I decided on policy b.
+    Perhaps policy a. is also possible.
 
 ## 2013-05-29
-  * highlight.sh: 作成
+  * highlight.sh: Create

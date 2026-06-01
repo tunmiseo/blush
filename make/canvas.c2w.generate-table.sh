@@ -188,7 +188,7 @@ function sub:c2w {
     }
 
     function output_table(_, output_values, output_ranges, code, c0, v0, ranges, irange, p, c1, c2) {
-      ISOLATED_THRESHOLD = 1; # 2 や 3 も試したが 1 が最も compact
+      ISOLATED_THRESHOLD = 1; # I tried 2 and 3, but 1 is the most compact.
 
       irange = 0;
       output_values = " ";
@@ -338,7 +338,7 @@ function sub:emoji {
       register_RegionalIndicators();
     }
 
-    # 単一絵文字 (sequence でない) のみを登録する。
+    # Register only single emoji (not sequences).
     match($0, / E([0-9]+\.[0-9]+)/, m) > 0 {
       if ($3 == "fully-qualified") {
         register_codepoint(strtonum("0x" $1), m[1], EmojiStatus_FullyQualified);
@@ -376,7 +376,7 @@ function sub:emoji {
         qtype = qtypes[i];
 
         if (i + 1 < len && (n = codes[i + 1]) - code <= 1) {
-          # 孤立コード
+          # orphan code
           for (; code < n; code++)
             output_values = output_values " [" code "]=" qtype;
 
@@ -384,7 +384,7 @@ function sub:emoji {
           output_values = output_values " [" code "]=" qtype;
           output_ranges = output_ranges " " code
 
-          # 非孤立領域の範囲
+          # Non-isolated area range
           p = int(code);
           if (qtype == EmojiStatus_None) p--;
           if (p < 0x10000) {
@@ -395,7 +395,7 @@ function sub:emoji {
             if (smp_max == "" || p > smp_max) smp_max = p;
           }
 
-          # 非孤立領域が BMP/SMP を跨がない事の確認
+          # Confirm that non-isolated areas do not cross BMP/SMP
           if (prev_qtype != EmojiStatus_None && prev_code < 0x10000 && 0x10000 < code)
             print "\x1b[31mEmojiStatus_xmaybe: a BMP-SMP crossing range unexpected.\x1b[m" > "/dev/stderr";
           prev_code = code;
@@ -512,14 +512,14 @@ function sub:GraphemeClusterBreak {
     cat "$cache4"
   } | gawk '
     BEGIN {
-      # ble.sh 実装では元の GraphemeClusterBreak に以下の修正を加える。
+      # In the ble.sh implementation, make the following modifications to the original GraphemeClusterBreak.
       #
-      # * CR/LF は独立した制御文字として扱う
-      # * Extend の一部は InCB_Linker 及び InCB_Extend としている。Unicode
-      #   15.1.0 で追加された Indic_Conjunct_Break (InCB) に依存した書記素クラ
-      #   スター境界 (GR9c) に対応するため。ZWJ も \p{InCB=Extend} だが区別の為
-      #   に ZWJ は ZWJ のままにする。
-      # * サロゲートペアを処理する為にサロゲートペアも規則に含める。
+      # * CR/LF are treated as independent control characters
+      # * Part of Extend is called InCB_Linker and InCB_Extend. Unicode
+      #   Grapheme class dependent on Indic_Conjunct_Break (InCB) added in 15.1.0.
+      #   To accommodate star boundaries (GR9c). ZWJ is also \p{InCB=Extend} but for distinction
+      #   Leave ZWJ as ZWJ.
+      # * Include surrogate pairs in the rules to handle surrogate pairs.
 
       PropertyCount = 18;
       prop2v["Other"]              = Other              = 0;
@@ -684,7 +684,7 @@ function sub:GraphemeClusterBreak {
       print out ")";
     }
 
-    # 孤立した物は先に出力
+    # Output isolated items first
     function print_isolated(_, out, c, i, j, v) {
       out = "";
       count = 0;
@@ -802,7 +802,7 @@ function sub:IndicConjunctBreak {
 
     $2 == "InCB" { process_IndicConjunctBreak($1, $3); }
 
-    # 孤立した物は先に出力
+    # Output isolated items first
     function print_isolated(_, out, c, i, j, v) {
       out = "";
       count = 0;
@@ -1021,7 +1021,7 @@ function sub:update-EastAsianWidth {
       }
 
       function output_table(_, output_values, output_ranges, code, c0, v0, ranges, irange, p, c1, c2) {
-        ISOLATED_THRESHOLD = 1; # 2 や 3 も試したが 1 が最も compact
+        ISOLATED_THRESHOLD = 1; # I tried 2 and 3, but 1 is the most compact.
 
         irange = 0;
         output_values = " ";
