@@ -500,7 +500,7 @@ function ble/init:cmap/initialize {
   ble/edit/info/immediate-show text 'ble.sh: generating "'"$dump"'"...'
   ble/init:cmap/initialize-kbd
   ble/init:cmap/initialize-keys
-  local hash='8c5b1b24da756fa6e2fc8e240eece33abfb0290c'
+  local hash='e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'
   ble-bind -D | ble/bin/awk -v hash="$hash" '
     {
       sub(/^declare +(-[aAilucnrtxfFgGI]+ +)?/, "");

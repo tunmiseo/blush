@@ -200,7 +200,7 @@ function ble/init:bind/.generate {
 
   ble/function#try ble/encoding:"$bleopt_input_encoding"/generate-binder
 
-  local hash='d1692a9f725036b1bbed19c7bc0459d2bb5deca2'
+  local hash='e69de29bb2d1d6434b8b29ae775ad8c2e48c5391'
   ble/util/print "_ble_decode_bind_cache_hash='$hash'" >&3
 }
 
