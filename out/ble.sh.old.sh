@@ -2121,7 +2121,7 @@ function ble-reload {
 _ble_base_repository='/Users/monad/src/repos/blush'
 _ble_base_branch='main'
 _ble_base_repository_url=https://github.com/akinomyoga/ble.sh
-_ble_base_build_git_version='git version 2.50.1 (Apple Git-155)'
+_ble_base_build_git_version='git version 2.51.0'
 _ble_base_build_make_version='GNU Make 3.81'
 _ble_base_build_gawk_version='GNU Awk 5.4.0, API 4.1, PMA Avon 8-g1, (GNU MPFR 4.2.2, GNU MP 6.3.0)'
 function ble-update/.check-install-directory-ownership {
