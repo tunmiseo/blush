@@ -263,7 +263,7 @@ function sub:c2w {
       output_table();
       generate_version_function();
     }
-  ' "$data" | ifold -w 131 --spaces --no-text-justify --indent=.. > src/canvas.c2w.sh
+  ' "$data" | ifold -w 131 --spaces --no-text-justify --indent=.. > src/@canvas/canvas.c2w.bash
 }
 
 function sub:convert-custom-c2w {
@@ -430,7 +430,7 @@ function sub:emoji {
       print_database();
       print_functions();
     }
-  ' "$cache" | ifold -w 131 --spaces --no-text-justify --indent=.. > src/canvas.emoji.sh
+  ' "$cache" | ifold -w 131 --spaces --no-text-justify --indent=.. > src/@canvas/canvas.emoji.bash
 }
 
 function sub:GraphemeClusterBreak {
@@ -501,7 +501,7 @@ function sub:GraphemeClusterBreak {
       process_case($0);
     }
     END { out_flush(); }
-  ' "$cache3" > lib/test-canvas.GraphemeClusterTest.sh
+  ' "$cache3" > lib/@test/test-canvas.GraphemeClusterTest.bash
 
   {
     echo '# __Grapheme_Cluster_Break__'
@@ -762,7 +762,7 @@ function sub:GraphemeClusterBreak {
       rule_initialize();
       rule_print();
     }
-  ' | sed 's/[[:blank:]]\{1,\}$//' > src/canvas.GraphemeClusterBreak.sh
+  ' | sed 's/[[:blank:]]\{1,\}$//' > src/@canvas/canvas.GraphemeClusterBreak.bash
 }
 
 # currently unused

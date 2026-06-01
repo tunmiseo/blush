@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ble-import lib/core-test
+ble-import lib/@core/core-test
 
 ble/test/start-section 'ble/edit' 2
 

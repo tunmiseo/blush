@@ -1,8 +1,8 @@
 # -*- mode: sh; mode: sh-bash -*-
 
-ble-import lib/core-test
-ble-import lib/keymap.vi
-ble-import lib/vim-surround
+ble-import lib/@core/core-test
+ble-import lib/@keymap/keymap.vi
+ble-import lib/@vim/vim-surround
 
 ## @var[out] str ind mark
 function ble/keymap:vi_test/decompose-state {

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ble-import keymap.vi
+ble-import lib/@keymap/keymap.vi
 
 # Mimic implementation of surround.vim (https://github.com/tpope/vim-surround)
 #

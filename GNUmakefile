@@ -64,9 +64,9 @@ outdirs += $(OUTDIR)
 
 outfiles+=$(OUTDIR)/ble.sh
 -include $(OUTDIR)/ble.dep
-# Note: ble.sh depends on lib/init-cmap.sh and lib/init-bind.sh
+# Note: ble.sh depends on lib/@init/init-cmap.bash and lib/@init/init-bind.bash
 # because it contains the hash of these files for the cache.
-$(OUTDIR)/ble.sh: ble.pp GNUmakefile lib/init-cmap.sh lib/init-bind.sh | $(OUTDIR)
+$(OUTDIR)/ble.sh: ble.pp GNUmakefile lib/@init/init-cmap.bash lib/@init/init-bind.bash | $(OUTDIR)
 	DEPENDENCIES_PHONY=1 DEPENDENCIES_OUTPUT="$(@:%.sh=%.dep)" DEPENDENCIES_TARGET="$@" \
 	  FULLVER=$(FULLVER) \
 	  BLE_GIT_COMMIT_ID="$(BLE_GIT_COMMIT_ID)" \
@@ -79,14 +79,14 @@ $(OUTDIR)/ble.sh: ble.pp GNUmakefile lib/init-cmap.sh lib/init-bind.sh | $(OUTDI
 
 GENTABLE := bash make/canvas.c2w.generate-table.sh
 
-src/canvas.c2w.sh:
+src/@canvas/canvas.c2w.bash:
 	$(GENTABLE) c2w
-src/canvas.c2w.musl.sh: make/canvas.c2w.wcwidth.cpp make/canvas.c2w.wcwidth-musl.cpp
+src/@canvas/canvas.c2w.musl.bash: make/canvas.c2w.wcwidth.cpp make/canvas.c2w.wcwidth-musl.cpp
 	+make -C make canvas.c2w.wcwidth.exe
 	make/canvas.c2w.wcwidth.exe table_musl2014 | $(GENTABLE) convert-custom-c2w _ble_util_c2w_musl > $@
-src/canvas.emoji.sh:
+src/@canvas/canvas.emoji.bash:
 	$(GENTABLE) emoji
-src/canvas.GraphemeClusterBreak.sh:
+src/@canvas/canvas.GraphemeClusterBreak.bash:
 	$(GENTABLE) GraphemeClusterBreak
 
 # Note: the following line is a workaround for the missing
@@ -97,6 +97,13 @@ ble-form.sh:
 # lib
 
 outdirs += $(OUTDIR)/lib
+outdirs += $(OUTDIR)/lib/@benchmark
+outdirs += $(OUTDIR)/lib/@core
+outdirs += $(OUTDIR)/lib/@init
+outdirs += $(OUTDIR)/lib/@keymap
+outdirs += $(OUTDIR)/lib/@test
+outdirs += $(OUTDIR)/lib/@util
+outdirs += $(OUTDIR)/lib/@vim
 
 # keymap
 outfiles += $(OUTDIR)/lib/keymap.emacs.sh
@@ -140,27 +147,139 @@ outfiles += $(OUTDIR)/lib/test-syntax.sh
 outfiles += $(OUTDIR)/lib/test-complete.sh
 outfiles += $(OUTDIR)/lib/test-keymap.vi.sh
 
-$(OUTDIR)/lib/%.sh: lib/%.sh | $(OUTDIR)/lib
+outfiles += $(OUTDIR)/lib/@keymap/keymap.emacs.bash
+outfiles += $(OUTDIR)/lib/@keymap/keymap.vi.bash
+outfiles += $(OUTDIR)/lib/@keymap/keymap.vi_digraph.bash
+outfiles += $(OUTDIR)/lib/@keymap/keymap.vi_digraph.txt
+
+outfiles += $(OUTDIR)/lib/@init/init-term.bash
+outfiles += $(OUTDIR)/lib/@init/init-bind.bash
+outfiles += $(OUTDIR)/lib/@init/init-cmap.bash
+outfiles += $(OUTDIR)/lib/@init/init-msys1.bash
+outfiles += $(OUTDIR)/lib/@init/init-msleep.bash
+outfiles += $(OUTDIR)/lib/@init/init-msleep.c
+
+outfiles += $(OUTDIR)/lib/@core/core-complete.bash
+outfiles += $(OUTDIR)/lib/@core/core-syntax.bash
+outfiles += $(OUTDIR)/lib/@core/core-test.bash
+outfiles += $(OUTDIR)/lib/@core/core-cmdspec.bash
+outfiles += $(OUTDIR)/lib/@core/core-debug.bash
+outfiles += $(OUTDIR)/lib/@core/core-edit.ignoreeof-messages.txt
+outfiles += $(OUTDIR)/lib/@core/core-decode.emacs-rlfunc.txt
+outfiles += $(OUTDIR)/lib/@core/core-decode.vi_imap-rlfunc.txt
+outfiles += $(OUTDIR)/lib/@core/core-decode.vi_nmap-rlfunc.txt
+
+outfiles += $(OUTDIR)/lib/@vim/vim-surround.bash
+outfiles += $(OUTDIR)/lib/@vim/vim-arpeggio.bash
+outfiles += $(OUTDIR)/lib/@vim/vim-airline.bash
+
+outfiles += $(OUTDIR)/lib/@util/util.bgproc.bash
+
+outfiles += $(OUTDIR)/lib/@test/test-bash.bash
+outfiles += $(OUTDIR)/lib/@test/test-main.bash
+outfiles += $(OUTDIR)/lib/@test/test-util.bash
+outfiles += $(OUTDIR)/lib/@test/test-canvas.bash
+outfiles += $(OUTDIR)/lib/@test/test-canvas.GraphemeClusterTest.bash
+outfiles += $(OUTDIR)/lib/@test/test-decode.bash
+outfiles += $(OUTDIR)/lib/@test/test-edit.bash
+outfiles += $(OUTDIR)/lib/@test/test-syntax.bash
+outfiles += $(OUTDIR)/lib/@test/test-complete.bash
+outfiles += $(OUTDIR)/lib/@test/test-keymap.vi.bash
+
+outfiles += $(OUTDIR)/lib/@benchmark/benchmark.ksh
+
+$(OUTDIR)/lib/keymap.emacs.sh: lib/@keymap/keymap.emacs.bash | $(OUTDIR)/lib
 	$(CP) $< $@
-$(OUTDIR)/lib/%.txt: lib/%.txt | $(OUTDIR)/lib
+$(OUTDIR)/lib/keymap.vi.sh: lib/@keymap/keymap.vi.bash | $(OUTDIR)/lib
 	$(CP) $< $@
-$(OUTDIR)/lib/core-syntax.sh: lib/core-syntax.sh lib/core-syntax-ctx.def | $(OUTDIR)/lib
+$(OUTDIR)/lib/keymap.vi_digraph.sh: lib/@keymap/keymap.vi_digraph.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/keymap.vi_digraph.txt: lib/@keymap/keymap.vi_digraph.txt | $(OUTDIR)/lib
+	$(CP) $< $@
+
+$(OUTDIR)/lib/init-term.sh: lib/@init/init-term.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/init-msys1.sh: lib/@init/init-msys1.bash lib/@init/init-msys1-helper.c | $(OUTDIR)/lib
 	$(MWGPP) $< > $@
-$(OUTDIR)/lib/init-msys1.sh: lib/init-msys1.sh lib/init-msys1-helper.c | $(OUTDIR)/lib
+$(OUTDIR)/lib/init-cmap.sh: lib/@init/init-cmap.bash | $(OUTDIR)/lib
 	$(MWGPP) $< > $@
-$(OUTDIR)/lib/test-canvas.sh: lib/test-canvas.sh lib/test-canvas.GraphemeClusterTest.sh | $(OUTDIR)/lib
+$(OUTDIR)/lib/init-bind.sh: lib/@init/init-bind.bash | $(OUTDIR)/lib
 	$(MWGPP) $< > $@
-$(OUTDIR)/lib/init-cmap.sh: lib/init-cmap.sh | $(OUTDIR)/lib
+
+$(OUTDIR)/lib/core-complete.sh: lib/@core/core-complete.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/core-syntax.sh: lib/@core/core-syntax.bash lib/@core/core-syntax-ctx.def | $(OUTDIR)/lib
 	$(MWGPP) $< > $@
-$(OUTDIR)/lib/init-bind.sh: lib/init-bind.sh | $(OUTDIR)/lib
+$(OUTDIR)/lib/core-test.sh: lib/@core/core-test.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/core-cmdspec.sh: lib/@core/core-cmdspec.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/core-debug.sh: lib/@core/core-debug.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/core-edit.ignoreeof-messages.txt: lib/@core/core-edit.ignoreeof-messages.txt | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/core-decode.emacs-rlfunc.txt: lib/@core/core-decode.emacs-rlfunc.txt | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/core-decode.vi_imap-rlfunc.txt: lib/@core/core-decode.vi_imap-rlfunc.txt | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/core-decode.vi_nmap-rlfunc.txt: lib/@core/core-decode.vi_nmap-rlfunc.txt | $(OUTDIR)/lib
+	$(CP) $< $@
+
+$(OUTDIR)/lib/vim-surround.sh: lib/@vim/vim-surround.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/vim-arpeggio.sh: lib/@vim/vim-arpeggio.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/vim-airline.sh: lib/@vim/vim-airline.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+
+$(OUTDIR)/lib/util.bgproc.sh: lib/@util/util.bgproc.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+
+$(OUTDIR)/lib/test-bash.sh: lib/@test/test-bash.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/test-main.sh: lib/@test/test-main.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/test-util.sh: lib/@test/test-util.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/test-canvas.sh: lib/@test/test-canvas.bash lib/@test/test-canvas.GraphemeClusterTest.bash | $(OUTDIR)/lib
+	$(MWGPP) $< > $@
+$(OUTDIR)/lib/test-decode.sh: lib/@test/test-decode.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/test-edit.sh: lib/@test/test-edit.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/test-syntax.sh: lib/@test/test-syntax.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/test-complete.sh: lib/@test/test-complete.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+$(OUTDIR)/lib/test-keymap.vi.sh: lib/@test/test-keymap.vi.bash | $(OUTDIR)/lib
+	$(CP) $< $@
+
+$(OUTDIR)/lib/@%.bash: lib/@%.bash | $(OUTDIR)/lib $(OUTDIR)/lib/@benchmark $(OUTDIR)/lib/@core $(OUTDIR)/lib/@init $(OUTDIR)/lib/@keymap $(OUTDIR)/lib/@test $(OUTDIR)/lib/@util $(OUTDIR)/lib/@vim
+	$(CP) $< $@
+$(OUTDIR)/lib/@%.txt: lib/@%.txt | $(OUTDIR)/lib $(OUTDIR)/lib/@benchmark $(OUTDIR)/lib/@core $(OUTDIR)/lib/@init $(OUTDIR)/lib/@keymap $(OUTDIR)/lib/@test $(OUTDIR)/lib/@util $(OUTDIR)/lib/@vim
+	$(CP) $< $@
+$(OUTDIR)/lib/@%.c: lib/@%.c | $(OUTDIR)/lib $(OUTDIR)/lib/@benchmark $(OUTDIR)/lib/@core $(OUTDIR)/lib/@init $(OUTDIR)/lib/@keymap $(OUTDIR)/lib/@test $(OUTDIR)/lib/@util $(OUTDIR)/lib/@vim
+	$(CP) $< $@
+$(OUTDIR)/lib/@benchmark/benchmark.ksh: lib/@benchmark/benchmark.ksh | $(OUTDIR)/lib/@benchmark
+	$(CP) $< $@
+
+$(OUTDIR)/lib/@core/core-syntax.bash: lib/@core/core-syntax.bash lib/@core/core-syntax-ctx.def | $(OUTDIR)/lib/@core
+	$(MWGPP) $< > $@
+$(OUTDIR)/lib/@init/init-msys1.bash: lib/@init/init-msys1.bash lib/@init/init-msys1-helper.c | $(OUTDIR)/lib/@init
+	$(MWGPP) $< > $@
+$(OUTDIR)/lib/@init/init-cmap.bash: lib/@init/init-cmap.bash | $(OUTDIR)/lib/@init
+	$(MWGPP) $< > $@
+$(OUTDIR)/lib/@init/init-bind.bash: lib/@init/init-bind.bash | $(OUTDIR)/lib/@init
+	$(MWGPP) $< > $@
+$(OUTDIR)/lib/@test/test-canvas.bash: lib/@test/test-canvas.bash lib/@test/test-canvas.GraphemeClusterTest.bash | $(OUTDIR)/lib/@test
 	$(MWGPP) $< > $@
 
 outfiles += $(OUTDIR)/lib/benchmark.ksh
-$(OUTDIR)/lib/benchmark.ksh: lib/benchmark.ksh src/benchmark.sh | $(OUTDIR)/lib
+$(OUTDIR)/lib/benchmark.ksh: lib/@benchmark/benchmark.ksh src/@benchmark/benchmark.bash | $(OUTDIR)/lib
 	$(MWGPP) $< > $@
 
 #outfiles += $(OUTDIR)/lib/init-msleep.sh
-#$(OUTDIR)/lib/init-msleep.sh: lib/init-msleep.sh lib/init-msleep.c | $(OUTDIR)/lib
+#$(OUTDIR)/lib/init-msleep.sh: lib/@init/init-msleep.bash lib/@init/init-msleep.c | $(OUTDIR)/lib
 #	$(MWGPP) $< > $@
 
 # I'll delete it someday

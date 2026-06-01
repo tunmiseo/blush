@@ -1,57 +1,57 @@
 out/ble.sh: ble.pp \
-  src/def.sh \
-  src/util.sh \
-  src/util.hook.sh \
-  src/benchmark.sh \
-  src/decode.sh \
-  src/color.sh \
-  src/canvas.sh \
-  src/canvas.c2w.sh \
-  src/canvas.emoji.sh \
-  src/canvas.c2w.musl.sh \
-  src/canvas.GraphemeClusterBreak.sh \
-  src/history.sh \
-  src/edit.sh \
-  lib/core-cmdspec-def.sh \
-  lib/core-syntax-def.sh \
-  lib/core-complete-def.sh \
-  lib/core-debug-def.sh \
+  src/@def/def.bash \
+  src/@util/util.bash \
+  src/@util/util.hook.bash \
+  src/@util/../@benchmark/benchmark.bash \
+  src/@decode/decode.bash \
+  src/@color/color.bash \
+  src/@canvas/canvas.bash \
+  src/@canvas/canvas.c2w.bash \
+  src/@canvas/canvas.emoji.bash \
+  src/@canvas/canvas.c2w.musl.bash \
+  src/@canvas/canvas.GraphemeClusterBreak.bash \
+  src/@history/history.bash \
+  src/@edit/edit.bash \
+  lib/@core/core-cmdspec-def.bash \
+  lib/@core/core-syntax-def.bash \
+  lib/@core/core-complete-def.bash \
+  lib/@core/core-debug-def.bash \
   contrib/integration/bash-preexec-def.sh
 ble.pp:
 
-src/def.sh:
+src/@def/def.bash:
 
-src/util.sh:
+src/@util/util.bash:
 
-src/util.hook.sh:
+src/@util/util.hook.bash:
 
-src/benchmark.sh:
+src/@util/../@benchmark/benchmark.bash:
 
-src/decode.sh:
+src/@decode/decode.bash:
 
-src/color.sh:
+src/@color/color.bash:
 
-src/canvas.sh:
+src/@canvas/canvas.bash:
 
-src/canvas.c2w.sh:
+src/@canvas/canvas.c2w.bash:
 
-src/canvas.emoji.sh:
+src/@canvas/canvas.emoji.bash:
 
-src/canvas.c2w.musl.sh:
+src/@canvas/canvas.c2w.musl.bash:
 
-src/canvas.GraphemeClusterBreak.sh:
+src/@canvas/canvas.GraphemeClusterBreak.bash:
 
-src/history.sh:
+src/@history/history.bash:
 
-src/edit.sh:
+src/@edit/edit.bash:
 
-lib/core-cmdspec-def.sh:
+lib/@core/core-cmdspec-def.bash:
 
-lib/core-syntax-def.sh:
+lib/@core/core-syntax-def.bash:
 
-lib/core-complete-def.sh:
+lib/@core/core-complete-def.bash:
 
-lib/core-debug-def.sh:
+lib/@core/core-debug-def.bash:
 
 contrib/integration/bash-preexec-def.sh:
 

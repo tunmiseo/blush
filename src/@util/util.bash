@@ -4348,12 +4348,12 @@ else
 
 fi
 
-#%< util.hook.sh
+#%< util.hook.bash
 
 #------------------------------------------------------------------------------
 # ble/util/msleep
 
-#%include benchmark.sh
+#%include ../@benchmark/benchmark.bash
 
 function ble/util/msleep/.check-sleep-decimal-support {
   local version; ble/util/assign version 'LC_ALL=C ble/bin/sleep --version 2>&1' 2>/dev/null # suppress locale error #D1440
@@ -8198,7 +8198,7 @@ function ble/util/.test-C-locale {
   # Note: In Termux, even with the locale "C", the behavior appears to be that
   # of UTF-8.  This makes it impossible to manipulate binary data in the shell.
   local LC_ALL= LC_CTYPE= LANG=C
-  local s='alpha'
+  local s=$'\343\201\202'
   ((${#s}==3)); local ext=$?
   ble/util/unlocal LC_ALL LC_CTYPE LANG
   return "$ext"
@@ -8211,7 +8211,7 @@ function ble/util/.test-utf8-locale {
   # set the locale to "C" and use it to obtain the number of bytes, 3, and then
   # check the target locale.
   local LC_ALL= LC_CTYPE= LANG=C
-  local s='alpha'
+  local s=$'\343\201\202'
   LANG=$ctype
   ((${#s}==1)); local ext=$?
   ble/util/unlocal LC_ALL LC_CTYPE LANG

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ble-import keymap.vi
+ble-import lib/@keymap/keymap.vi
 
 bleopt/declare -v vim_arpeggio_timeoutlen 40
 

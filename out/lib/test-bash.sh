@@ -1,6 +1,6 @@
 # -*- mode: sh; mode: sh-bash -*-
 
-ble-import lib/core-test
+ble-import lib/@core/core-test
 
 ble/test/start-section 'bash' 117
 

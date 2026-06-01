@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ble-import lib/core-test
+ble-import lib/@core/core-test
 
 _ble_test_canvas_contra=
 if [[ -x ext/contra ]]; then
@@ -801,7 +801,7 @@ ble/test/start-section 'ble/canvas/GraphemeCluster/c2break (GraphemeBreakTest.tx
 
   bleopt emoji_opts=ri:tpvs:epvs:zwj
   tests_cases=(
-#%< test-canvas.GraphemeClusterTest.sh
+#%< test-canvas.GraphemeClusterTest.bash
   )
 
   function ble/test:canvas/GraphemeClusterBreak/find-previous-boundary {

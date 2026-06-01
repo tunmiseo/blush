@@ -11752,8 +11752,8 @@ if [[ $bleopt_internal_suppress_bash_output ]]; then
            $line == *'Use "exit" to leave the shell.'* ||
            $line == *'Gebruik Kaart na Los Tronk'* ]] && return 0
 
-      # Should I cache the contents of lib/core-edit.ignoreeof-messages.txt?
-      [[ $line == *exit* ]] && ble/bin/grep -q -F "$line" "$_ble_base"/lib/core-edit.ignoreeof-messages.txt
+      # Should I cache the contents of lib/@core/core-edit.ignoreeof-messages.txt?
+      [[ $line == *exit* ]] && ble/bin/grep -q -F "$line" "$_ble_base"/lib/@core/core-edit.ignoreeof-messages.txt
     }
 
     function ble-edit/io/check-ignoreeof-loop {

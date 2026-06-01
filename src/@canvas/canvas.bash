@@ -139,7 +139,7 @@ function ble/util/c2s-edit {
 
 # ---- Character type determination ----
 
-#%< canvas.c2w.sh
+#%< canvas.c2w.bash
 _ble_unicode_c2w_version=14
 _ble_unicode_c2w_ambiguous=1
 _ble_unicode_c2w_invalid=1
@@ -212,7 +212,7 @@ function ble/unicode/c2w {
 ##   Generate the file src/canvas.emoji.sh with the following command.
 ##   $ make/canvas.c2w.generate-table.sh emoji
 ##
-#%< canvas.emoji.sh
+#%< canvas.emoji.bash
 
 bleopt/declare -v emoji_width 2
 bleopt/declare -v emoji_opts ri
@@ -378,7 +378,7 @@ function ble/util/c2w:emacs {
   return 0
 }
 
-#%< canvas.c2w.musl.sh
+#%< canvas.c2w.musl.bash
 
 function ble/util/c2w:musl {
   local code=$1
@@ -558,7 +558,7 @@ function bleopt/check:grapheme_cluster {
   esac
 }
 
-#%< canvas.GraphemeClusterBreak.sh
+#%< canvas.GraphemeClusterBreak.bash
 
 # Note #D2076: On many terminals (terminals that refer to glibc's wcwidth/wcswidth), the following
 # characters are implemented with different behavior than Unicode. Unique for kitty and RLogin

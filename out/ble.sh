@@ -9,7 +9,7 @@
 # check --help or --version
 
 {
-  _ble_init_version=0.4.0-devel4+2300c5f
+  _ble_init_version=0.4.0-devel4+e4beea9
   _ble_init_exit=
   _ble_init_command=
   _ble_init_skip=
@@ -2121,8 +2121,8 @@ function ble-reload {
 _ble_base_repository='/Users/monad/src/repos/blush'
 _ble_base_branch='main'
 _ble_base_repository_url=https://github.com/akinomyoga/ble.sh
-_ble_base_build_git_version='git version 2.50.1 (Apple Git-155)'
-_ble_base_build_make_version='GNU Make 3.81'
+_ble_base_build_git_version='git version 2.51.0'
+_ble_base_build_make_version='GNU Make 4.4.1'
 _ble_base_build_gawk_version='GNU Awk 5.4.0, API 4.1, PMA Avon 8-g1, (GNU MPFR 4.2.2, GNU MP 6.3.0)'
 function ble-update/.check-install-directory-ownership {
   if [[ ! -O $_ble_base ]]; then
@@ -2382,7 +2382,7 @@ _ble_attached=
 BLE_ATTACHED=
 
 ###############################################################################
-# Included from src/def.sh
+# Included from src/@def/def.bash
 
 # -*- mode: sh; mode: sh-bash -*-
 
@@ -2524,7 +2524,7 @@ function ble/complete/action/inherit-from {
   ble/complete/action#inherit-from "$@"
 }
 ###############################################################################
-# Included from src/util.sh
+# Included from src/@util/util.bash
 
 # -*- mode: sh; mode: sh-bash -*-
 # bash script to be sourced from interactive shell
@@ -8630,8 +8630,8 @@ if ((_ble_bash>=40400)) && ble/util/load-standard-builtin sleep; then
     ble/builtin/sleep "$@"
     builtin eval -- "$_ble_bash_POSIXLY_CORRECT_local_return"
   }
-elif [[ -f $_ble_base/lib/init-msleep.sh ]] &&
-       source -- "$_ble_base/lib/init-msleep.sh" &&
+elif [[ -f $_ble_base/lib/@init/init-msleep.bash ]] &&
+       source -- "$_ble_base/lib/@init/init-msleep.bash" &&
        ble/util/msleep/.load-compiled-builtin
 then
   # Compile sleep.so yourself.
@@ -10642,10 +10642,10 @@ function ble/term/DA2R.hook {
   esac
 }
 function ble/term/.initialize {
-  if [[ -s $_ble_base_cache/term.$TERM && $_ble_base_cache/term.$TERM -nt $_ble_base/lib/init-term.sh ]]; then
+  if [[ -s $_ble_base_cache/term.$TERM && $_ble_base_cache/term.$TERM -nt $_ble_base/lib/@init/init-term.bash ]]; then
     source -- "$_ble_base_cache/term.$TERM"
   else
-    source -- "$_ble_base/lib/init-term.sh"
+    source -- "$_ble_base/lib/@init/init-term.bash"
   fi
 
   ble/string#reserve-prototype "$_ble_term_it"
@@ -12175,7 +12175,7 @@ function ble/util/.test-C-locale {
   # Note: In Termux, even with the locale "C", the behavior appears to be that
   # of UTF-8.  This makes it impossible to manipulate binary data in the shell.
   local LC_ALL= LC_CTYPE= LANG=C
-  local s='alpha'
+  local s=$'\343\201\202'
   ((${#s}==3)); local ext=$?
   ble/util/unlocal LC_ALL LC_CTYPE LANG
   return "$ext"
@@ -12188,7 +12188,7 @@ function ble/util/.test-utf8-locale {
   # set the locale to "C" and use it to obtain the number of bytes, 3, and then
   # check the target locale.
   local LC_ALL= LC_CTYPE= LANG=C
-  local s='alpha'
+  local s=$'\343\201\202'
   LANG=$ctype
   ((${#s}==1)); local ext=$?
   ble/util/unlocal LC_ALL LC_CTYPE LANG
@@ -12869,7 +12869,7 @@ function ble/base/check-bash-debug-version {
 ble/base/check-bash-debug-version
 
 ###############################################################################
-# Included from src/decode.sh
+# Included from src/@decode/decode.bash
 
 #! /bin/bash
 
@@ -15623,7 +15623,7 @@ function ble/decode/cmap/.generate-binder-template {
 function ble/decode/cmap/initialize {
   function ble/decode/cmap/initialize { return 0; }
 
-  local init=$_ble_base/lib/init-cmap.sh
+  local init=$_ble_base/lib/@init/init-cmap.bash
   local dump=$_ble_base_cache/decode.cmap.$_ble_decode_kbd_ver.$TERM.dump
   local hash='8c5b1b24da756fa6e2fc8e240eece33abfb0290c'
   if [[ -s $dump && $dump -nt $init ]]; then
@@ -15884,10 +15884,10 @@ function ble/decode/readline/bind {
 
   local hash='d1692a9f725036b1bbed19c7bc0459d2bb5deca2'
   local _ble_decode_bind_cache_hash=
-  [[ -s $file && $file -nt $_ble_base/lib/init-bind.sh ]] && source -- "$file"
+  [[ -s $file && $file -nt $_ble_base/lib/@init/init-bind.bash ]] && source -- "$file"
 
   if [[ $_ble_decode_bind_cache_hash != "$hash" ]]; then
-    source -- "$_ble_base/lib/init-bind.sh"
+    source -- "$_ble_base/lib/@init/init-bind.bash"
     source -- "$file"
   fi
 
@@ -16712,11 +16712,11 @@ function ble/builtin/bind/rlfunc2widget/load-dict {
 
   local rlfunc_file= rlfunc_dict=
   case $kmap in
-  (emacs)   rlfunc_file=$_ble_base/lib/core-decode.emacs-rlfunc.txt
+  (emacs)   rlfunc_file=$_ble_base/lib/@core/core-decode.emacs-rlfunc.txt
             rlfunc_dict=_ble_decode_rlfunc2widget_emacs ;;
-  (vi_imap) rlfunc_file=$_ble_base/lib/core-decode.vi_imap-rlfunc.txt
+  (vi_imap) rlfunc_file=$_ble_base/lib/@core/core-decode.vi_imap-rlfunc.txt
             rlfunc_dict=_ble_decode_rlfunc2widget_vi_imap ;;
-  (vi_nmap) rlfunc_file=$_ble_base/lib/core-decode.vi_nmap-rlfunc.txt
+  (vi_nmap) rlfunc_file=$_ble_base/lib/@core/core-decode.vi_nmap-rlfunc.txt
             rlfunc_dict=_ble_decode_rlfunc2widget_vi_nmap ;;
   esac
 
@@ -17145,7 +17145,7 @@ function ble/builtin/bind/read-user-settings/.cache-enabled {
 ##   @var[in] cache_prefix
 function ble/builtin/bind/read-user-settings/.cache-alive {
   [[ -e $cache_prefix.settings ]] || return 1
-  [[ $cache_prefix.settings -nt $_ble_base/lib/init-cmap.sh  ]] || return 1
+  [[ $cache_prefix.settings -nt $_ble_base/lib/@init/init-cmap.bash  ]] || return 1
   local keymap
   for keymap in emacs vi_imap vi_nmap; do
     [[ $cache_prefix.settings -nt $_ble_base/core-decode.$cache-rlfunc.txt ]] || return 1
@@ -17486,7 +17486,7 @@ function ble/encoding:C/c2bc {
   ret=1
 }
 ###############################################################################
-# Included from src/color.sh
+# Included from src/@color/color.bash
 
 #!/bin/bash
 
@@ -19731,7 +19731,7 @@ function ble/highlight/layer:overwrite_mode/getg {
 
 _ble_highlight_layer_list=(plain syntax region overwrite_mode disabled)
 ###############################################################################
-# Included from src/canvas.sh
+# Included from src/@canvas/canvas.bash
 
 #!/bin/bash
 
@@ -24077,7 +24077,7 @@ function ble/canvas/panel/ensure-tmargin.draw {
   ble/canvas/panel/load-position.draw "$pos"
 }
 ###############################################################################
-# Included from src/history.sh
+# Included from src/@history/history.bash
 
 #!/bin/bash
 
@@ -26454,7 +26454,7 @@ function ble/history/isearch-backward {
   ble/history/isearch-forward.impl "$1:backward"
 }
 ###############################################################################
-# Included from src/edit.sh
+# Included from src/@edit/edit.bash
 
 #!/bin/bash
 
@@ -29099,7 +29099,7 @@ function ble-edit/content/.update-dirty-range {
 }
 
 function ble-edit/content/update-syntax {
-  if ble/util/import/is-loaded "$_ble_base/lib/core-syntax.sh"; then
+  if ble/util/import/is-loaded "$_ble_base/lib/@core/core-syntax.bash"; then
     local beg end end0
     ble/dirty-range#load --prefix=_ble_edit_dirty_syntax_
     if ((beg>=0)); then
@@ -37341,11 +37341,11 @@ function ble-edit/bind/load-editing-mode:safe {
   ble/decode/keymap#load safe
 }
 
-ble/util/autoload "lib/keymap.emacs.sh" \
+ble/util/autoload "lib/@keymap/keymap.emacs.bash" \
                   ble-decode/keymap:emacs/define
-ble/util/autoload "lib/keymap.vi.sh" \
+ble/util/autoload "lib/@keymap/keymap.vi.bash" \
                   ble-decode/keymap:vi_{i,n,o,x,s,c}map/define
-ble/util/autoload "lib/keymap.vi_digraph.sh" \
+ble/util/autoload "lib/@keymap/keymap.vi_digraph.bash" \
                   ble-decode/keymap:vi_digraph/define
 
 function ble/widget/.change-editing-mode {
@@ -38260,8 +38260,8 @@ if [[ $bleopt_internal_suppress_bash_output ]]; then
            $line == *'Use "exit" to leave the shell.'* ||
            $line == *'Gebruik Kaart na Los Tronk'* ]] && return 0
 
-      # Should I cache the contents of lib/core-edit.ignoreeof-messages.txt?
-      [[ $line == *exit* ]] && ble/bin/grep -q -F "$line" "$_ble_base"/lib/core-edit.ignoreeof-messages.txt
+      # Should I cache the contents of lib/@core/core-edit.ignoreeof-messages.txt?
+      [[ $line == *exit* ]] && ble/bin/grep -q -F "$line" "$_ble_base"/lib/@core/core-edit.ignoreeof-messages.txt
     }
 
     function ble-edit/io/check-ignoreeof-loop {
@@ -38292,7 +38292,7 @@ if [[ $bleopt_internal_suppress_bash_output ]]; then
         ble-edit/io/check-stderr
         exec 2>&"$_ble_edit_io_fd2"
       }
-    elif . "$_ble_base/lib/init-msys1.sh"; ble-edit/io:msys1/start-background; then
+    elif . "$_ble_base/lib/@init/init-msys1.bash"; ble-edit/io:msys1/start-background; then
       function ble-edit/bind/stdout.off {
         ble/util/buffer.flush
         ble-edit/io/check-stderr
@@ -38627,7 +38627,7 @@ function ble-edit/bind/load-editing-mode {
   if ble/is-function ble-edit/bind/load-editing-mode:"$name"; then
     ble-edit/bind/load-editing-mode:"$name"
   else
-    ble/util/import "$_ble_base/lib/keymap.$name.sh"
+    ble/util/import "$_ble_base/lib/@keymap/keymap.$name.bash"
   fi
 }
 function ble-edit/bind/clear-keymap-definition-loader {
@@ -38681,12 +38681,12 @@ function ble-append-line {
   builtin eval -- "$_ble_bash_POSIXLY_CORRECT_local_return"
 }
 ###############################################################################
-# Included from lib/core-cmdspec-def.sh
+# Included from lib/@core/core-cmdspec-def.bash
 
 # -*- mode: sh; mode: sh-bash -*-
 
-function ble/cmdspec/initialize { ble-import "$_ble_base/lib/core-cmdspec.sh"; }
-ble/is-function ble/util/idle.push && ble-import -d "$_ble_base/lib/core-cmdspec.sh"
+function ble/cmdspec/initialize { ble-import "$_ble_base/lib/@core/core-cmdspec.bash"; }
+ble/is-function ble/util/idle.push && ble-import -d "$_ble_base/lib/@core/core-cmdspec.bash"
 
 
 ## @type cmdspec_opts
@@ -38768,11 +38768,11 @@ function ble/cmdspec/opts#load {
   fi
 }
 ###############################################################################
-# Included from lib/core-syntax-def.sh
+# Included from lib/@core/core-syntax-def.bash
 
 # -*- mode: sh; mode: sh-bash -*-
 
-# The main body is located in lib/core-syntax.sh. Lazy load.
+# The main body is located in lib/@core/core-syntax.bash. Lazy load.
 
 #------------------------------------------------------------------------------
 # public variables
@@ -38830,8 +38830,8 @@ function ble/highlight/layer:syntax/getg { return 0; }
 function ble/syntax:bash/is-complete { return 0; }
 
 
-# Load lib/core-syntax.sh on the fly without delay for the following functions:
-ble/util/autoload "$_ble_base/lib/core-syntax.sh" \
+# Load lib/@core/core-syntax.bash on the fly without delay for the following functions:
+ble/util/autoload "$_ble_base/lib/@core/core-syntax.bash" \
   ble/syntax/parse \
   ble/syntax/highlight \
   ble/syntax/tree-enumerate \
@@ -38952,27 +38952,27 @@ blehook/eval-after-load color_defface ble/syntax/defface.onload
 #------------------------------------------------------------------------------
 # Configuring lazy loading
 
-# If you need to use variables in lib/core-syntax.sh or ble/syntax/parse, use
-# Make sure to load lib/core-syntax.sh using the following function.
+# If you need to use variables in lib/@core/core-syntax.bash or ble/syntax/parse, use
+# Make sure to load lib/@core/core-syntax.bash using the following function.
 function ble/syntax/import {
-  ble/util/import "$_ble_base/lib/core-syntax.sh"
+  ble/util/import "$_ble_base/lib/@core/core-syntax.bash"
 }
 
-# Note: Due to initialization order, it is executed last. Registered in lib/core-syntax
+# Note: Due to initialization order, it is executed last. Registered in lib/@core/core-syntax.bash
 # ble/syntax/attr2iface/color_defface.onload is registered above.
 # This is because it needs to be executed after ble/syntax/defface.onload.
-ble-import -d lib/core-syntax
+ble-import -d lib/@core/core-syntax
 ###############################################################################
-# Included from lib/core-complete-def.sh
+# Included from lib/@core/core-complete-def.bash
 
 #!/bin/bash
 
-ble/is-function ble/util/idle.push && ble-import -d "$_ble_base/lib/core-complete.sh"
+ble/is-function ble/util/idle.push && ble-import -d "$_ble_base/lib/@core/core-complete.bash"
 
 #------------------------------------------------------------------------------
 # Public functions and public functions
 
-ble/util/autoload "$_ble_base/lib/core-complete.sh" \
+ble/util/autoload "$_ble_base/lib/@core/core-complete.bash" \
                   ble/widget/complete \
                   ble/widget/menu-complete \
                   ble/widget/auto-complete-enter \
@@ -38989,7 +38989,7 @@ function ble-sabbrev {
     fi
   done
   if (($#==0)) || [[ $print ]]; then
-    ble-import lib/core-complete && ble-sabbrev "$@"
+    ble-import lib/@core/core-complete && ble-sabbrev "$@"
     return "$?"
   fi
 
@@ -39052,7 +39052,7 @@ function bleopt/check:complete_menu_style {
   return 0
 }
 
-ble/util/autoload "$_ble_base/lib/core-complete.sh" \
+ble/util/autoload "$_ble_base/lib/@core/core-complete.bash" \
                   ble/complete/menu-style:{align,dense}{,-nowrap}/construct-page \
                   ble/complete/menu-style:linewise/construct-page \
                   ble/complete/menu-style:desc{,-text,-raw}/construct-page
@@ -39091,7 +39091,7 @@ bleopt/declare -v menu_linewise_prefix ''
 bleopt/declare -v menu_desc_prefix ''
 bleopt/declare -v menu_desc_multicolumn_width 65
 
-ble/util/autoload "$_ble_base/lib/core-complete.sh" \
+ble/util/autoload "$_ble_base/lib/@core/core-complete.bash" \
                   ble/complete/menu#start \
                   ble-decode/keymap:menu/define \
                   ble-decode/keymap:auto_complete/define \
@@ -39131,11 +39131,11 @@ ble/color/defface menu_desc_quote   ref:syntax_quoted
 ble/color/defface menu_complete_match    bold
 ble/color/defface menu_complete_selected reverse
 ###############################################################################
-# Included from lib/core-debug-def.sh
+# Included from lib/@core/core-debug-def.bash
 
 # -*- mode: sh; mode: sh-bash -*-
 
-ble/util/autoload "$_ble_base/lib/core-debug.sh" \
+ble/util/autoload "$_ble_base/lib/@core/core-debug.bash" \
                   ble/debug/print-variables \
                   ble/debug/stopwatch/start \
                   ble/debug/stopwatch/stop \
@@ -39702,7 +39702,7 @@ function ble/base/sub:test {
 
   [[ ${LANG-} ]] || local LANG=en_US.UTF-8
 
-  ble-import lib/core-test
+  ble-import lib/@core/core-test
 
   if (($#==0)); then
     set -- bash main util canvas decode edit syntax complete keymap.vi
@@ -39728,7 +39728,7 @@ function ble/base/sub:test {
   local _ble_test_section_failure_count=0
   local section
   for section; do
-    local file=$_ble_base/lib/test-$section.sh
+    local file=$_ble_base/lib/@test/test-$section.bash
     if [[ -f $file ]]; then
       source -- "$file"
     else

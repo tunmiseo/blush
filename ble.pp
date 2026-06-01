@@ -50,7 +50,7 @@ $"leakvar"=__t1wJltaP9nmow__
 #%%end.i
 function ble/bin/grep { command grep "$@"; }
 function ble/util/print { printf '%s\n' "$1"; }
-source -- "${BASH_SOURCE%/*}/lib/core-debug.sh"
+source -- "${BASH_SOURCE%/*}/lib/@core/core-debug.bash"
 #%end
 #%define inc
 #%%[guard_name = "@_included".replace("[^_a-zA-Z0-9]", "_")]
@@ -58,21 +58,21 @@ source -- "${BASH_SOURCE%/*}/lib/core-debug.sh"
 #%%%if $"guard_name" != 1
 #%%%%[$"guard_name" = 1]
 ###############################################################################
-# Included from @.sh
+# Included from @
 
 #%%%%if leakvar
-ble/debug/leakvar#check $"leakvar" "[before include @.sh]"
+ble/debug/leakvar#check $"leakvar" "[before include @]"
 #%%%%end.i
 #%%%%if measure_load_time
 time {
-#%%%%%include @.sh
-ble/debug/measure-set-timeformat '@.sh'
+#%%%%%include @
+ble/debug/measure-set-timeformat '@'
 }
 #%%%%else
-#%%%%%include @.sh
+#%%%%%include @
 #%%%%end
 #%%%%if leakvar
-ble/debug/leakvar#check $"leakvar" "[after include @.sh]"
+ble/debug/leakvar#check $"leakvar" "[after include @]"
 #%%%%end.i
 #%%%end
 #%%end.i
@@ -2493,8 +2493,8 @@ ble/debug/measure-set-timeformat ble.pp/prologue
 _ble_attached=
 BLE_ATTACHED=
 
-#%x inc.r|@|src/def|
-#%x inc.r|@|src/util|
+#%x inc.r|@|src/@def/def.bash|
+#%x inc.r|@|src/@util/util.bash|
 
 bleopt/declare -v debug_xtrace ''
 bleopt/declare -v debug_xtrace_ps4 '+ '
@@ -2593,16 +2593,16 @@ function ble/base/check-bash-debug-version {
 }
 ble/base/check-bash-debug-version
 
-#%x inc.r|@|src/decode|
-#%x inc.r|@|src/color|
-#%x inc.r|@|src/canvas|
-#%x inc.r|@|src/history|
-#%x inc.r|@|src/edit|
-#%x inc.r|@|lib/core-cmdspec-def|
-#%x inc.r|@|lib/core-syntax-def|
-#%x inc.r|@|lib/core-complete-def|
-#%x inc.r|@|lib/core-debug-def|
-#%x inc.r|@|contrib/integration/bash-preexec-def|
+#%x inc.r|@|src/@decode/decode.bash|
+#%x inc.r|@|src/@color/color.bash|
+#%x inc.r|@|src/@canvas/canvas.bash|
+#%x inc.r|@|src/@history/history.bash|
+#%x inc.r|@|src/@edit/edit.bash|
+#%x inc.r|@|lib/@core/core-cmdspec-def.bash|
+#%x inc.r|@|lib/@core/core-syntax-def.bash|
+#%x inc.r|@|lib/@core/core-complete-def.bash|
+#%x inc.r|@|lib/@core/core-debug-def.bash|
+#%x inc.r|@|contrib/integration/bash-preexec-def.sh|
 
 # initialization time = 9ms (for 70 files)
 ble/function#try ble/util/idle.push ble/base/clean-up-runtime-directory
@@ -3205,7 +3205,7 @@ function ble/base/sub:test {
 
   [[ ${LANG-} ]] || local LANG=en_US.UTF-8
 
-  ble-import lib/core-test
+  ble-import lib/@core/core-test
 
   if (($#==0)); then
     set -- bash main util canvas decode edit syntax complete keymap.vi
@@ -3231,7 +3231,7 @@ function ble/base/sub:test {
   local _ble_test_section_failure_count=0
   local section
   for section; do
-    local file=$_ble_base/lib/test-$section.sh
+    local file=$_ble_base/lib/@test/test-$section.bash
     if [[ -f $file ]]; then
       source -- "$file"
     else
