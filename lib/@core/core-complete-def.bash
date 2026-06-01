@@ -1,11 +1,11 @@
 #!/bin/bash
 
-ble/is-function ble/util/idle.push && ble-import -d "$_ble_base/lib/core-complete.sh"
+ble/is-function ble/util/idle.push && ble-import -d "$_ble_base/lib/@core/core-complete.bash"
 
 #------------------------------------------------------------------------------
 # Public functions and public functions
 
-ble/util/autoload "$_ble_base/lib/core-complete.sh" \
+ble/util/autoload "$_ble_base/lib/@core/core-complete.bash" \
                   ble/widget/complete \
                   ble/widget/menu-complete \
                   ble/widget/auto-complete-enter \
@@ -22,7 +22,7 @@ function ble-sabbrev {
     fi
   done
   if (($#==0)) || [[ $print ]]; then
-    ble-import lib/core-complete && ble-sabbrev "$@"
+    ble-import lib/@core/core-complete && ble-sabbrev "$@"
     return "$?"
   fi
 
@@ -85,7 +85,7 @@ function bleopt/check:complete_menu_style {
   return 0
 }
 
-ble/util/autoload "$_ble_base/lib/core-complete.sh" \
+ble/util/autoload "$_ble_base/lib/@core/core-complete.bash" \
                   ble/complete/menu-style:{align,dense}{,-nowrap}/construct-page \
                   ble/complete/menu-style:linewise/construct-page \
                   ble/complete/menu-style:desc{,-text,-raw}/construct-page
@@ -124,7 +124,7 @@ bleopt/declare -v menu_linewise_prefix ''
 bleopt/declare -v menu_desc_prefix ''
 bleopt/declare -v menu_desc_multicolumn_width 65
 
-ble/util/autoload "$_ble_base/lib/core-complete.sh" \
+ble/util/autoload "$_ble_base/lib/@core/core-complete.bash" \
                   ble/complete/menu#start \
                   ble-decode/keymap:menu/define \
                   ble-decode/keymap:auto_complete/define \

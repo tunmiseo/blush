@@ -1,6 +1,6 @@
 # -*- mode: sh; mode: sh-bash -*-
 
-# The main body is located in lib/core-syntax.sh. Lazy load.
+# The main body is located in lib/@core/core-syntax.bash. Lazy load.
 
 #------------------------------------------------------------------------------
 # public variables
@@ -58,8 +58,8 @@ function ble/highlight/layer:syntax/getg { return 0; }
 function ble/syntax:bash/is-complete { return 0; }
 
 
-# Load lib/core-syntax.sh on the fly without delay for the following functions:
-ble/util/autoload "$_ble_base/lib/core-syntax.sh" \
+# Load lib/@core/core-syntax.bash on the fly without delay for the following functions:
+ble/util/autoload "$_ble_base/lib/@core/core-syntax.bash" \
   ble/syntax/parse \
   ble/syntax/highlight \
   ble/syntax/tree-enumerate \
@@ -180,13 +180,13 @@ blehook/eval-after-load color_defface ble/syntax/defface.onload
 #------------------------------------------------------------------------------
 # Configuring lazy loading
 
-# If you need to use variables in lib/core-syntax.sh or ble/syntax/parse, use
-# Make sure to load lib/core-syntax.sh using the following function.
+# If you need to use variables in lib/@core/core-syntax.bash or ble/syntax/parse, use
+# Make sure to load lib/@core/core-syntax.bash using the following function.
 function ble/syntax/import {
-  ble/util/import "$_ble_base/lib/core-syntax.sh"
+  ble/util/import "$_ble_base/lib/@core/core-syntax.bash"
 }
 
-# Note: Due to initialization order, it is executed last. Registered in lib/core-syntax
+# Note: Due to initialization order, it is executed last. Registered in lib/@core/core-syntax.bash
 # ble/syntax/attr2iface/color_defface.onload is registered above.
 # This is because it needs to be executed after ble/syntax/defface.onload.
-ble-import -d lib/core-syntax
+ble-import -d lib/@core/core-syntax

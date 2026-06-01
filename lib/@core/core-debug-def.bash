@@ -1,6 +1,6 @@
 # -*- mode: sh; mode: sh-bash -*-
 
-ble/util/autoload "$_ble_base/lib/core-debug.sh" \
+ble/util/autoload "$_ble_base/lib/@core/core-debug.bash" \
                   ble/debug/print-variables \
                   ble/debug/stopwatch/start \
                   ble/debug/stopwatch/stop \

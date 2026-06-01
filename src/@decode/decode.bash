@@ -2831,7 +2831,7 @@ function ble/decode/cmap/.generate-binder-template {
 function ble/decode/cmap/initialize {
   function ble/decode/cmap/initialize { return 0; }
 
-  local init=$_ble_base/lib/init-cmap.sh
+  local init=$_ble_base/lib/@init/init-cmap.bash
   local dump=$_ble_base_cache/decode.cmap.$_ble_decode_kbd_ver.$TERM.dump
 #%$ echo "  local hash='$(./make_command.sh hash lib/init-cmap.sh)'"
   if [[ -s $dump && $dump -nt $init ]]; then
@@ -3094,10 +3094,10 @@ function ble/decode/readline/bind {
 
 #%$ echo "  local hash='$(./make_command.sh hash lib/init-bind.sh)'"
   local _ble_decode_bind_cache_hash=
-  [[ -s $file && $file -nt $_ble_base/lib/init-bind.sh ]] && source -- "$file"
+  [[ -s $file && $file -nt $_ble_base/lib/@init/init-bind.bash ]] && source -- "$file"
 
   if [[ $_ble_decode_bind_cache_hash != "$hash" ]]; then
-    source -- "$_ble_base/lib/init-bind.sh"
+    source -- "$_ble_base/lib/@init/init-bind.bash"
     source -- "$file"
   fi
 
@@ -3922,11 +3922,11 @@ function ble/builtin/bind/rlfunc2widget/load-dict {
 
   local rlfunc_file= rlfunc_dict=
   case $kmap in
-  (emacs)   rlfunc_file=$_ble_base/lib/core-decode.emacs-rlfunc.txt
+  (emacs)   rlfunc_file=$_ble_base/lib/@core/core-decode.emacs-rlfunc.txt
             rlfunc_dict=_ble_decode_rlfunc2widget_emacs ;;
-  (vi_imap) rlfunc_file=$_ble_base/lib/core-decode.vi_imap-rlfunc.txt
+  (vi_imap) rlfunc_file=$_ble_base/lib/@core/core-decode.vi_imap-rlfunc.txt
             rlfunc_dict=_ble_decode_rlfunc2widget_vi_imap ;;
-  (vi_nmap) rlfunc_file=$_ble_base/lib/core-decode.vi_nmap-rlfunc.txt
+  (vi_nmap) rlfunc_file=$_ble_base/lib/@core/core-decode.vi_nmap-rlfunc.txt
             rlfunc_dict=_ble_decode_rlfunc2widget_vi_nmap ;;
   esac
 
@@ -4358,7 +4358,7 @@ function ble/builtin/bind/read-user-settings/.cache-enabled {
 ##   @var[in] cache_prefix
 function ble/builtin/bind/read-user-settings/.cache-alive {
   [[ -e $cache_prefix.settings ]] || return 1
-  [[ $cache_prefix.settings -nt $_ble_base/lib/init-cmap.sh  ]] || return 1
+  [[ $cache_prefix.settings -nt $_ble_base/lib/@init/init-cmap.bash  ]] || return 1
   local keymap
   for keymap in emacs vi_imap vi_nmap; do
     [[ $cache_prefix.settings -nt $_ble_base/core-decode.$cache-rlfunc.txt ]] || return 1

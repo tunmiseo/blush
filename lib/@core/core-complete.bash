@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ble/util/import "$_ble_base/lib/core-syntax.sh"
+ble/util/import "$_ble_base/lib/@core/core-syntax.bash"
 
 ## @fn ble/complete/string#search-longest-suffix-in needle haystack
 ##   @var[out] ret
@@ -5899,7 +5899,7 @@ function ble/complete/mandb/generate-cache {
   if ble/opts#extract-all-optargs "$cmdspec_opts" mandb-help --help; then
     local -a helpspecs; helpspecs=("${ret[@]}")
     local subcache=$mandb_cache_dir/help.d/$command
-    if ! [[ -s $subcache && $subcache -nt $_ble_base/lib/core-complete.sh ]]; then
+    if ! [[ -s $subcache && $subcache -nt $_ble_base/lib/@core/core-complete.bash ]]; then
       ble/util/mkd "${subcache%/*}"
       local helpspec
       for helpspec in "${helpspecs[@]}"; do
@@ -5921,7 +5921,7 @@ function ble/complete/mandb/generate-cache {
        local path=${ret:-"$1"}
        ble/bin#has "$path"; }; then
     local subcache=$mandb_cache_dir/man.d/$command
-    if ! [[ -s $subcache && $subcache -nt $_ble_base/lib/core-complete.sh ]]; then
+    if ! [[ -s $subcache && $subcache -nt $_ble_base/lib/@core/core-complete.bash ]]; then
       ble/util/mkd "${subcache%/*}"
       ble/complete/mandb/.generate-cache-from-man "$command" >| "$subcache"
     fi
@@ -5932,7 +5932,7 @@ function ble/complete/mandb/generate-cache {
   local subcache update=
   ble/complete/util/eval-pathname-expansion '"$mandb_cache_dir"/_parse_help.d/"$command".??????????????'
   for subcache in "${ret[@]}" "$mandb_cache_dir"/{help,man}.d/"$command"; do
-    if [[ -s $subcache && $subcache -nt $_ble_base/lib/core-complete.sh ]]; then
+    if [[ -s $subcache && $subcache -nt $_ble_base/lib/@core/core-complete.bash ]]; then
       ble/array#push subcaches "$subcache"
       [[ $fcache -nt $subcache ]] || update=1
     fi

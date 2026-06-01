@@ -30,7 +30,7 @@ function ble-edit/io:msys1/get-winpid.proc {
 }
 function ble-edit/io:msys1/compile-helper {
   local helper=$1
-  [[ -x $helper && -s $helper && $helper -nt $_ble_base/lib/init-msys1.sh ]] && return 0
+  [[ -x $helper && -s $helper && $helper -nt $_ble_base/lib/@init/init-msys1.bash ]] && return 0
 
   # /mingw/bin/gcc
   gcc -O2 -s -o "$helper" -xc - << EOF || return 1

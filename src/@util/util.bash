@@ -4653,8 +4653,8 @@ if ((_ble_bash>=40400)) && ble/util/load-standard-builtin sleep; then
     ble/builtin/sleep "$@"
     builtin eval -- "$_ble_bash_POSIXLY_CORRECT_local_return"
   }
-elif [[ -f $_ble_base/lib/init-msleep.sh ]] &&
-       source -- "$_ble_base/lib/init-msleep.sh" &&
+elif [[ -f $_ble_base/lib/@init/init-msleep.bash ]] &&
+       source -- "$_ble_base/lib/@init/init-msleep.bash" &&
        ble/util/msleep/.load-compiled-builtin
 then
   # Compile sleep.so yourself.
@@ -6665,10 +6665,10 @@ function ble/term/DA2R.hook {
   esac
 }
 function ble/term/.initialize {
-  if [[ -s $_ble_base_cache/term.$TERM && $_ble_base_cache/term.$TERM -nt $_ble_base/lib/init-term.sh ]]; then
+  if [[ -s $_ble_base_cache/term.$TERM && $_ble_base_cache/term.$TERM -nt $_ble_base/lib/@init/init-term.bash ]]; then
     source -- "$_ble_base_cache/term.$TERM"
   else
-    source -- "$_ble_base/lib/init-term.sh"
+    source -- "$_ble_base/lib/@init/init-term.bash"
   fi
 
   ble/string#reserve-prototype "$_ble_term_it"

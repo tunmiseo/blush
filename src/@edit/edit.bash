@@ -2645,7 +2645,7 @@ function ble-edit/content/.update-dirty-range {
 }
 
 function ble-edit/content/update-syntax {
-  if ble/util/import/is-loaded "$_ble_base/lib/core-syntax.sh"; then
+  if ble/util/import/is-loaded "$_ble_base/lib/@core/core-syntax.bash"; then
     local beg end end0
     ble/dirty-range#load --prefix=_ble_edit_dirty_syntax_
     if ((beg>=0)); then
@@ -10833,11 +10833,11 @@ function ble-edit/bind/load-editing-mode:safe {
   ble/decode/keymap#load safe
 }
 
-ble/util/autoload "lib/keymap.emacs.sh" \
+ble/util/autoload "lib/@keymap/keymap.emacs.bash" \
                   ble-decode/keymap:emacs/define
-ble/util/autoload "lib/keymap.vi.sh" \
+ble/util/autoload "lib/@keymap/keymap.vi.bash" \
                   ble-decode/keymap:vi_{i,n,o,x,s,c}map/define
-ble/util/autoload "lib/keymap.vi_digraph.sh" \
+ble/util/autoload "lib/@keymap/keymap.vi_digraph.bash" \
                   ble-decode/keymap:vi_digraph/define
 
 function ble/widget/.change-editing-mode {
@@ -11784,7 +11784,7 @@ if [[ $bleopt_internal_suppress_bash_output ]]; then
         ble-edit/io/check-stderr
         exec 2>&"$_ble_edit_io_fd2"
       }
-    elif . "$_ble_base/lib/init-msys1.sh"; ble-edit/io:msys1/start-background; then
+    elif . "$_ble_base/lib/@init/init-msys1.bash"; ble-edit/io:msys1/start-background; then
       function ble-edit/bind/stdout.off {
         ble/util/buffer.flush
         ble-edit/io/check-stderr
@@ -12125,7 +12125,7 @@ function ble-edit/bind/load-editing-mode {
   if ble/is-function ble-edit/bind/load-editing-mode:"$name"; then
     ble-edit/bind/load-editing-mode:"$name"
   else
-    ble/util/import "$_ble_base/lib/keymap.$name.sh"
+    ble/util/import "$_ble_base/lib/@keymap/keymap.$name.bash"
   fi
 }
 function ble-edit/bind/clear-keymap-definition-loader {
